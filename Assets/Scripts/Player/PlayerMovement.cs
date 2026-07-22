@@ -5,27 +5,28 @@ namespace DefaultNamespace
 {
     public class PlayerMovement : NetworkBehaviour
     {
-        [Header("Movement")]
-        [SerializeField]
-        private CharacterController controller;
-        [SerializeField]
-        private float moveSpeed = 5f;
-        
+        [SerializeField] private Rigidbody rigidBody;
+        [SerializeField] private float moveSpeed = 100f;
+        [SerializeField] private float acceleration = 25f;
+
         public override void FixedUpdateNetwork()
         {
-            if (!Object.HasInputAuthority || !controller) return;
+            if (!Object.HasInputAuthority || !rigidBody) return;
             if (GetInput(out GameplayInput input))
             {
                 Vector3 direction = input.MoveDirection.normalized;
-                transform.rotation = Quaternion.Euler(0f, input.LookRotation.x, 0f);
-                
+                rigidBody.MoveRotation(Quaternion.Euler(0f, input.LookRotation.x, 0f));
+
                 DoMove(direction);
             }
         }
 
         private void DoMove(Vector3 direction)
         {
-            controller.Move(direction * moveSpeed * Runner.DeltaTime);
+            Vector3 currentVelocity = rigidBody.linearVelocity;
+            Vector3 wishVelocity = direction * moveSpeed;
+            rigidBody.AddForce((wishVelocity - new Vector3(currentVelocity.x, 0, currentVelocity.z)) * acceleration,
+                ForceMode.Acceleration);
         }
     }
 }

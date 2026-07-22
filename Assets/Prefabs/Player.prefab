@@ -364,12 +364,11 @@ GameObject:
   m_Component:
   - component: {fileID: 5453781071388308594}
   - component: {fileID: 2524672585982938568}
-  - component: {fileID: 86132070539257337}
   - component: {fileID: 941868879188101433}
   - component: {fileID: 625442329849667838}
-  - component: {fileID: 6874228769804373575}
   - component: {fileID: 2437361841328486602}
   - component: {fileID: 3458336771368325197}
+  - component: {fileID: 589587090951933647}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -411,31 +410,6 @@ MonoBehaviour:
   HPLabel: {fileID: 476318218719191834}
   _CharacterID: 0
   startingHP: 10
---- !u!143 &86132070539257337
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6059781578005178534}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 2
-  m_Radius: 0.5
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &941868879188101433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -460,25 +434,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb131e8e7c5e46d3bdb8c1bb38af7d1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.PlayerMovement
-  controller: {fileID: 86132070539257337}
-  moveSpeed: 5
---- !u!114 &6874228769804373575
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6059781578005178534}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
-  _stateAuthorityChangeErrorCorrectionDelta: 0
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
+  rigidBody: {fileID: 3458336771368325197}
+  moveSpeed: 20
+  acceleration: 10
 --- !u!114 &2437361841328486602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -499,7 +457,7 @@ MonoBehaviour:
   - {fileID: 2524672585982938568}
   - {fileID: 941868879188101433}
   - {fileID: 625442329849667838}
-  - {fileID: 6874228769804373575}
+  - {fileID: 589587090951933647}
   ForceRemoteRenderTimeframe: 0
 --- !u!54 &3458336771368325197
 Rigidbody:
@@ -510,8 +468,8 @@ Rigidbody:
   m_GameObject: {fileID: 6059781578005178534}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_LinearDamping: 0.25
+  m_AngularDamping: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -523,8 +481,31 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
+--- !u!114 &589587090951933647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6059781578005178534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a591d221a634417e9827eb58e17de84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Addons.Physics::Fusion.Addons.Physics.NetworkRigidbody3D
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 1
+  _interpolationTarget: {fileID: 0}
+  UsePreciseRotation: 0
+  UseRenderSleepThresholds: 1
+  RenderThresholds:
+    UseEnergy: 1
+    Position: 0.01
+    Rotation: 0.01
+    Scale: 0.01
