@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
+using DefaultNamespace;
 using Fusion;
+using Fusion.Sockets;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -27,12 +31,6 @@ public class Player : NetworkBehaviour, IHitable
 
     [SerializeField]
     private float startingHP;
-
-    [Header("Movement")]
-    [SerializeField]
-    private float moveSpeed = 5f;
-    [SerializeField]
-    private CharacterController _controller;
 
 
     public override void Spawned()
@@ -65,27 +63,6 @@ public class Player : NetworkBehaviour, IHitable
     private void OnHPChanged()
     {
         HPLabel.text = $"Health: {_hp:F2}";
-    }
-
-    public override void FixedUpdateNetwork()
-    {
-        if (!Object.HasInputAuthority || !_controller) return;
-
-        var moveDirection = Vector3.zero;
-
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)
-                moveDirection.z += 1;
-            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)
-                moveDirection.z -= 1;
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
-                moveDirection.x -= 1;
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
-                moveDirection.x += 1;
-        }
-
-        _controller.Move(moveDirection.normalized * moveSpeed * Runner.DeltaTime);
     }
 
     void Update()
