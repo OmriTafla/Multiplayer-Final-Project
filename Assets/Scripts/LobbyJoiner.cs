@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Fusion;
 using UnityEngine;
@@ -9,14 +10,13 @@ public class LobbyJoiner : Singleton<LobbyJoiner>
     public UnityEvent OnJoinedLobby;
     public UnityEvent OnStartJoin;
     public UnityEvent OnCancelJoin;
-    [field: SerializeField]
-    public string LobbyName { get; private set; }
+    [field: SerializeField] public string LobbyName { get; private set; }
     private bool busy;
 
     public void JoinLobby(string lobbyName)
     {
         if (busy) return;
-        
+
         JoinLobbyAsync(lobbyName);
     }
 
@@ -25,16 +25,16 @@ public class LobbyJoiner : Singleton<LobbyJoiner>
         SinglePeer_NetworkRunnerManager.Instance.ReinstantiateRunner();
         JoinLobby(LobbyName);
     }
-    
+
     private async Task JoinLobbyAsync(string lobbyName)
     {
         busy = true;
-        
+
         OnStartJoin.Invoke();
 
         var networkRunner = SinglePeer_NetworkRunnerManager.Instance.NetworkRunner;
         var result = await networkRunner.JoinSessionLobby(SessionLobby.Custom, lobbyName);
-        
+
         if (result.Ok)
         {
             LobbyName = lobbyName;
@@ -46,7 +46,7 @@ public class LobbyJoiner : Singleton<LobbyJoiner>
             SinglePeer_NetworkRunnerManager.Instance.ReinstantiateRunner();
             OnCancelJoin.Invoke();
         }
-        
+
         busy = false;
     }
 }

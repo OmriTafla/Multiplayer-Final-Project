@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Fusion;
 using TMPro;
+using UI;
 using UnityEngine;
 
 public class ActivePlayersUI : MonoBehaviour
@@ -16,8 +17,15 @@ public class ActivePlayersUI : MonoBehaviour
 
         foreach (var player in runner.ActivePlayers)
         {
+            var playerObject = runner.GetPlayerObject(player);
+            if (!playerObject) continue;
+
+            var playerData = playerObject.GetComponent<PlayerData>();
+            if (!playerData) continue;
+
             var newItem = Instantiate(playerItemPrefab, playerListContainer);
-            newItem.text = $"Player ID: {player.PlayerId}";
+            newItem.text = $"{playerData.NickName}";
+            newItem.color = playerData.Color;
         }
     }
 
