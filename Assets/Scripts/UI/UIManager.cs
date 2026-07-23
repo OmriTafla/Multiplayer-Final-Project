@@ -5,7 +5,7 @@ using Singleton;
 
 public class UIManager : Singleton<UIManager>
 {
-    [SerializeField] private GameObject lobbyMenu;
+    [SerializeField] private GameObject signInMenu;
     [SerializeField] private GameObject sessionsMenu;
     [SerializeField] private GameObject playersMenu;
     [SerializeField] private GameObject waitingScreen;
@@ -15,7 +15,7 @@ public class UIManager : Singleton<UIManager>
     protected override void Awake()
     {
         base.Awake();
-        menus.Add(UIStates.lobbyMenu, lobbyMenu);
+        menus.Add(UIStates.lobbyMenu, signInMenu);
         menus.Add(UIStates.sessionsMenu, sessionsMenu);
         menus.Add(UIStates.playersMenu, playersMenu);
         menus.Add(UIStates.waitingScreen, waitingScreen);

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakeSettings">
+    <configurations />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DpaMonitoringSettings">
+    <option name="firstShow" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/46/f17216fe/NetworkRunner.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/4e/529855e3/NetworkPrefabRef.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/78/c3711eb0/NetworkInput.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/7f/a88c55e5/PlayerRef.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/af/fc8a4290/SimulationBehaviour.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f713e1c3c5f545ce9b1df47230f4f85346ae00/c9/f4df80af/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/LobbyPlayerDataSpawner.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/NicknameSubmitUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/PlayerData.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0000000000212381" />
+      <entry key="M2" value="1.0000065238863554" />
+      <entry key="M5" value="1.0157516042688066" />
+      <entry key="M10" value="1.5661362221719726" />
+      <entry key="M15" value="3.55479799446044" />
+      <entry key="M30" value="13.786564812663105" />
+      <entry key="H1" value="30.324019696994437" />
+      <entry key="H2" value="45.60152186800773" />
+      <entry key="H4" value="56.05660522736558" />
+      <entry key="D1" value="66.64622304119979" />
+      <entry key="W1" value="68.65858898270407" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0028597841216722367" />
+      <entry key="MS500" value="0.357424576747294" />
+      <entry key="S2" value="1.2129705301446763" />
+      <entry key="S5" value="1.626798007629021" />
+      <entry key="S10" value="1.8017958038971746" />
+      <entry key="S30" value="1.9311491048546303" />
+      <entry key="S60" value="1.9652130502052116" />
+      <entry key="M2" value="1.9825152696416908" />
+      <entry key="M5" value="1.9972628638356493" />
+      <entry key="M10" value="2.2088673845297864" />
+      <entry key="M15" value="2.919857773285346" />
+      <entry key="M30" value="6.352201777800577" />
+      <entry key="H1" value="11.713834286714425" />
+      <entry key="H2" value="16.593893440912694" />
+      <entry key="H4" value="19.9110203784742" />
+      <entry key="D1" value="23.257639579333755" />
+      <entry key="W1" value="23.89235288553889" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9395230347205464" />
+      <entry key="MS500" value="1.04227580669555" />
+      <entry key="S2" value="1.740819364266217" />
+      <entry key="S5" value="2.333647758728536" />
+      <entry key="S10" value="2.630916658482777" />
+      <entry key="S30" value="2.867933857659203" />
+      <entry key="S60" value="2.9327634181590962" />
+      <entry key="M2" value="2.9660816709677364" />
+      <entry key="M5" value="3.0063468027812363" />
+      <entry key="M10" value="3.7707380964197394" />
+      <entry key="M15" value="6.469532245875528" />
+      <entry key="M30" value="20.130338628521677" />
+      <entry key="H1" value="42.02889513422214" />
+      <entry key="H2" value="62.18874124017561" />
+      <entry key="H4" value="75.9635368805669" />
+      <entry key="D1" value="89.90305417964838" />
+      <entry key="W1" value="92.55082292791029" />
+    </decayedShown>
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to&quot;: &quot;Unity Editor&quot;,
+    &quot;DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider&quot;: &quot;Unity Editor&quot;,
+    &quot;Unity Attach To.Attach to.executor&quot;: &quot;Debug&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Eitan__ControllableCharacter&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration name="Attach to" type="UnityDevicePlayer" factoryName="UnityAttachToDevicePlayer">
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="Both" />
+</project>
