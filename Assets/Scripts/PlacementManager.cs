@@ -34,6 +34,6 @@ public class PlacementManager : NetworkBehaviour
 
         Vector3 spawnPos = origin + direction.normalized * 1.0f;
 
-        Runner.Spawn(props.projectile, spawnPos, Quaternion.LookRotation(direction), info.Source);
+        Runner.Spawn(props.bullet, spawnPos, Quaternion.LookRotation(direction), info.Source);
     }
 }

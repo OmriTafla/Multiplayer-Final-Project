@@ -32,6 +32,9 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField]
     private float startingHP;
 
+    [SerializeField] private float shootingCooldown;
+    private float _nextShootTime;
+
 
     public override void Spawned()
     {
@@ -69,7 +72,7 @@ public class Player : NetworkBehaviour, IHitable
     {
         if (!Object.HasInputAuthority) return;
         
-        if (Mouse.current.leftButton.wasPressedThisFrame && MatchManager.Instance)
+        if (Mouse.current.rightButton.wasPressedThisFrame && MatchManager.Instance)
         {            
             var screenPos = Mouse.current.position.ReadValue();
             Ray ray = Camera.main.ScreenPointToRay(screenPos);
@@ -94,7 +97,7 @@ public class Player : NetworkBehaviour, IHitable
             }
         }
 
-        if (Mouse.current.rightButton.wasPressedThisFrame && MatchManager.Instance)
+        if (Mouse.current.leftButton.isPressed && MatchManager.Instance && Time.time > _nextShootTime)
         {
             var screenPos = Mouse.current.position.ReadValue();
             Ray ray = Camera.main.ScreenPointToRay(screenPos);
@@ -108,6 +111,7 @@ public class Player : NetworkBehaviour, IHitable
                 if (direction.sqrMagnitude > 0.0001f)
                 {
                     MatchManager.Instance.RequestSpawnProjectile(CharacterID, origin, direction.normalized);
+                    _nextShootTime = Time.time + shootingCooldown;
                 }
             }
         }

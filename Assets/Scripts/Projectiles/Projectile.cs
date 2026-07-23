@@ -7,7 +7,7 @@ public class Projectile : NetworkBehaviour
     [Networked]
     private TickTimer lifeTimer { get; set; }
     
-    [SerializeField] private float speed = 10f;
+    [SerializeField] private float speed = 20f;
 
     [SerializeField]
     private DamageData damageData;
@@ -15,7 +15,7 @@ public class Projectile : NetworkBehaviour
     public override void Spawned()
     {
         if (!Object.HasStateAuthority) return;
-        lifeTimer = TickTimer.CreateFromSeconds(Runner, 10f);
+        lifeTimer = TickTimer.CreateFromSeconds(Runner, 20f);
     }
 
     public override void FixedUpdateNetwork()
@@ -37,6 +37,7 @@ public class Projectile : NetworkBehaviour
 
         if (hitObject.TryGetComponent(out Player player) && hitObject.InputAuthority == Object.InputAuthority)
             return;
+        if (hitObject.TryGetComponent(out Projectile projectile)) return;
 
         TriggerHitOnTargetRPC(hitObject.StateAuthority, hitObject.Id, damageData);
         ScoreManager.Instance.AddScoreForHit_Client();

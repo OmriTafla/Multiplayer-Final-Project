@@ -16,4 +16,4 @@ MonoBehaviour:
   characterName: silly goofy
   characterColor: {r: 0.51189566, g: 0.45098042, b: 1, a: 1}
   spawnObject: {fileID: 1126937442830666779, guid: 8cfc4d375e4c4d044b3c1b56bbcbe466, type: 3}
-  projectile: {fileID: 1039216601492686992, guid: 565e4d86bbc68984cb7ec1353a414ac4, type: 3}
+  bullet: {fileID: 1039216601492686992, guid: 565e4d86bbc68984cb7ec1353a414ac4, type: 3}

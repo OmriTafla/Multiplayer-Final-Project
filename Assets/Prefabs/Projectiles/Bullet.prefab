@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 2117687961676920522}
   - component: {fileID: 4651100386155500513}
   m_Layer: 0
-  m_Name: Projectile
+  m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -175,7 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bc5502446971d141a0c9424919b505e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
-  speed: 10
+  speed: 15
   damageData:
     damage: 1.5
 --- !u!114 &4651100386155500513

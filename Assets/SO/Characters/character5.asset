@@ -16,4 +16,4 @@ MonoBehaviour:
   characterName: you :)
   characterColor: {r: 1, g: 0.45098042, b: 0.85789716, a: 1}
   spawnObject: {fileID: 1126937442830666779, guid: f5dcf78582c2fac499ffdd0a779dc7c6, type: 3}
-  projectile: {fileID: 1039216601492686992, guid: 565e4d86bbc68984cb7ec1353a414ac4, type: 3}
+  bullet: {fileID: 1039216601492686992, guid: 565e4d86bbc68984cb7ec1353a414ac4, type: 3}
