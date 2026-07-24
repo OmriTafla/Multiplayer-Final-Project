@@ -406,10 +406,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   modelRenderer: {fileID: 6373446527506911363}
+  hitCollider: {fileID: 7767355097294866205}
   playerUI: {fileID: 4275309682345805136}
-  HPLabel: {fileID: 476318218719191834}
+  hpLabel: {fileID: 476318218719191834}
   _CharacterID: 0
-  startingHP: 10
+  startingHp: 10
+  respawnDelay: 3
   shootingCooldown: 0.5
 --- !u!114 &941868879188101433
 MonoBehaviour:

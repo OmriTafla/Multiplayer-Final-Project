@@ -48,4 +48,9 @@ public class MatchManager : Singleton<MatchManager>
     {
         pm.SpawnProjectileRPC(characterID, origin, direction);
     }
+    
+    public Vector3 GetRandomSpawnPosition()
+    {
+        return cm.GetRandomSpawnPosition();
+    }
 }

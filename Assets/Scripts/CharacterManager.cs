@@ -84,6 +84,12 @@ public class CharacterManager : NetworkBehaviour
         var character = characters.First(x => x.CharacterID == characterID);
         await spawnPoints[spawnPointIndex].SpawnGivenPlayer(player, character);
     }
+    
+    public Vector3 GetRandomSpawnPosition()
+    {
+        var sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        return sp.GetSpawnPosition();
+    }
 
     // when someone wants a character but its not available
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

@@ -4,21 +4,12 @@ using UnityEngine;
 
 public class SpawnPoint : MonoBehaviour
 {
-    [SerializeField]
-    private Vector2 minRandomOffset;
+    [SerializeField] private Vector2 minRandomOffset;
+    [SerializeField] private Vector2 maxRandomOffset;
+    [SerializeField] private GameObject _playerPrefab;
 
-    [SerializeField]
-    private Vector2 maxRandomOffset;
-
-    [SerializeField]
-    private GameObject _playerPrefab;
-
-    public async Task SpawnGivenPlayer(PlayerRef player, CharacterProperties character, bool useRandomOffset = true)
+    public Vector3 GetSpawnPosition(bool useRandomOffset = true)
     {
-        var runner = SinglePeer_NetworkRunnerManager.Instance.NetworkRunner;
-        
-        if (runner.LocalPlayer != player) return;
-
         var offset = Vector3.up;
         if (useRandomOffset)
         {
@@ -28,8 +19,15 @@ public class SpawnPoint : MonoBehaviour
                 Random.Range(minRandomOffset.y, maxRandomOffset.y)
             );
         }
+        return transform.position + offset;
+    }
 
-        var spawned = await runner.SpawnAsync(_playerPrefab, transform.position + offset, null, player);
+    public async Task SpawnGivenPlayer(PlayerRef player, CharacterProperties character, bool useRandomOffset = true)
+    {
+        var runner = SinglePeer_NetworkRunnerManager.Instance.NetworkRunner;
+        if (runner.LocalPlayer != player) return;
+
+        var spawned = await runner.SpawnAsync(_playerPrefab, GetSpawnPosition(useRandomOffset), null, player);
         spawned.GetComponent<Player>().SetCharacter(character);
     }
 }

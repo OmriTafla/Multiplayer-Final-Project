@@ -177,7 +177,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
   speed: 15
   damageData:
-    damage: 1.5
+    damage: 3
 --- !u!114 &4651100386155500513
 MonoBehaviour:
   m_ObjectHideFlags: 0
