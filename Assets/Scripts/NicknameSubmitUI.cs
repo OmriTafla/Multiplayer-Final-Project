@@ -8,7 +8,7 @@ public class NicknameSubmitUI : MonoBehaviour
     [SerializeField] private TMP_InputField inputNicknameField;
     [SerializeField] private TMP_Dropdown dropdownColour;
     [SerializeField] private Button signInButton;
-    [SerializeField] private bool allowEditorHostFallback = true;
+    [SerializeField] private bool allowEditorHostFallback;
 
     private bool signingIn;
 
