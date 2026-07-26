@@ -3140,6 +3140,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f4f5004b9651c1499d156a2426b74e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  maximumPlacementDistance: 20
+  projectileSpawnOffset: 1
+  maximumPlaceablesPerPlayer: 20
 --- !u!4 &952074404
 Transform:
   m_ObjectHideFlags: 0
@@ -3529,6 +3532,7 @@ MonoBehaviour:
   - {fileID: 2125133656}
   - {fileID: 513462134}
   playerPrefab: {fileID: 2437361841328486602, guid: f86056493afc0914aa19cf51b5b36cae, type: 3}
+  allowDuplicateCharacters: 1
 --- !u!4 &1292589680
 Transform:
   m_ObjectHideFlags: 0
@@ -4073,6 +4077,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   characterManager: {fileID: 1292589679}
   placementManager: {fileID: 952074403}
+  playerDataPrefab: {fileID: 2015413166823085070, guid: b5912bc7d2822b1499f9fa154bd30994, type: 3}
   onMatchEnded:
     m_PersistentCalls:
       m_Calls:

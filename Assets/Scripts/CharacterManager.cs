@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
@@ -9,6 +10,7 @@ public class CharacterManager : NetworkBehaviour
     [SerializeField] private CharacterSelectUI selectUI;
     [SerializeField] private SpawnPoint[] spawnPoints;
     [SerializeField] private NetworkObject playerPrefab;
+    [SerializeField] private bool allowDuplicateCharacters = true;
 
     private readonly HashSet<int> selectedCharacterIds = new();
     private readonly HashSet<PlayerRef> playersInSelection = new();
@@ -33,7 +35,7 @@ public class CharacterManager : NetworkBehaviour
     {
         RegisterCharacters();
 
-        if (selectUI == null)
+        if (!Application.isBatchMode && selectUI == null)
             Debug.LogError("CharacterManager requires a CharacterSelectUI reference", this);
 
         if (playerPrefab == null)
@@ -45,20 +47,20 @@ public class CharacterManager : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        if (spawnedPlayers.ContainsKey(player))
+        if (spawnedPlayers.ContainsKey(player) || playersInSelection.Contains(player))
             return;
 
-        if (selectUI == null)
-        {
-            Debug.LogError("CharacterManager cannot open selection because CharacterSelectUI is missing", this);
-            return;
-        }
+        playersInSelection.Add(player);
 
-        OpenSelectionRpc(player);
+        var unavailableCharacters = allowDuplicateCharacters
+            ? Array.Empty<int>()
+            : selectedCharacterIds.ToArray();
+
+        OpenSelectionRpc(player, unavailableCharacters);
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void OpenSelectionRpc([RpcTarget] PlayerRef player)
+    private void OpenSelectionRpc([RpcTarget] PlayerRef player, int[] unavailableCharacters)
     {
         if (selectUI == null)
         {
@@ -70,7 +72,7 @@ public class CharacterManager : NetworkBehaviour
         selectUI.OnSelectedCharacter -= OnSelectCharacter;
         selectUI.OnSelectedCharacter += OnSelectCharacter;
         selectUI.PopulateSelection(characters);
-        selectUI.UpdateSelectedCharacters(selectedCharacterIds.ToArray());
+        selectUI.UpdateSelectedCharacters(unavailableCharacters);
         selectUI.OpenMenu();
     }
 
@@ -93,50 +95,44 @@ public class CharacterManager : NetworkBehaviour
         if (info.Source != PlayerRef.None && requestedPlayer != info.Source)
             return;
 
-        if (playersInSelection.Contains(player))
+        if (!playersInSelection.Contains(player) || spawnedPlayers.ContainsKey(player))
             return;
-
-        if (spawnedPlayers.ContainsKey(player))
-            return;
-
-        playersInSelection.Add(player);
 
         var character = characters?.FirstOrDefault(x => x != null && x.CharacterID == characterId);
 
         if (character == null)
         {
-            FailSelection(player, "Invalid character.");
+            SelectionFailedRpc(player, "Invalid character.");
             return;
         }
 
-        if (selectedCharacterIds.Contains(characterId))
+        if (!allowDuplicateCharacters && selectedCharacterIds.Contains(characterId))
         {
-            FailSelection(player, "Character is already selected.");
+            SelectionFailedRpc(player, "Character is already selected.");
             return;
         }
 
         if (spawnPoints == null || spawnPoints.Length == 0)
         {
-            FailSelection(player, "No spawn points configured.");
+            SelectionFailedRpc(player, "No spawn points configured.");
             return;
         }
 
         if (playerPrefab == null)
         {
-            FailSelection(player, "Player prefab is not assigned.");
+            SelectionFailedRpc(player, "Player prefab is not assigned.");
             return;
         }
 
-        selectedCharacterIds.Add(characterId);
+        var validSpawnPoints = spawnPoints.Where(x => x != null).ToArray();
 
-        var spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-
-        if (spawnPoint == null)
+        if (validSpawnPoints.Length == 0)
         {
-            selectedCharacterIds.Remove(characterId);
-            FailSelection(player, "Selected spawn point is missing.");
+            SelectionFailedRpc(player, "No valid spawn points configured.");
             return;
         }
+
+        var spawnPoint = validSpawnPoints[UnityEngine.Random.Range(0, validSpawnPoints.Length)];
 
         var avatar = Runner.Spawn(
             playerPrefab,
@@ -153,15 +149,19 @@ public class CharacterManager : NetworkBehaviour
 
         if (avatar == null)
         {
-            selectedCharacterIds.Remove(characterId);
-            FailSelection(player, "Could not spawn the player prefab.");
+            SelectionFailedRpc(player, "Could not spawn the player prefab.");
             return;
         }
 
+        if (!allowDuplicateCharacters)
+            selectedCharacterIds.Add(characterId);
+
         spawnedPlayers[player] = avatar;
-        SelectionSucceededRpc(player);
-        UpdateSelectedCharactersRpc(selectedCharacterIds.ToArray());
         playersInSelection.Remove(player);
+        SelectionSucceededRpc(player);
+
+        if (!allowDuplicateCharacters)
+            UpdateSelectedCharactersRpc(selectedCharacterIds.ToArray());
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -189,22 +189,28 @@ public class CharacterManager : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
+        playersInSelection.Remove(player);
+
         if (!spawnedPlayers.TryGetValue(player, out var avatar))
             return;
 
         if (avatar != null)
         {
-            var playerComponent = avatar.GetComponent<Player>();
+            if (!allowDuplicateCharacters)
+            {
+                var playerComponent = avatar.GetComponent<Player>();
 
-            if (playerComponent != null)
-                selectedCharacterIds.Remove(playerComponent.CharacterID);
+                if (playerComponent != null)
+                    selectedCharacterIds.Remove(playerComponent.CharacterID);
+            }
 
             Runner.Despawn(avatar);
         }
 
         spawnedPlayers.Remove(player);
-        playersInSelection.Remove(player);
-        UpdateSelectedCharactersRpc(selectedCharacterIds.ToArray());
+
+        if (!allowDuplicateCharacters)
+            UpdateSelectedCharactersRpc(selectedCharacterIds.ToArray());
     }
 
     public Vector3 GetRandomSpawnPosition()
@@ -212,8 +218,12 @@ public class CharacterManager : NetworkBehaviour
         if (spawnPoints == null || spawnPoints.Length == 0)
             return Vector3.zero;
 
-        var spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        return spawnPoint != null ? spawnPoint.GetSpawnPosition() : Vector3.zero;
+        var validSpawnPoints = spawnPoints.Where(x => x != null).ToArray();
+
+        if (validSpawnPoints.Length == 0)
+            return Vector3.zero;
+
+        return validSpawnPoints[UnityEngine.Random.Range(0, validSpawnPoints.Length)].GetSpawnPosition();
     }
 
     private void RegisterCharacters()
@@ -226,11 +236,5 @@ public class CharacterManager : NetworkBehaviour
             if (character != null)
                 CharacterProperties.Register(character);
         }
-    }
-
-    private void FailSelection(PlayerRef player, string reason)
-    {
-        SelectionFailedRpc(player, reason);
-        playersInSelection.Remove(player);
     }
 }

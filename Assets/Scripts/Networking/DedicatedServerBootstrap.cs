@@ -3,42 +3,41 @@ using UnityEngine;
 
 public class DedicatedServerBootstrap : MonoBehaviour
 {
-    [SerializeField] private string defaultSessionName = "DedicatedServer";
+    [SerializeField] private string defaultSessionName = "MainWorld";
 
     private async void Start()
     {
         if (!Application.isBatchMode)
             return;
 
-        var sessionName =
-            GetCommandLineValue(
-                "-session",
-                defaultSessionName);
+        var manager = SinglePeer_NetworkRunnerManager.Instance;
 
-        var result =
-            await SinglePeer_NetworkRunnerManager.Instance
-                .StartDedicatedServer(sessionName);
-
-        if (!result.Ok)
+        if (manager == null)
         {
-            Debug.LogError(
-                $"Dedicated server start failed: " +
-                result.ShutdownReason);
-
+            Debug.LogError("Dedicated server cannot start because the runner manager is missing");
             Application.Quit(1);
             return;
         }
 
-        Debug.Log(
-            $"Dedicated server started: {sessionName}");
+        if (manager.IsRunning || manager.OperationInProgress)
+            return;
+
+        var sessionName = GetCommandLineValue("-session", defaultSessionName);
+        var result = await manager.StartPersistentServer(sessionName);
+
+        if (!result.Ok)
+        {
+            Debug.LogError($"Persistent world server start failed: {result.ShutdownReason}");
+            Application.Quit(1);
+            return;
+        }
+
+        Debug.Log($"Persistent world server started: {sessionName}");
     }
 
-    private static string GetCommandLineValue(
-        string key,
-        string fallback)
+    private static string GetCommandLineValue(string key, string fallback)
     {
-        var arguments =
-            Environment.GetCommandLineArgs();
+        var arguments = Environment.GetCommandLineArgs();
 
         for (var i = 0; i < arguments.Length - 1; i++)
         {

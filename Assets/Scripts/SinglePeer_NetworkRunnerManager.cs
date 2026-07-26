@@ -1,14 +1,19 @@
 using System;
 using System.Threading.Tasks;
 using Fusion;
+using Fusion.Addons.Physics;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_NetworkRunnerManager>
 {
     [SerializeField] private NetworkRunner networkRunnerPrefab;
     [SerializeField] private NetworkEvents networkEvents;
-    [SerializeField] private int maximumPlayers = 8;
+    [SerializeField] private string persistentSessionName = "MainWorld";
+    [SerializeField] private string customLobbyName = "Cool";
+    [SerializeField] private string gameScenePath = "Assets/Scenes/GameScene.unity";
+    [SerializeField] private int maximumPlayers = 32;
     [SerializeField] private UnityEvent<NetworkRunner> onRunnerInstantiated;
     [SerializeField] private UnityEvent onConnectionStarted;
     [SerializeField] private UnityEvent onConnectionSucceeded;
@@ -24,6 +29,8 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
     public bool IsRunning => networkRunner != null && networkRunner.IsRunning;
     public bool IsServer => IsRunning && networkRunner.IsServer;
     public bool IsClient => IsRunning && networkRunner.IsClient;
+    public string PersistentSessionName => persistentSessionName;
+    public string CustomLobbyName => customLobbyName;
 
     private void Start()
     {
@@ -44,6 +51,9 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
         networkRunner = Instantiate(networkRunnerPrefab);
         networkRunner.name = "NetworkRunner";
         networkRunner.ProvideInput = !Application.isBatchMode;
+
+        if (networkRunner.GetComponent<RunnerSimulatePhysics3D>() == null)
+            networkRunner.gameObject.AddComponent<RunnerSimulatePhysics3D>();
 
         if (networkEvents != null)
             networkRunner.AddCallbacks(networkEvents);
@@ -72,12 +82,64 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
             networkRunner.AddCallbacks(networkEvents);
     }
 
+    public Task<StartGameResult> JoinPersistentWorld()
+    {
+        return StartSession(new StartGameArgs
+        {
+            GameMode = GameMode.Client,
+            SessionName = persistentSessionName,
+            CustomLobbyName = customLobbyName,
+            EnableClientSessionCreation = false
+        });
+    }
+
+    public Task<StartGameResult> StartPersistentServer(string sessionNameOverride = null)
+    {
+        var sessionName = string.IsNullOrWhiteSpace(sessionNameOverride)
+            ? persistentSessionName
+            : sessionNameOverride.Trim();
+
+        if (!TryCreateGameSceneInfo(out var sceneInfo))
+            return Task.FromResult(default(StartGameResult));
+
+        return StartSession(new StartGameArgs
+        {
+            GameMode = GameMode.Server,
+            SessionName = sessionName,
+            CustomLobbyName = customLobbyName,
+            PlayerCount = maximumPlayers,
+            IsOpen = true,
+            IsVisible = true,
+            EnableClientSessionCreation = true,
+            Scene = sceneInfo
+        });
+    }
+
+    public Task<StartGameResult> StartPersistentHostForDevelopment()
+    {
+        if (!TryCreateGameSceneInfo(out var sceneInfo))
+            return Task.FromResult(default(StartGameResult));
+
+        return StartSession(new StartGameArgs
+        {
+            GameMode = GameMode.Host,
+            SessionName = persistentSessionName,
+            CustomLobbyName = customLobbyName,
+            PlayerCount = maximumPlayers,
+            IsOpen = true,
+            IsVisible = true,
+            EnableClientSessionCreation = true,
+            Scene = sceneInfo
+        });
+    }
+
     public Task<StartGameResult> StartHost(string sessionName)
     {
         return StartSession(new StartGameArgs
         {
             GameMode = GameMode.Host,
             SessionName = sessionName,
+            CustomLobbyName = customLobbyName,
             PlayerCount = maximumPlayers,
             IsOpen = true,
             IsVisible = true,
@@ -91,27 +153,23 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
         {
             GameMode = GameMode.Client,
             SessionName = sessionName,
+            CustomLobbyName = customLobbyName,
             EnableClientSessionCreation = false
         });
     }
 
     public Task<StartGameResult> StartDedicatedServer(string sessionName)
     {
-        return StartSession(new StartGameArgs
-        {
-            GameMode = GameMode.Server,
-            SessionName = sessionName,
-            PlayerCount = maximumPlayers,
-            IsOpen = true,
-            IsVisible = true,
-            EnableClientSessionCreation = true
-        });
+        return StartPersistentServer(sessionName);
     }
 
     public async Task<StartGameResult> StartSession(StartGameArgs args)
     {
         if (operationInProgress)
+        {
+            Debug.LogWarning("A network operation is already in progress");
             return default;
+        }
 
         if (string.IsNullOrWhiteSpace(args.SessionName))
         {
@@ -211,5 +269,22 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
     {
         await ShutdownRunner(false);
         CreateRunner();
+    }
+
+    private bool TryCreateGameSceneInfo(out NetworkSceneInfo sceneInfo)
+    {
+        sceneInfo = default;
+
+        var buildIndex = SceneUtility.GetBuildIndexByScenePath(gameScenePath);
+
+        if (buildIndex < 0)
+        {
+            Debug.LogError($"Game scene is not included in Build Profiles: {gameScenePath}");
+            return false;
+        }
+
+        sceneInfo = new NetworkSceneInfo();
+        sceneInfo.AddSceneRef(SceneRef.FromIndex(buildIndex), LoadSceneMode.Single);
+        return true;
     }
 }

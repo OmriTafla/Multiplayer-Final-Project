@@ -15,8 +15,7 @@ public class Projectile : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        LifeTimer =
-            TickTimer.CreateFromSeconds(Runner, lifetime);
+        LifeTimer = TickTimer.CreateFromSeconds(Runner, lifetime);
     }
 
     public override void FixedUpdateNetwork()
@@ -24,10 +23,7 @@ public class Projectile : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        transform.position +=
-            transform.forward *
-            speed *
-            Runner.DeltaTime;
+        transform.position += transform.forward * speed * Runner.DeltaTime;
 
         if (LifeTimer.Expired(Runner))
             Runner.Despawn(Object);
@@ -35,32 +31,25 @@ public class Projectile : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!Object.HasStateAuthority)
+        if (Object == null || !Object.HasStateAuthority)
             return;
 
-        var target =
-            other.GetComponentInParent<NetworkObject>();
+        var target = other.GetComponentInParent<NetworkObject>();
 
-        if (target == null)
+        if (target == null || target == Object)
             return;
 
-        if (target == Object)
+        if (target.InputAuthority == Object.InputAuthority && target.TryGetComponent(out Player _))
             return;
-
-        if (target.InputAuthority == Object.InputAuthority)
-        {
-            if (target.TryGetComponent(out Player _))
-                return;
-        }
 
         if (target.TryGetComponent(out Projectile _))
             return;
 
         if (target.TryGetComponent(out IHitable hittable))
+        {
             hittable.OnHit(damageData);
-
-        if (ScoreManager.Instance != null)
-            ScoreManager.Instance.AddScoreForHit_Client();
+            ScoreManager.Instance?.AddScoreForHit(Object.InputAuthority);
+        }
 
         Runner.Despawn(Object);
     }

@@ -5,29 +5,44 @@ using UnityEngine;
 
 public class ScoreManager : NetworkSingleton<ScoreManager>
 {
-    [Networked, Capacity(20)] 
-    private NetworkDictionary<PlayerRef, int> Scores { get; } = 
+    [Networked, Capacity(64)]
+    private NetworkDictionary<PlayerRef, int> Scores { get; } =
         MakeInitializer<PlayerRef, int>(new Dictionary<PlayerRef, int>());
+
     [SerializeField] private int scoreForHit = 1;
 
-    public void AddScoreForHit_Client()
+    public void AddScoreForHit(PlayerRef player)
     {
-        var runner = SinglePeer_NetworkRunnerManager.Instance.NetworkRunner;
-        if (!Scores.ContainsKey(runner.LocalPlayer))
-            Scores.Add(runner.LocalPlayer, scoreForHit);
-        else
+        if (!Object.HasStateAuthority || player == PlayerRef.None)
+            return;
+
+        if (!Scores.ContainsKey(player))
         {
-            var prevScore = Scores.Get(runner.LocalPlayer);
-            Scores.Set(runner.LocalPlayer, prevScore + scoreForHit);
+            Scores.Add(player, scoreForHit);
+            return;
         }
+
+        Scores.Set(player, Scores.Get(player) + scoreForHit);
     }
-    
-    public Dictionary<PlayerRef, int> GetScores() => new(Scores);
-    
+
+    public void RemovePlayer(PlayerRef player)
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        if (Scores.ContainsKey(player))
+            Scores.Remove(player);
+    }
+
+    public Dictionary<PlayerRef, int> GetScores()
+    {
+        return new Dictionary<PlayerRef, int>(Scores);
+    }
+
     [ContextMenu("Print Scores")]
     private void PrintScores()
     {
-        foreach (var (player, score) in Scores)
-            print($"{player.PlayerId}: {score}");
+        foreach (var pair in Scores)
+            Debug.Log($"{pair.Key.PlayerId}: {pair.Value}");
     }
 }

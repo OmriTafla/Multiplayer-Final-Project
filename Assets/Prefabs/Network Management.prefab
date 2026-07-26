@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3719237687854773764}
+  - component: {fileID: 9010000000000000001}
   m_Layer: 0
   m_Name: Network Management
   m_TagString: Untagged
@@ -33,6 +34,19 @@ Transform:
   - {fileID: 6704128371058956756}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9010000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 367268857560990003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d34dacc9e1be4fa78564f8ecb965f98e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  defaultSessionName: MainWorld
 --- !u!1 &1702628412880338151
 GameObject:
   m_ObjectHideFlags: 0
@@ -79,7 +93,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   networkRunnerPrefab: {fileID: 1552692716013036465, guid: c98164ac347e68d428be9ee2f7388683, type: 3}
   networkEvents: {fileID: 4761396219911374435}
-  maximumPlayers: 8
+  persistentSessionName: MainWorld
+  customLobbyName: Cool
+  gameScenePath: Assets/Scenes/GameScene.unity
+  maximumPlayers: 32
   onRunnerInstantiated:
     m_PersistentCalls:
       m_Calls: []

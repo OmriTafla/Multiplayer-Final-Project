@@ -5976,6 +5976,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   inputNicknameField: {fileID: 679923194}
   dropdownColour: {fileID: 936291472}
+  signInButton: {fileID: 0}
+  allowEditorHostFallback: 0
 --- !u!1 &811948964
 GameObject:
   m_ObjectHideFlags: 0

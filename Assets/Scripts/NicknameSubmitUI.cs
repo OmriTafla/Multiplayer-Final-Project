@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +8,7 @@ public class NicknameSubmitUI : MonoBehaviour
     [SerializeField] private TMP_InputField inputNicknameField;
     [SerializeField] private TMP_Dropdown dropdownColour;
     [SerializeField] private Button signInButton;
-    [SerializeField] private string lobbyName = "Cool";
+    [SerializeField] private bool allowEditorHostFallback = true;
 
     private bool signingIn;
 
@@ -65,6 +64,14 @@ public class NicknameSubmitUI : MonoBehaviour
             return;
         }
 
+        var manager = SinglePeer_NetworkRunnerManager.Instance;
+
+        if (manager == null)
+        {
+            Debug.LogError("No active SinglePeer_NetworkRunnerManager exists");
+            return;
+        }
+
         signingIn = true;
 
         if (signInButton != null)
@@ -74,44 +81,37 @@ public class NicknameSubmitUI : MonoBehaviour
         PlayerPrefs.SetString("PendingColour", dropdownColour.options[dropdownColour.value].text);
         PlayerPrefs.Save();
 
-        Debug.Log($"Saved nickname '{nickname}'. Joining lobby '{lobbyName}'...");
-
-        if (UIManager.Instance != null)
-            UIManager.Instance.ShowWaitingScreen();
+        UIManager.Instance?.ShowWaitingScreen();
 
         try
         {
-            var lobbyJoiner = LobbyJoiner.Instance;
+            Debug.Log($"Joining persistent world '{manager.PersistentSessionName}'...");
 
-            if (lobbyJoiner == null)
-                lobbyJoiner = FindAnyObjectByType<LobbyJoiner>();
+            var result = await manager.JoinPersistentWorld();
 
-            if (lobbyJoiner == null)
+            if (!result.Ok && allowEditorHostFallback && Application.isEditor && !Application.isBatchMode)
             {
-                Debug.LogError("No active LobbyJoiner exists in LobbyScene");
-                ShowSignInMenu();
+                Debug.LogWarning("Persistent server was unavailable. Starting an Editor development host.");
+                result = await manager.StartPersistentHostForDevelopment();
+            }
+
+            if (result.Ok)
+            {
+                Debug.Log($"Connected to persistent world '{manager.PersistentSessionName}'. Waiting for GameScene synchronization.");
                 return;
             }
 
-            var joined = await lobbyJoiner.JoinLobbyAsync(lobbyName);
+            var message = string.IsNullOrWhiteSpace(result.ErrorMessage)
+                ? result.ShutdownReason.ToString()
+                : result.ErrorMessage;
 
-            if (joined)
-            {
-                Debug.Log($"Joined lobby '{lobbyName}'. Opening session browser");
-
-                if (UIManager.Instance != null)
-                    UIManager.Instance.ShowSessionsMenu();
-
-                return;
-            }
-
-            Debug.LogError($"Could not join lobby '{lobbyName}'");
-            ShowSignInMenu();
+            Debug.LogError($"Could not join persistent world: {message}");
+            UIManager.Instance?.ShowLobbyMenu();
         }
         catch (Exception exception)
         {
             Debug.LogException(exception);
-            ShowSignInMenu();
+            UIManager.Instance?.ShowLobbyMenu();
         }
         finally
         {
@@ -125,12 +125,6 @@ public class NicknameSubmitUI : MonoBehaviour
     private void HandleSubmit(string value)
     {
         SignIn();
-    }
-
-    private void ShowSignInMenu()
-    {
-        if (UIManager.Instance != null)
-            UIManager.Instance.ShowLobbyMenu();
     }
 
     private static Button FindSignInButton(Transform root)
