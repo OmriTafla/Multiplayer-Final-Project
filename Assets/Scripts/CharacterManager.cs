@@ -9,8 +9,6 @@ public class CharacterManager : NetworkBehaviour
     [SerializeField] private SpawnPoint[] spawnPoints;
     [SerializeField] private NetworkObject playerPrefab;
 
-    private readonly HashSet<int> selectedCharacterIds = new();
-    private readonly HashSet<PlayerRef> playersInSelection = new();
     private readonly Dictionary<PlayerRef, NetworkObject> spawnedPlayers = new();
     private PlayerRef localSelectingPlayer;
 
@@ -26,51 +24,63 @@ public class CharacterManager : NetworkBehaviour
             Debug.LogError("CharacterManager requires the Player network prefab", this);
     }
 
-    public void StartSelection(PlayerRef player)
+    // public void StartSelection(PlayerRef player)
+    // {
+    //     if (!Object.HasStateAuthority)
+    //         return;
+    //
+    //     if (spawnedPlayers.ContainsKey(player))
+    //         return;
+    //
+    //     //TODO: Spawn the player here
+    //     SpawnPlayerAtRandomPoint(player);
+    // }
+
+    // [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    // private void RequestCharacterRpc(PlayerRef requestedPlayer, int characterId, RpcInfo info = default)
+    // {
+    //     var player = info.Source == PlayerRef.None ? requestedPlayer : info.Source;
+    //
+    //     if (player == PlayerRef.None)
+    //     {
+    //         Debug.LogWarning("Character selection request had no player source", this);
+    //         return;
+    //     }
+    //
+    //     if (info.Source != PlayerRef.None && requestedPlayer != info.Source)
+    //         return;
+    //
+    //     if (spawnedPlayers.ContainsKey(player))
+    //         return;
+    //
+    //     if (spawnPoints == null || spawnPoints.Length == 0)
+    //     {
+    //         SelectionFailedRpc(player, "No spawn points configured.");
+    //         return;
+    //     }
+    //
+    //     if (playerPrefab == null)
+    //     {
+    //         SelectionFailedRpc(player, "Player prefab is not assigned.");
+    //         return;
+    //     }
+    //
+    //     SpawnPlayerAtRandomPoint(player);
+    // }
+
+    public void SpawnPlayerAtRandomPoint(PlayerRef player)
     {
-        if (!Object.HasStateAuthority)
-            return;
-
-        if (spawnedPlayers.ContainsKey(player) || playersInSelection.Contains(player))
-            return;
-
-        playersInSelection.Add(player);
-    }
-
-    private void OnSelectCharacter(int characterId)
-    {
-        RequestCharacterRpc(localSelectingPlayer, characterId);
-    }
-
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    private void RequestCharacterRpc(PlayerRef requestedPlayer, int characterId, RpcInfo info = default)
-    {
-        var player = info.Source == PlayerRef.None ? requestedPlayer : info.Source;
-
         if (player == PlayerRef.None)
         {
             Debug.LogWarning("Character selection request had no player source", this);
             return;
         }
-
-        if (info.Source != PlayerRef.None && requestedPlayer != info.Source)
+        
+        if (spawnedPlayers.ContainsKey(player))
             return;
-
-        if (!playersInSelection.Contains(player) || spawnedPlayers.ContainsKey(player))
-            return;
-
-        if (spawnPoints == null || spawnPoints.Length == 0)
-        {
-            SelectionFailedRpc(player, "No spawn points configured.");
-            return;
-        }
-
-        if (playerPrefab == null)
-        {
-            SelectionFailedRpc(player, "Player prefab is not assigned.");
-            return;
-        }
-
+        
+        print($"Spawning player {player.AsIndex}");
+        
         var validSpawnPoints = spawnPoints.Where(x => x != null).ToArray();
 
         if (validSpawnPoints.Length == 0)
@@ -94,8 +104,6 @@ public class CharacterManager : NetworkBehaviour
         }
 
         spawnedPlayers[player] = avatar;
-        playersInSelection.Remove(player);
-
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -108,8 +116,6 @@ public class CharacterManager : NetworkBehaviour
     {
         if (!Object.HasStateAuthority)
             return;
-
-        playersInSelection.Remove(player);
 
         if (!spawnedPlayers.TryGetValue(player, out var avatar))
             return;

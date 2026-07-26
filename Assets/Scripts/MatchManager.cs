@@ -8,9 +8,6 @@ public class MatchManager : Singleton<MatchManager>
     [FormerlySerializedAs("cm")]
     [SerializeField] private CharacterManager characterManager;
 
-    [FormerlySerializedAs("pm")]
-    [SerializeField] private PlacementManager placementManager;
-
     [SerializeField] private NetworkObject playerDataPrefab;
 
     protected override void Awake()
@@ -56,7 +53,6 @@ public class MatchManager : Singleton<MatchManager>
             return;
 
         characterManager.RemovePlayer(player);
-        placementManager?.RemovePlayer(player);
         ScoreManager.Instance?.RemovePlayer(player);
 
         var playerDataObject = runner.GetPlayerObject(player);
@@ -81,7 +77,7 @@ public class MatchManager : Singleton<MatchManager>
     private void PreparePlayer(NetworkRunner runner, PlayerRef player)
     {
         EnsurePlayerData(runner, player);
-        characterManager.StartSelection(player);
+        characterManager.SpawnPlayerAtRandomPoint(player);
     }
 
     private void EnsurePlayerData(NetworkRunner runner, PlayerRef player)
@@ -105,9 +101,6 @@ public class MatchManager : Singleton<MatchManager>
     {
         if (characterManager == null)
             characterManager = FindAnyObjectByType<CharacterManager>();
-
-        if (placementManager == null)
-            placementManager = FindAnyObjectByType<PlacementManager>();
 
         if (characterManager != null)
             return true;
