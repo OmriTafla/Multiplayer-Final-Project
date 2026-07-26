@@ -41,7 +41,7 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
             return null;
         }
 
-        networkRunner = Instantiate(networkRunnerPrefab, transform);
+        networkRunner = Instantiate(networkRunnerPrefab);
         networkRunner.name = "NetworkRunner";
         networkRunner.ProvideInput = !Application.isBatchMode;
 

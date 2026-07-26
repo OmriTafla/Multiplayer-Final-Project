@@ -1212,7 +1212,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e91335dc851fed44bf2e8460db56419, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ObjectActiveByRunner
+  m_EditorClassIdentifier: Assembly-CSharp::ActivateObjectsBySceneAuth
   sceneAuthExclusiveObjs:
   - {fileID: 439669680}
 --- !u!1 &1624820816
@@ -1260,7 +1260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b9954aa0435ab643b6a1b7d6b663072, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  OnMatchEnded:
+  onMatchEnded:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 712539126}
@@ -1508,7 +1508,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4761396219911374435, guid: ece57d3017de8b24da3fead81d9e0951, type: 3}
       propertyPath: PlayerLeft.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: ObjectActiveByRunner, Assembly-CSharp
+      value: ActivateObjectsBySceneAuth, Assembly-CSharp
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

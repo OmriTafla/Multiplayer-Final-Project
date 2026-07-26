@@ -1,3 +1,4 @@
+using System;
 using Fusion;
 using UnityEngine;
 
@@ -29,22 +30,35 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
             return;
         }
 
-        var sceneRef = SceneRef.FromPath(gameScenePath);
+        var buildIndex = UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath(gameScenePath);
 
-        if (!sceneRef.IsValid)
+        if (buildIndex < 0)
         {
-            Debug.LogError($"Invalid Fusion scene path: {gameScenePath}");
+            Debug.LogError($"Game scene is not included in Build Profiles: {gameScenePath}");
             return;
         }
+
+        var sceneRef = SceneRef.FromIndex(buildIndex);
 
         runner.SessionInfo.IsOpen = false;
 
         if (UIManager.Instance != null)
             UIManager.Instance.ShowWaitingScreen();
 
-        await runner.LoadScene(
-            sceneRef,
-            UnityEngine.SceneManagement.LoadSceneMode.Single);
+        try
+        {
+            Debug.Log($"Loading network game scene at build index {buildIndex}: {gameScenePath}");
+
+            await runner.LoadScene(
+                sceneRef,
+                UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+            Debug.Log("Network game scene loaded");
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception);
+        }
     }
 
     public async void ReturnToMenu()
