@@ -1,4 +1,3 @@
-using System;
 using Fusion;
 using Singleton;
 using UnityEngine;
@@ -7,15 +6,18 @@ using UnityEngine;
 public class NetworkEventsManager : Singleton<NetworkEventsManager>
 {
     [SerializeField, HideInInspector] private NetworkEvents networkEvents;
-    
+
     private void OnValidate()
     {
         networkEvents = GetComponent<NetworkEvents>();
     }
 
-    protected void Start()
+    private void Start()
     {
-        SinglePeer_NetworkRunnerManager.Instance.networkEvents = networkEvents;
-        SinglePeer_NetworkRunnerManager.Instance.SubscribeRunnerToEvents();
+        if (networkEvents == null)
+            networkEvents = GetComponent<NetworkEvents>();
+
+        if (SinglePeer_NetworkRunnerManager.Instance != null)
+            SinglePeer_NetworkRunnerManager.Instance.ConfigureNetworkEvents(networkEvents);
     }
 }

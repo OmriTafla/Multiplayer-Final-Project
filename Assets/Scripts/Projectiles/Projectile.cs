@@ -1,63 +1,67 @@
-using System;
 using Fusion;
 using UnityEngine;
 
 public class Projectile : NetworkBehaviour
 {
-    [Networked]
-    private TickTimer lifeTimer { get; set; }
-    
     [SerializeField] private float speed = 20f;
+    [SerializeField] private float lifetime = 20f;
+    [SerializeField] private DamageData damageData;
 
-    [SerializeField]
-    private DamageData damageData;
+    [Networked]
+    private TickTimer LifeTimer { get; set; }
 
     public override void Spawned()
     {
-        if (!Object.HasStateAuthority) return;
-        lifeTimer = TickTimer.CreateFromSeconds(Runner, 20f);
+        if (!Object.HasStateAuthority)
+            return;
+
+        LifeTimer =
+            TickTimer.CreateFromSeconds(Runner, lifetime);
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (!Object.HasStateAuthority) return;
-        transform.position += transform.forward * speed * Time.fixedDeltaTime;
-        
-        if (lifeTimer.Expired(Runner))
-        {   
+        if (!Object.HasStateAuthority)
+            return;
+
+        transform.position +=
+            transform.forward *
+            speed *
+            Runner.DeltaTime;
+
+        if (LifeTimer.Expired(Runner))
             Runner.Despawn(Object);
-        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!Object.HasStateAuthority) return;
-        var hitObject = other.GetComponentInParent<NetworkObject>();
-        if (!hitObject) return;
-
-        if (hitObject.TryGetComponent(out Player player) && hitObject.InputAuthority == Object.InputAuthority)
+        if (!Object.HasStateAuthority)
             return;
-        if (hitObject.TryGetComponent(out Projectile projectile)) return;
 
-        TriggerHitOnTargetRPC(hitObject.StateAuthority, hitObject.Id, damageData);
-        ScoreManager.Instance.AddScoreForHit_Client();
+        var target =
+            other.GetComponentInParent<NetworkObject>();
 
-        Debug.Log("Projectile hit " + hitObject.name);
-        Runner.Despawn(Object);
-    }
+        if (target == null)
+            return;
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    void TriggerHitOnTargetRPC([RpcTarget] PlayerRef player, NetworkId theOneUnskilledIndividualThatWasHit, DamageData sentDamageData)
-    {
-        if (!SinglePeer_NetworkRunnerManager.Instance.NetworkRunner.TryFindObject(theOneUnskilledIndividualThatWasHit, out NetworkObject sillyHittable)) return;
+        if (target == Object)
+            return;
 
-        if (sentDamageData.damage > DamageData.MAX_POSSIBLE_DAMAGE || sentDamageData.damage < DamageData.MIN_POSSIBLE_DAMAGE)
+        if (target.InputAuthority == Object.InputAuthority)
         {
-            Debug.LogError($"This {sentDamageData} was sent by an EVIL CHEATOR!!!! HAXXOR!!!! >:(");
-            return;
+            if (target.TryGetComponent(out Player _))
+                return;
         }
 
-        if (sillyHittable.TryGetComponent(out IHitable hitable))
-            hitable.OnHit(sentDamageData);
+        if (target.TryGetComponent(out Projectile _))
+            return;
+
+        if (target.TryGetComponent(out IHitable hittable))
+            hittable.OnHit(damageData);
+
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.AddScoreForHit_Client();
+
+        Runner.Despawn(Object);
     }
 }

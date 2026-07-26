@@ -44,8 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 801705fef3883aa488c1fb585af60047, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  gameSceneAsset: {fileID: 102900000, guid: 41ffc63ec8e9f9640b44904afbccf9a6, type: 3}
-  connectionSceneAsset: {fileID: 102900000, guid: 99c9720ab356a0642a771bea13969a05, type: 3}
+  gameScenePath: Assets/Scenes/GameScene.unity
+  connectionSceneName: LobbyScene
 --- !u!1 &3359833220522842353
 GameObject:
   m_ObjectHideFlags: 0

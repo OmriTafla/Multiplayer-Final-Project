@@ -1,5 +1,4 @@
 using Fusion;
-using Fusion.Sockets;
 using UnityEngine;
 
 public class LobbyPlayerDataSpawner : MonoBehaviour
@@ -9,11 +8,33 @@ public class LobbyPlayerDataSpawner : MonoBehaviour
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        if (!runner.IsSceneAuthority) return;
+        if (!runner.IsServer)
+            return;
 
-        var dataObject = runner.Spawn(playerDataPrefab, inputAuthority: player);
-        runner.SetPlayerObject(player, dataObject);
+        if (runner.GetPlayerObject(player) != null)
+            return;
 
-        activePlayersUI.UpdateActivePlayers(runner);
+        var playerDataObject = runner.Spawn(
+            playerDataPrefab,
+            inputAuthority: player);
+
+        runner.SetPlayerObject(player, playerDataObject);
+
+        if (activePlayersUI != null)
+            activePlayersUI.UpdateActivePlayers(runner);
+    }
+
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        if (!runner.IsServer)
+            return;
+
+        var playerDataObject = runner.GetPlayerObject(player);
+
+        if (playerDataObject != null)
+            runner.Despawn(playerDataObject);
+
+        if (activePlayersUI != null)
+            activePlayersUI.UpdateActivePlayers(runner);
     }
 }

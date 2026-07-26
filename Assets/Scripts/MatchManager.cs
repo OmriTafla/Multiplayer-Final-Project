@@ -1,4 +1,3 @@
-
 using Fusion;
 using Singleton;
 using UnityEngine;
@@ -6,51 +5,52 @@ using UnityEngine.Events;
 
 public class MatchManager : Singleton<MatchManager>
 {
-    [SerializeField]
-    private CharacterManager cm;
-    [SerializeField]
-    private PlacementManager pm;
+    [SerializeField] private CharacterManager characterManager;
+    [SerializeField] private PlacementManager placementManager;
+    [SerializeField] private UnityEvent onMatchEnded;
 
     public void OnSceneLoaded(NetworkRunner runner)
     {
-        if (!SinglePeer_NetworkRunnerManager.Instance.NetworkRunner.IsSceneAuthority) return;
+        if (!runner.IsServer)
+            return;
 
-        foreach (var player in SinglePeer_NetworkRunnerManager.Instance.NetworkRunner.ActivePlayers)
-        {
-            cm.MakeSelectCharacterRPC(player);
-        }
+        foreach (var player in runner.ActivePlayers)
+            characterManager.StartSelection(player);
     }
 
-    [SerializeField] private UnityEvent OnMatchEnded;
+    public void OnPlayerJoined(
+        NetworkRunner runner,
+        PlayerRef player)
+    {
+        if (!runner.IsServer)
+            return;
+
+        characterManager.StartSelection(player);
+    }
+
+    public void OnPlayerLeft(
+        NetworkRunner runner,
+        PlayerRef player)
+    {
+        if (!runner.IsServer)
+            return;
+
+        characterManager.RemovePlayer(player);
+    }
 
     public void EndMatch()
     {
-        if (!SinglePeer_NetworkRunnerManager.Instance.NetworkRunner.IsSceneAuthority)
-        {
-            print("Can't end match, not the scene authority");
+        var runner =
+            SinglePeer_NetworkRunnerManager.Instance.NetworkRunner;
+
+        if (runner == null || !runner.IsServer)
             return;
-        }
-        
-        OnMatchEnded.Invoke();
+
+        onMatchEnded?.Invoke();
     }
 
-    public void RequestPlacePlaceable(int characterID, Vector3 position)
-    {
-        pm.PlacePlaceableRPC(characterID, position);
-    }
-
-    public void RequestDeletePlaceable(NetworkId id)
-    {
-        pm.DeletePlaceableRPC(id);
-    }
-    
-    public void RequestSpawnProjectile(int characterID, Vector3 origin, Vector3 direction)
-    {
-        pm.SpawnProjectileRPC(characterID, origin, direction);
-    }
-    
     public Vector3 GetRandomSpawnPosition()
     {
-        return cm.GetRandomSpawnPosition();
+        return characterManager.GetRandomSpawnPosition();
     }
 }

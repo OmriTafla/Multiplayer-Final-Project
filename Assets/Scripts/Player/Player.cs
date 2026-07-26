@@ -1,188 +1,303 @@
 using Fusion;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-#region VeryPersonalAndImportantDontTouchOrOpen
-[HelpURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ")]
-#endregion
 public class Player : NetworkBehaviour, IHitable
 {
-    private CharacterProperties _myCharacter;
     [SerializeField] private Renderer modelRenderer;
     [SerializeField] private Collider hitCollider;
+    [SerializeField] private Rigidbody rigidBody;
     [SerializeField] private Canvas playerUI;
     [SerializeField] private TMP_Text hpLabel;
+    [SerializeField] private float startingHp = 10f;
+    [SerializeField] private float movementSpeed = 5f;
+    [SerializeField] private float shootingCooldown = 0.5f;
+    [SerializeField] private float respawnDelay = 3f;
+    [SerializeField] private float placementDistance = 20f;
+    [SerializeField] private LayerMask placementMask = -1;
+    [SerializeField] private LayerMask deletionMask = -1;
 
     [Networked, OnChangedRender(nameof(OnCharacterIdChanged))]
-    public int CharacterID { get; set; }
+    public int CharacterID { get; private set; }
 
-    private CharacterProperties _character;
-    private int _placeableAreaLayer;
+    [Networked, OnChangedRender(nameof(OnHpChanged))]
+    public float Hp { get; private set; }
 
-    [Networked, OnChangedRender(nameof(OnHPChanged))]
-    private float _hp { get; set; }
-
-    [SerializeField] private float startingHp;
-    [SerializeField] private float respawnDelay = 3f;
-
-    [SerializeField] private float shootingCooldown;
-    private float _nextShootTime;
-    
     [Networked, OnChangedRender(nameof(OnDeathStateChanged))]
-    private NetworkBool IsDead { get; set; }
+    public NetworkBool IsDead { get; private set; }
 
+    [Networked] private TickTimer ShootCooldownTimer { get; set; }
     [Networked] private TickTimer RespawnTimer { get; set; }
-    [Networked] private Vector3 SpawnPosition { get; set; }
-    private string _cachedNickname;
+    [Networked] private NetworkButtons PreviousButtons { get; set; }
 
+    private CharacterProperties character;
+    private string cachedNickname;
 
     public override void Spawned()
     {
-        base.Spawned();
-        _cachedNickname = GetNickname();
         OnCharacterIdChanged();
-        _placeableAreaLayer = LayerMask.NameToLayer("PlaceableArea");
 
         if (Object.HasStateAuthority)
         {
-            SpawnPosition = transform.position;
-            _hp = startingHp;
+            Hp = startingHp;
             IsDead = false;
+            ShootCooldownTimer = TickTimer.None;
+            RespawnTimer = TickTimer.None;
         }
 
-        if (playerUI) playerUI.gameObject.SetActive(Object.HasStateAuthority);
+        cachedNickname = GetNickname();
 
+        OnHpChanged();
         OnDeathStateChanged();
+        ConfigureLocalPresentation();
     }
 
-    public void SetCharacter(CharacterProperties character)
+    public void SetCharacter(CharacterProperties newCharacter)
     {
-        if (character == null) return;
-        CharacterID = character.CharacterID;
-        _character = character;
+        if (!Object.HasStateAuthority || newCharacter == null)
+            return;
+
+        CharacterID = newCharacter.CharacterID;
     }
 
-    private void OnCharacterIdChanged()
-    {        
-        _myCharacter = CharacterProperties.GetByID(CharacterID);
-        if (_myCharacter != null)
-        {
-            modelRenderer.material.color = _myCharacter.characterColor;
-        }
-    }
-
-    private void OnHPChanged()
-    {
-        hpLabel.text = $"Health: {_hp:F2}";
-    }
-    
-    private void OnDeathStateChanged()
-    {
-        if (modelRenderer) modelRenderer.enabled = !IsDead;
-        if (hitCollider) hitCollider.enabled = !IsDead;
-        if (playerUI) playerUI.gameObject.SetActive(!IsDead && Object.HasStateAuthority);
-    }
-    
     public override void FixedUpdateNetwork()
     {
-        if (!Object.HasStateAuthority) return;
-        if (!IsDead) return;
-
-        if (RespawnTimer.Expired(Runner))
+        if (!GetInput<GameplayInput>(out var input))
         {
-            Respawn();
+            ProcessRespawn();
+            return;
         }
+
+        if (IsDead)
+        {
+            ProcessRespawn();
+            PreviousButtons = input.Buttons;
+            return;
+        }
+
+        Move(input.Move);
+        ProcessFire(input);
+        ProcessPlacement(input);
+        ProcessDeletion(input);
+
+        PreviousButtons = input.Buttons;
     }
 
-    void Update()
+    private void Move(Vector2 movementInput)
     {
-        if (!Object.HasInputAuthority) return;
-        
-        if (Mouse.current.rightButton.wasPressedThisFrame && MatchManager.Instance)
-        {            
-            var screenPos = Mouse.current.position.ReadValue();
-            Ray ray = Camera.main.ScreenPointToRay(screenPos);
-            
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                if (hit.transform.gameObject.layer == _placeableAreaLayer)
-                {
-                    MatchManager.Instance.RequestPlacePlaceable(CharacterID, hit.point);
-                }
-                else 
-                {
-                    // ik this is not optimal but it might just be 3am
-                    var placeable = hit.transform.GetComponentInParent<PlaceableObject>();
-                    if (placeable != null)
-                    {
-                        var netObj = placeable.GetComponent<NetworkObject>();
-                        if (netObj != null)
-                            MatchManager.Instance.RequestDeletePlaceable(netObj.Id);
-                    }
-                }
-            }
-        }
+        movementInput = Vector2.ClampMagnitude(movementInput, 1f);
 
-        if (Mouse.current.leftButton.isPressed && MatchManager.Instance && Time.time > _nextShootTime)
+        var direction = new Vector3(
+            movementInput.x,
+            0f,
+            movementInput.y);
+
+        var nextPosition = transform.position +
+                           direction *
+                           movementSpeed *
+                           Runner.DeltaTime;
+
+        if (rigidBody != null)
         {
-            var screenPos = Mouse.current.position.ReadValue();
-            Ray ray = Camera.main.ScreenPointToRay(screenPos);
-
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                Vector3 origin = transform.position;
-                Vector3 direction = hit.point - origin;
-                direction.y = 0f;
-
-                if (direction.sqrMagnitude > 0.0001f)
-                {
-                    MatchManager.Instance.RequestSpawnProjectile(CharacterID, origin, direction.normalized);
-                    _nextShootTime = Time.time + shootingCooldown;
-                }
-            }
+            rigidBody.MovePosition(nextPosition);
+            return;
         }
+
+        transform.position = nextPosition;
+    }
+
+    private void ProcessFire(GameplayInput input)
+    {
+        if (!input.Buttons.IsSet(GameplayButton.Fire))
+            return;
+
+        if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
+            return;
+
+        if (!Object.HasStateAuthority)
+            return;
+
+        var direction = input.AimPosition - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
+        ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
+
+        var placementManager = FindAnyObjectByType<PlacementManager>();
+
+        if (placementManager == null)
+            return;
+
+        placementManager.SpawnProjectile(
+            Object,
+            CharacterID,
+            transform.position,
+            direction.normalized);
+    }
+
+    private void ProcessPlacement(GameplayInput input)
+    {
+        if (!input.Buttons.WasPressed(PreviousButtons, GameplayButton.Place))
+            return;
+
+        if (!Object.HasStateAuthority)
+            return;
+
+        var distance = Vector3.Distance(transform.position, input.AimPosition);
+
+        if (distance > placementDistance)
+            return;
+
+        if (!Physics.CheckSphere(input.AimPosition, 0.25f, placementMask))
+            return;
+
+        var placementManager = FindAnyObjectByType<PlacementManager>();
+
+        if (placementManager == null)
+            return;
+
+        placementManager.PlacePlaceable(Object, CharacterID, input.AimPosition);
+    }
+
+    private void ProcessDeletion(GameplayInput input)
+    {
+        if (!input.Buttons.WasPressed(PreviousButtons, GameplayButton.Delete))
+            return;
+
+        if (!Object.HasStateAuthority)
+            return;
+
+        var direction = input.AimPosition - transform.position;
+        var distance = direction.magnitude;
+
+        if (distance <= 0f || distance > placementDistance)
+            return;
+
+        if (!Physics.Raycast(
+                transform.position,
+                direction.normalized,
+                out var hit,
+                distance,
+                deletionMask))
+            return;
+
+        var target = hit.collider.GetComponentInParent<NetworkObject>();
+
+        if (target == null)
+            return;
+
+        var placementManager = FindAnyObjectByType<PlacementManager>();
+
+        if (placementManager == null)
+            return;
+
+        placementManager.DeletePlaceable(Object, target);
     }
 
     public void OnHit(DamageData data)
     {
-        Debug.Log($"[GUEST CHECK] OnHit called, HasStateAuthority: {Object.HasStateAuthority}, IsDead: {IsDead}, HP before: {_hp}, damage: {data.damage}");
-        if (!Object.HasStateAuthority) return;
-        if (IsDead) return;
-    
-        _hp -= data.damage;
-        Debug.Log($"[GUEST CHECK] HP after: {_hp}");
-    
-        if (_hp <= 0)
-        {
-            _hp = 0;
+        if (!Object.HasStateAuthority || IsDead)
+            return;
+
+        if (data.damage < DamageData.MIN_POSSIBLE_DAMAGE ||
+            data.damage > DamageData.MAX_POSSIBLE_DAMAGE)
+            return;
+
+        Hp = Mathf.Max(0f, Hp - data.damage);
+
+        if (Hp <= 0f)
             Die();
-        }
     }
 
     private void Die()
     {
+        if (!Object.HasStateAuthority)
+            return;
+
         IsDead = true;
         RespawnTimer = TickTimer.CreateFromSeconds(Runner, respawnDelay);
-        Debug.Log($"{_cachedNickname} has been killed!");
+        Debug.Log($"{cachedNickname} died");
+    }
+
+    private void ProcessRespawn()
+    {
+        if (!Object.HasStateAuthority || !IsDead)
+            return;
+
+        if (RespawnTimer.Expired(Runner))
+            Respawn();
     }
 
     private void Respawn()
     {
-        if (MatchManager.Instance)
-            transform.position = MatchManager.Instance.GetRandomSpawnPosition();
+        var spawnPosition = MatchManager.Instance.GetRandomSpawnPosition();
 
-        _hp = startingHp;
+        if (rigidBody != null)
+        {
+            rigidBody.position = spawnPosition;
+            rigidBody.linearVelocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
+        }
+        else
+        {
+            transform.position = spawnPosition;
+        }
+
+        Hp = startingHp;
         IsDead = false;
-        Debug.Log($"{_cachedNickname} respawned!");
+        RespawnTimer = TickTimer.None;
+
+        Debug.Log($"{cachedNickname} respawned");
     }
-    
+
+    private void OnCharacterIdChanged()
+    {
+        character = CharacterProperties.GetByID(CharacterID);
+
+        if (character == null)
+            return;
+
+        if (modelRenderer != null)
+            modelRenderer.material.color = character.characterColor;
+    }
+
+    private void OnHpChanged()
+    {
+        if (hpLabel != null)
+            hpLabel.text = $"Health: {Hp:F0}";
+    }
+
+    private void OnDeathStateChanged()
+    {
+        if (modelRenderer != null)
+            modelRenderer.enabled = !IsDead;
+
+        if (hitCollider != null)
+            hitCollider.enabled = !IsDead;
+
+        if (playerUI != null)
+            playerUI.gameObject.SetActive(!IsDead && Object.HasInputAuthority);
+    }
+
+    private void ConfigureLocalPresentation()
+    {
+        if (playerUI != null)
+            playerUI.gameObject.SetActive(Object.HasInputAuthority && !IsDead);
+    }
+
     private string GetNickname()
     {
         var dataObject = Runner.GetPlayerObject(Object.InputAuthority);
-        if (!dataObject) return $"Player {CharacterID}";
+
+        if (dataObject == null)
+            return $"Player {Object.InputAuthority.PlayerId}";
 
         var playerData = dataObject.GetComponent<UI.PlayerData>();
-        return playerData ? playerData.NickName.ToString() : $"Player {CharacterID}";
+
+        return playerData != null
+            ? playerData.NickName.ToString()
+            : $"Player {Object.InputAuthority.PlayerId}";
     }
 }

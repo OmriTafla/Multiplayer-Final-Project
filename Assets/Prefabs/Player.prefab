@@ -364,8 +364,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5453781071388308594}
   - component: {fileID: 2524672585982938568}
-  - component: {fileID: 941868879188101433}
-  - component: {fileID: 625442329849667838}
   - component: {fileID: 2437361841328486602}
   - component: {fileID: 3458336771368325197}
   - component: {fileID: 589587090951933647}
@@ -407,39 +405,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   modelRenderer: {fileID: 6373446527506911363}
   hitCollider: {fileID: 7767355097294866205}
+  rigidBody: {fileID: 3458336771368325197}
   playerUI: {fileID: 4275309682345805136}
   hpLabel: {fileID: 476318218719191834}
-  _CharacterID: 0
   startingHp: 10
-  respawnDelay: 3
+  movementSpeed: 5
   shootingCooldown: 0.5
---- !u!114 &941868879188101433
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6059781578005178534}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 066fe46af95d49678f142752fa2eb261, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.PlayerInput
---- !u!114 &625442329849667838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6059781578005178534}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb131e8e7c5e46d3bdb8c1bb38af7d1c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.PlayerMovement
-  rigidBody: {fileID: 3458336771368325197}
-  moveSpeed: 20
-  acceleration: 10
+  respawnDelay: 3
+  placementDistance: 20
+  placementMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  deletionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!114 &2437361841328486602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -458,8 +437,6 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 2524672585982938568}
-  - {fileID: 941868879188101433}
-  - {fileID: 625442329849667838}
   - {fileID: 589587090951933647}
   ForceRemoteRenderTimeframe: 0
 --- !u!54 &3458336771368325197

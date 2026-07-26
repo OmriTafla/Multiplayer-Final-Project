@@ -62,8 +62,7 @@ Transform:
   m_LocalPosition: {x: -960, y: -537, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1632235315337262047}
+  m_Children: []
   m_Father: {fileID: 3719237687854773764}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2153853301481476726
@@ -78,24 +77,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fb932cc9b0fc644985aaf5a3e32165f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  OnRunnerInstantiated:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: ObjectActiveByRunner, Assembly-CSharp
-        m_MethodName: HandleNewRunner
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  networkRunner: {fileID: 953259070947682233}
   networkRunnerPrefab: {fileID: 1552692716013036465, guid: c98164ac347e68d428be9ee2f7388683, type: 3}
-  networkEvents: {fileID: 0}
+  networkEvents: {fileID: 4761396219911374435}
+  maximumPlayers: 8
+  onRunnerInstantiated:
+    m_PersistentCalls:
+      m_Calls: []
+  onConnectionStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onConnectionSucceeded:
+    m_PersistentCalls:
+      m_Calls: []
+  onConnectionFailed:
+    m_PersistentCalls:
+      m_Calls: []
+  onShutdownCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5465570489713543578
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,47 +258,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   networkEvents: {fileID: 4761396219911374435}
---- !u!1 &7932992227639815429
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1632235315337262047}
-  - component: {fileID: 953259070947682233}
-  m_Layer: 0
-  m_Name: Network Runner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1632235315337262047
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7932992227639815429}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1001.0271, y: 577.9156, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5034887685477852923}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &953259070947682233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7932992227639815429}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1199893898, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkRunner

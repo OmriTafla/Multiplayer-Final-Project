@@ -4,9 +4,9 @@ using System.Linq;
 using Enums;
 using Fusion;
 using ScriptableObjects;
+using Singleton;
 using UnityEngine;
 using UnityEngine.Events;
-using Singleton;
 
 public class SessionJoiner : Singleton<SessionJoiner>
 {
@@ -14,110 +14,143 @@ public class SessionJoiner : Singleton<SessionJoiner>
     public const string MAP_PROPERTY_NAME = "Map";
 
     public string SessionName { get; set; }
+
     [Header("Custom Session Settings")]
-    [SerializeField] private int playerCapacity;
-    [SerializeField] private int maxCapacity;
-    [SerializeField] private bool isVisible;
+    [SerializeField] private int playerCapacity = 2;
+    [SerializeField] private int maxCapacity = 8;
+    [SerializeField] private bool isVisible = true;
     [SerializeField] private GameModes gameMode = GameModes.Fun;
     [SerializeField] private string mapName;
     [SerializeField] private MapList mapList;
-    
+
     [Header("Events")]
     public UnityEvent<int> OnCapacityChanged;
     public UnityEvent OnStartJoin;
     public UnityEvent<NetworkRunner> OnJoined;
     public UnityEvent OnCancelJoin;
     public UnityEvent<List<SessionInfo>> OnAvaliableSessionsChanged;
-    
-    private List<SessionInfo> availableSessions;
+
+    private List<SessionInfo> availableSessions = new();
+    private bool busy;
 
     private void OnValidate()
     {
-        mapName = mapList.GetMapNames().First();
+        if (mapList != null && mapList.GetMapNames().Any())
+            mapName = mapList.GetMapNames().First();
     }
 
     private void Start()
     {
-        OnCapacityChanged.Invoke(playerCapacity);
+        OnCapacityChanged?.Invoke(playerCapacity);
     }
 
     public void JoinCustomSession()
     {
-        print($"Joining session: {SessionName}");
-        var networkRunner = SinglePeer_NetworkRunnerManager.Instance.NetworkRunner;
-        JoinSession(networkRunner, new StartGameArgs
+        if (busy)
+            return;
+
+        if (string.IsNullOrWhiteSpace(SessionName))
         {
-            GameMode = GameMode.Shared,
-            SessionName = SessionName,
+            Debug.LogWarning("Session name cannot be empty");
+            return;
+        }
+
+        var args = new StartGameArgs
+        {
+            GameMode = GameMode.Host,
+            SessionName = SessionName.Trim(),
             CustomLobbyName = LobbyJoiner.Instance.LobbyName,
             PlayerCount = playerCapacity,
+            IsOpen = true,
             IsVisible = isVisible,
+            EnableClientSessionCreation = true,
             SessionProperties = new Dictionary<string, SessionProperty>
             {
-                {GAMEMODE_PROPERTY_NAME, (int)gameMode},
-                {MAP_PROPERTY_NAME, mapName}
+                { GAMEMODE_PROPERTY_NAME, (int)gameMode },
+                { MAP_PROPERTY_NAME, mapName }
             }
-        });
+        };
+
+        JoinSession(args);
     }
 
     public void JoinSpecificSession(SessionInfo sessionInfo)
     {
-        var runner = SinglePeer_NetworkRunnerManager.Instance.NetworkRunner;
-        JoinSession(runner, new StartGameArgs()
+        if (busy || sessionInfo == null)
+            return;
+
+        if (!sessionInfo.IsOpen || sessionInfo.PlayerCount >= sessionInfo.MaxPlayers)
+            return;
+
+        var args = new StartGameArgs
         {
-            GameMode = GameMode.Shared,
+            GameMode = GameMode.Client,
             SessionName = sessionInfo.Name,
-            CustomLobbyName = LobbyJoiner.Instance.LobbyName
-        });
+            CustomLobbyName = LobbyJoiner.Instance.LobbyName,
+            EnableClientSessionCreation = false
+        };
+
+        JoinSession(args);
     }
 
-    private async void JoinSession(NetworkRunner runner, StartGameArgs args)
+    private async void JoinSession(StartGameArgs args)
     {
-        OnStartJoin.Invoke();
-        
-        var result = await runner.StartGame(args);
-        
+        busy = true;
+        OnStartJoin?.Invoke();
+
+        var result = await SinglePeer_NetworkRunnerManager.Instance.StartSession(args);
+
+        busy = false;
+
         if (result.Ok)
         {
-            OnJoined.Invoke(runner);
+            OnJoined?.Invoke(SinglePeer_NetworkRunnerManager.Instance.NetworkRunner);
+            return;
         }
-        else
-        {
-            OnCancelJoin.Invoke();
-        }
+
+        OnCancelJoin?.Invoke();
     }
 
     public void IncreasePlayerCapacity()
     {
         playerCapacity = Mathf.Clamp(playerCapacity + 1, 1, maxCapacity);
-        OnCapacityChanged.Invoke(playerCapacity);
+        OnCapacityChanged?.Invoke(playerCapacity);
     }
-    
+
     public void DecreasePlayerCapacity()
     {
         playerCapacity = Mathf.Clamp(playerCapacity - 1, 1, maxCapacity);
-        OnCapacityChanged.Invoke(playerCapacity);
+        OnCapacityChanged?.Invoke(playerCapacity);
     }
-    
-    public void SetVisibleFromPrivate(bool isPrivate) => isVisible = !isPrivate;
+
+    public void SetVisibleFromPrivate(bool isPrivate)
+    {
+        isVisible = !isPrivate;
+    }
 
     public void SetGameMode(int gameModeInt)
     {
-        GameModes chosenGameMode = (GameModes)(gameModeInt + 1);
-        
+        var chosenGameMode = (GameModes)(gameModeInt + 1);
+
         if (chosenGameMode == GameModes.Any)
-            throw new ArgumentOutOfRangeException(nameof(gameModeInt), "Cannot set game mode to Any");
-        
-        this.gameMode = chosenGameMode;
+            throw new ArgumentOutOfRangeException(nameof(gameModeInt));
+
+        gameMode = chosenGameMode;
     }
 
-    public void SetMapNameByIndex(int index) => mapName = mapList.GetMapNames().ToArray()[index];
-    
+    public void SetMapNameByIndex(int index)
+    {
+        mapName = mapList.GetMapNames().ToArray()[index];
+    }
+
     public void UpdateAvailableSessions(NetworkRunner runner, List<SessionInfo> sessionList)
     {
         availableSessions = new List<SessionInfo>(sessionList);
-        OnAvaliableSessionsChanged.Invoke(availableSessions);
+        OnAvaliableSessionsChanged?.Invoke(availableSessions);
     }
-    
-    public IEnumerable<SessionInfo> GetAvailableSessions() => availableSessions;
+
+    public IEnumerable<SessionInfo> GetAvailableSessions()
+    {
+        return availableSessions;
+    }
 }

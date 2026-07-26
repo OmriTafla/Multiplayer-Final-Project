@@ -1,40 +1,64 @@
-using System;
 using Fusion;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : PersistentSingleton<GameManager>, IGameManager
 {
-    [SerializeField] private SceneAsset gameSceneAsset;
-    [SerializeField] private SceneAsset connectionSceneAsset;
+    [SerializeField] private string gameScenePath = "Assets/Scenes/GameScene.unity";
+    [SerializeField] private string connectionSceneName = "LobbyScene";
 
     public void QuitGame()
     {
-        print("Quitting game");
+        Debug.Log("Quitting game");
         Application.Quit();
     }
 
     public async void StartGame()
     {
-        NetworkRunner runner = SinglePeer_NetworkRunnerManager.Instance.NetworkRunner;
-        if (!runner.IsSceneAuthority)
+        var manager = SinglePeer_NetworkRunnerManager.Instance;
+        var runner = manager != null ? manager.NetworkRunner : null;
+
+        if (runner == null || !runner.IsRunning)
         {
-            Debug.LogWarning("Cannot start game, not the scene authority");
+            Debug.LogWarning("Cannot start game because no NetworkRunner is running");
             return;
         }
 
-        var loadAsyncOp = runner.LoadScene(gameSceneAsset.name, LoadSceneMode.Single);
-        await loadAsyncOp;
-        
+        if (!runner.IsServer)
+        {
+            Debug.LogWarning("Only the Host or dedicated server can start the game");
+            return;
+        }
+
+        var sceneRef = SceneRef.FromPath(gameScenePath);
+
+        if (!sceneRef.IsValid)
+        {
+            Debug.LogError($"Invalid Fusion scene path: {gameScenePath}");
+            return;
+        }
+
         runner.SessionInfo.IsOpen = false;
-        
-        UIManager.Instance.ShowWaitingScreen();
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowWaitingScreen();
+
+        await runner.LoadScene(
+            sceneRef,
+            UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
-    public void ReturnToMenu()
+    public async void ReturnToMenu()
     {
-        SceneManager.LoadScene(connectionSceneAsset.name);
-        SinglePeer_NetworkRunnerManager.Instance.ReinstantiateRunner();
+        var manager = SinglePeer_NetworkRunnerManager.Instance;
+
+        if (manager != null)
+            await manager.ShutdownRunner(false);
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            connectionSceneName,
+            UnityEngine.SceneManagement.LoadSceneMode.Single);
+
+        if (manager != null)
+            manager.CreateRunner();
     }
 }

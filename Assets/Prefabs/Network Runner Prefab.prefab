@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1013363244234717143}
   - component: {fileID: 1552692716013036465}
+  - component: {fileID: 884422110099887766}
   m_Layer: 0
   m_Name: Network Runner Prefab
   m_TagString: Untagged
@@ -44,3 +45,31 @@ MonoBehaviour:
   m_Script: {fileID: -1199893898, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkRunner
+
+--- !u!114 &884422110099887766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8548196825934178573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54ccfcbabe5f4b3d9c782b8c182f1b6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  playerActionMapName: Player
+  uiActionMapName: UI
+  moveActionName: Move
+  lookActionName: Look
+  pointerActionName: Point
+  fireActionName: Attack
+  placeActionName: RightClick
+  deleteActionName: MiddleClick
+  gameplayCamera: {fileID: 0}
+  aimMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  gamepadAimDistance: 30
+  gamepadAimDeadZone: 0.15

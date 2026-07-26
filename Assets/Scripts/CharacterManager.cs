@@ -1,120 +1,173 @@
-using UnityEngine;
-using Fusion;
 using System.Collections.Generic;
 using System.Linq;
+using Fusion;
+using UnityEngine;
 
 public class CharacterManager : NetworkBehaviour
 {
-    [SerializeField]
-    private CharacterProperties[] characters;
-    [SerializeField]
-    private CharacterSelectUI selectUI;
+    [SerializeField] private CharacterProperties[] characters;
+    [SerializeField] private CharacterSelectUI selectUI;
+    [SerializeField] private SpawnPoint[] spawnPoints;
+    [SerializeField] private NetworkPrefabRef playerPrefab;
 
-    [SerializeField]
-    private SpawnPoint[] spawnPoints;
+    private readonly HashSet<int> selectedCharacterIds = new();
+    private readonly HashSet<PlayerRef> playersInSelection = new();
+    private readonly Dictionary<PlayerRef, NetworkObject> spawnedPlayers = new();
 
     private void Awake()
     {
-        if (characters == null) return;
+        if (characters == null)
+            return;
 
         foreach (var character in characters)
             CharacterProperties.Register(character);
     }
 
-    private HashSet<int> _selectedCharacterIDs = new();
+    public void StartSelection(PlayerRef player)
+    {
+        if (!Object.HasStateAuthority)
+            return;
 
-    private HashSet<int> _playersInSelection = new();
+        if (spawnedPlayers.ContainsKey(player))
+            return;
 
-    // host telling fellow to choose a character
+        OpenSelectionRpc(player);
+    }
+
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void MakeSelectCharacterRPC([RpcTarget] PlayerRef player)
+    private void OpenSelectionRpc([RpcTarget] PlayerRef player)
     {
         selectUI.OnSelectedCharacter -= OnSelectCharacter;
         selectUI.OnSelectedCharacter += OnSelectCharacter;
 
         selectUI.PopulateSelection(characters);
-
+        selectUI.UpdateSelectedCharacters(selectedCharacterIds.ToArray());
         selectUI.OpenMenu();
     }
 
-    private void OnSelectCharacter(int characterID)
+    private void OnSelectCharacter(int characterId)
     {
-        RequestCharacterRPC(characterID);
+        RequestCharacterRpc(characterId);
     }
 
-    // request a chosen character from the host
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public async void RequestCharacterRPC(int characterID, RpcInfo info = default)
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RequestCharacterRpc(
+        int characterId,
+        RpcInfo info = default)
     {
-        if (_playersInSelection.Contains(info.Source.PlayerId)) return;
-        _playersInSelection.Add(info.Source.PlayerId);
+        var player = info.Source;
 
-        var characterProps = characters.First(x => x.CharacterID == characterID);
+        if (playersInSelection.Contains(player))
+            return;
 
-        if (characterProps == null)
+        if (spawnedPlayers.ContainsKey(player))
+            return;
+
+        playersInSelection.Add(player);
+
+        var character =
+            characters.FirstOrDefault(x => x.CharacterID == characterId);
+
+        if (character == null)
         {
-            CharacterInvalidRPC(info.Source, characterID);
-            _playersInSelection.Remove(info.Source.PlayerId);
+            SelectionFailedRpc(player, "Invalid character.");
+            playersInSelection.Remove(player);
             return;
         }
 
-        if (_selectedCharacterIDs.Contains(characterID))
+        if (selectedCharacterIds.Contains(characterId))
         {
-            CharacterAlreadyChosenRPC(info.Source, characterID);
-            _playersInSelection.Remove(info.Source.PlayerId);
+            SelectionFailedRpc(player, "Character is already selected.");
+            playersInSelection.Remove(player);
             return;
         }
 
-        _selectedCharacterIDs.Add(characterID);
-        CharacterChosensuccessfullyRPC(info.Source, characterID);
-        UpdateSelectedCharactersRPC(_selectedCharacterIDs.ToArray());
+        if (spawnPoints == null || spawnPoints.Length == 0)
+        {
+            SelectionFailedRpc(player, "No spawn points configured.");
+            playersInSelection.Remove(player);
+            return;
+        }
 
-        if (spawnPoints.Length == 0) return;
+        selectedCharacterIds.Add(characterId);
 
-        var sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        var spawnPoint =
+            spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-        TriggerSpawnRPC(info.Source, characterID, System.Array.IndexOf(spawnPoints, sp));
+        var avatar = Runner.Spawn(
+            playerPrefab,
+            spawnPoint.GetSpawnPosition(),
+            Quaternion.identity,
+            player,
+            (_, networkObject) =>
+            {
+                var playerComponent =
+                    networkObject.GetComponent<Player>();
 
-        _playersInSelection.Remove(info.Source.PlayerId);
+                playerComponent.SetCharacter(character);
+            });
+
+        spawnedPlayers[player] = avatar;
+
+        SelectionSucceededRpc(player);
+        UpdateSelectedCharactersRpc(selectedCharacterIds.ToArray());
+
+        playersInSelection.Remove(player);
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public async void TriggerSpawnRPC(PlayerRef player, int characterID, int spawnPointIndex)
-    {
-        var character = characters.First(x => x.CharacterID == characterID);
-        await spawnPoints[spawnPointIndex].SpawnGivenPlayer(player, character);
-    }
-    
-    public Vector3 GetRandomSpawnPosition()
-    {
-        var sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        return sp.GetSpawnPosition();
-    }
-
-    // when someone wants a character but its not available
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void CharacterInvalidRPC([RpcTarget] PlayerRef player, int characterID)
-    {
-        
-    }
-
-    // when someone wants a character but its not available
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void CharacterAlreadyChosenRPC([RpcTarget] PlayerRef player, int characterID)
-    {
-        
-    }
-
-    // when someone wants a character and managed to get it
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void CharacterChosensuccessfullyRPC([RpcTarget] PlayerRef player, int characterID)
+    private void SelectionSucceededRpc(
+        [RpcTarget] PlayerRef player)
     {
         selectUI.CloseMenu();
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    public void UpdateSelectedCharactersRPC(int[] selectedChars)
+    private void SelectionFailedRpc(
+        [RpcTarget] PlayerRef player,
+        string reason)
     {
-        selectUI.UpdateSelectedCharacters(selectedChars);
+        Debug.LogWarning(reason);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void UpdateSelectedCharactersRpc(
+        int[] selectedCharacters)
+    {
+        selectUI.UpdateSelectedCharacters(selectedCharacters);
+    }
+
+    public void RemovePlayer(PlayerRef player)
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        if (!spawnedPlayers.TryGetValue(player, out var avatar))
+            return;
+
+        if (avatar != null)
+        {
+            var playerComponent = avatar.GetComponent<Player>();
+
+            if (playerComponent != null)
+                selectedCharacterIds.Remove(playerComponent.CharacterID);
+
+            Runner.Despawn(avatar);
+        }
+
+        spawnedPlayers.Remove(player);
+        playersInSelection.Remove(player);
+
+        UpdateSelectedCharactersRpc(selectedCharacterIds.ToArray());
+    }
+
+    public Vector3 GetRandomSpawnPosition()
+    {
+        if (spawnPoints == null || spawnPoints.Length == 0)
+            return Vector3.zero;
+
+        return spawnPoints[
+            Random.Range(0, spawnPoints.Length)
+        ].GetSpawnPosition();
     }
 }
