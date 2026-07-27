@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
+using Managers;
 using UnityEngine;
 
 public class CharacterManager : NetworkBehaviour
 {
     [SerializeField] private SpawnPoint[] spawnPoints;
     [SerializeField] private NetworkObject playerPrefab;
+    [SerializeField] private TeamsManager teamsManager;
 
     private readonly Dictionary<PlayerRef, NetworkObject> spawnedPlayers = new();
     private PlayerRef localSelectingPlayer;
@@ -88,8 +90,11 @@ public class CharacterManager : NetworkBehaviour
             return;
         }
 
-        var spawnPoint = validSpawnPoints[UnityEngine.Random.Range(0, validSpawnPoints.Length)];
+        teamsManager.AutoAssignPlayerToTeam(player);
 
+        //TODO: Use team specific spawn points
+        var spawnPoint = validSpawnPoints[UnityEngine.Random.Range(0, validSpawnPoints.Length)];
+        
         var avatar = Runner.Spawn(
             playerPrefab,
             spawnPoint.GetSpawnPosition(),

@@ -13,6 +13,8 @@ namespace Managers
 
         public void AutoAssignPlayerToTeam(PlayerRef player)
         {
+            if (!Object.HasStateAuthority) return;
+            
             if (!GameManager.Instance)
             {
                 Debug.LogError("Teams Manager can't assign teams because there's no Game Manager to report game mode");
@@ -26,6 +28,12 @@ namespace Managers
                     break;
                 
                 case IOGameMode.TwoTeams:
+                    if (PlayersInTeams.Count == 0)
+                    {
+                        PlayersInTeams.Set(player, 0);
+                        break;
+                    }
+                    
                     Dictionary<int, int> teamSizes = new();
                     foreach (var playerInTeam in PlayersInTeams)
                     {
@@ -35,6 +43,12 @@ namespace Managers
                         }
                         
                         teamSizes[playerInTeam.Value]++;
+                    }
+
+                    if (teamSizes.Count == 1)
+                    {
+                        PlayersInTeams.Set(player, 1);
+                        break;
                     }
                     
                     var smallestTeamSize = teamSizes.Min(team => team.Value);
@@ -54,6 +68,8 @@ namespace Managers
 
         public void HandlePlayerLeft(PlayerRef player)
         {
+            if (!Object.HasStateAuthority) return;
+            
             if (!PlayersInTeams.Remove(player))
             {
                 Debug.LogWarning($"Tried to remove player {player.PlayerId} from teams but it wasn't in a team");

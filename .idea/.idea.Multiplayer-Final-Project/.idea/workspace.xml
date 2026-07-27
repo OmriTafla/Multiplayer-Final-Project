@@ -11,23 +11,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Managers.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/LobbyScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/LobbyScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/CharacterManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/CharacterManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/EnumUtils/GameModesUtils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/EnumUtils/GameModesUtils.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Enums/GameModes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Enums/IOGameMode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Enums/GameModes.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Enums/IOGameMode.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/GameManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/SessionJoiner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/SessionJoiner.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Singleton/NetworkSingleton.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Singleton/NetworkedSingleton.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Singleton/NetworkSingleton.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Singleton/NetworkedSingleton.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/DropdownOptionsFromGamemodes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/DropdownOptionsFromGamemodes.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SessionItemUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SessionItemUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/SessionListUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/SessionListUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +33,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f713e1c3c5f545ce9b1df47230f4f85346ae00/ee/d540c7df/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Photon/Fusion/Editor/Fusion.Unity.Editor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Enums/GameplayInput.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/LobbyPlayerDataSpawner.cs" root0="FORCE_HIGHLIGHTING" />
@@ -62,61 +51,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="2.422345655400587E-50" />
-      <entry key="MS500" value="1.1937435644174247E-10" />
-      <entry key="S2" value="0.003926188381578056" />
-      <entry key="S5" value="0.2003362745525477" />
-      <entry key="S10" value="0.968544014244102" />
-      <entry key="S30" value="6.069980811454888" />
-      <entry key="S60" value="12.871332820008094" />
-      <entry key="M2" value="22.72751590333622" />
-      <entry key="M5" value="44.874298491431446" />
-      <entry key="M10" value="74.08938634778752" />
-      <entry key="M15" value="96.29096285882191" />
-      <entry key="M30" value="135.62644715312274" />
-      <entry key="H1" value="167.81843944834142" />
-      <entry key="H2" value="189.6590359118425" />
-      <entry key="H4" value="206.99562280883603" />
-      <entry key="D1" value="274.57616305640397" />
-      <entry key="W1" value="310.4089273350116" />
+      <entry key="MS100" value="1.0000000000000435" />
+      <entry key="MS500" value="1.004930350061988" />
+      <entry key="S2" value="1.6037261322871186" />
+      <entry key="S5" value="2.6581046043938548" />
+      <entry key="S10" value="3.649470071686033" />
+      <entry key="S30" value="5.905911636937749" />
+      <entry key="S60" value="7.402505135218527" />
+      <entry key="M2" value="8.51724689550717" />
+      <entry key="M5" value="10.019348411332778" />
+      <entry key="M10" value="17.847801847396852" />
+      <entry key="M15" value="31.732872838481057" />
+      <entry key="M30" value="75.41084829568243" />
+      <entry key="H1" value="128.96591178426252" />
+      <entry key="H2" value="173.2403288769665" />
+      <entry key="H4" value="206.18386901307943" />
+      <entry key="D1" value="289.81884528318704" />
+      <entry key="W1" value="329.6373262751254" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0001123275940704" />
-      <entry key="MS500" value="1.1622173458674026" />
-      <entry key="S2" value="1.6349554445132743" />
-      <entry key="S5" value="1.8977246555185032" />
-      <entry key="S10" value="2.37577361797993" />
-      <entry key="S30" value="4.261717244467526" />
-      <entry key="S60" value="6.162692099253349" />
-      <entry key="M2" value="8.59794319751781" />
-      <entry key="M5" value="14.389763122100703" />
-      <entry key="M10" value="23.030260664326985" />
-      <entry key="M15" value="29.3748371034411" />
-      <entry key="M30" value="40.39286629842025" />
-      <entry key="H1" value="49.74272046944453" />
-      <entry key="H2" value="56.63456271080468" />
-      <entry key="H4" value="62.949871784127374" />
-      <entry key="D1" value="86.6322181951959" />
-      <entry key="W1" value="98.51040217871648" />
+      <entry key="MS100" value="5.6594126560432845E-130" />
+      <entry key="MS500" value="1.4143414595653062E-26" />
+      <entry key="S2" value="3.450101533835662E-7" />
+      <entry key="S5" value="0.002763812904965538" />
+      <entry key="S10" value="0.06872077477276606" />
+      <entry key="S30" value="0.7828759466233942" />
+      <entry key="S60" value="1.5162425421602939" />
+      <entry key="M2" value="2.1304613184079684" />
+      <entry key="M5" value="3.0924193201837458" />
+      <entry key="M10" value="6.6899671591007515" />
+      <entry key="M15" value="11.897623212220738" />
+      <entry key="M30" value="26.510158078450754" />
+      <entry key="H1" value="43.595846305215524" />
+      <entry key="H2" value="57.8531970243031" />
+      <entry key="H4" value="69.15604224928295" />
+      <entry key="D1" value="98.05293552995555" />
+      <entry key="W1" value="111.25432266486692" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.8507075979180268E-4" />
-      <entry key="MS500" value="0.2134410842841088" />
-      <entry key="S2" value="1.084776060883052" />
-      <entry key="S5" value="1.803619704606707" />
-      <entry key="S10" value="3.1296369647071565" />
-      <entry key="S30" value="10.140011915290751" />
-      <entry key="S60" value="18.86494975965116" />
-      <entry key="M2" value="31.184542694962193" />
-      <entry key="M5" value="59.14032819135621" />
-      <entry key="M10" value="97.00648551307555" />
-      <entry key="M15" value="125.56518196704893" />
-      <entry key="M30" value="175.94718773658587" />
-      <entry key="H1" value="217.51595099240154" />
-      <entry key="H2" value="246.26768542777756" />
-      <entry key="H4" value="269.9311138815375" />
-      <entry key="D1" value="361.20515407974835" />
-      <entry key="W1" value="408.9188093128065" />
+      <entry key="MS100" value="0.02384780014004339" />
+      <entry key="MS500" value="0.47819125282875163" />
+      <entry key="S2" value="1.4181637119549302" />
+      <entry key="S5" value="2.5703770141634963" />
+      <entry key="S10" value="3.653482509875739" />
+      <entry key="S30" value="6.6062902403000345" />
+      <entry key="S60" value="8.845423473275599" />
+      <entry key="M2" value="10.597489919033183" />
+      <entry key="M5" value="13.083365508331486" />
+      <entry key="M10" value="24.506833034469242" />
+      <entry key="M15" value="43.59246868626272" />
+      <entry key="M30" value="101.87625427557892" />
+      <entry key="H1" value="172.52387476329335" />
+      <entry key="H2" value="231.06805370539342" />
+      <entry key="H4" value="275.3246344317678" />
+      <entry key="D1" value="387.86820839891146" />
+      <entry key="W1" value="440.8910724529489" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -221,6 +210,38 @@
     <option name="unityProjectFolder" value="true" />
   </component>
   <component name="UnityUnitTestConfiguration" currentTestLauncher="Both" />
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs</url>
+          <line>36</line>
+          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Managers\TeamsManager.cs" containingFunctionPresentation="Method 'AutoAssignPlayerToTeam'">
+            <startOffsets>
+              <option value="1171" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1210" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs</url>
+          <line>14</line>
+          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Managers\TeamsManager.cs" containingFunctionPresentation="Method 'AutoAssignPlayerToTeam'">
+            <startOffsets>
+              <option value="399" />
+            </startOffsets>
+            <endOffsets>
+              <option value="400" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
     <select />
