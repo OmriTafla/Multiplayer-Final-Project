@@ -6,9 +6,9 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
     public const int MAX_PLAYERS = 32;
 
     [SerializeField] private string connectionSceneName = "LobbyScene";
+    [SerializeField] private IOGameMode gameMode = IOGameMode.TwoTeams;
 
-    [field: SerializeField]
-    public IOGameMode GameMode { get; private set; }
+    public IOGameMode GameMode => gameMode;
 
     public void QuitGame()
     {

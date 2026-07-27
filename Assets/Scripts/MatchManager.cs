@@ -48,10 +48,11 @@ public class MatchManager : Singleton<MatchManager>
         if (runner == null || !runner.IsServer)
             return;
 
-        if (!ResolveReferences())
-            return;
+        ResolveReferences();
 
-        characterManager.RemovePlayer(player);
+        if (characterManager != null)
+            characterManager.RemovePlayer(player);
+
         ScoreManager.Instance?.RemovePlayer(player);
 
         var playerDataObject = runner.GetPlayerObject(player);
@@ -74,6 +75,7 @@ public class MatchManager : Singleton<MatchManager>
     private void PreparePlayer(NetworkRunner runner, PlayerRef player)
     {
         EnsurePlayerData(runner, player);
+        ScoreManager.Instance?.AddPlayer(player);
         characterManager.SpawnPlayerAtRandomPoint(player);
     }
 

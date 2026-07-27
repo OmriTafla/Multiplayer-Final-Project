@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour, IHitable
 {
+    private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    private static readonly int ColorId = Shader.PropertyToID("_Color");
+
     [SerializeField] private Renderer modelRenderer;
     [SerializeField] private Collider hitCollider;
     [SerializeField] private Rigidbody rigidBody;
@@ -16,6 +19,12 @@ public class Player : NetworkBehaviour, IHitable
 
     [Networked, OnChangedRender(nameof(OnCharacterIdChanged))]
     public int CharacterID { get; private set; }
+
+    [Networked]
+    public int TeamId { get; private set; } = -1;
+
+    [Networked, OnChangedRender(nameof(OnTeamColorChanged))]
+    public Color TeamColor { get; private set; }
 
     [Networked, OnChangedRender(nameof(OnHpChanged))]
     public float Hp { get; private set; }
@@ -30,7 +39,8 @@ public class Player : NetworkBehaviour, IHitable
     private CharacterProperties character;
     private string cachedNickname;
     private bool controlsLocalCamera;
-    
+    private MaterialPropertyBlock materialPropertyBlock;
+
     public override void Spawned()
     {
         OnCharacterIdChanged();
@@ -45,25 +55,40 @@ public class Player : NetworkBehaviour, IHitable
 
         cachedNickname = GetNickname();
 
+        OnTeamColorChanged();
         OnHpChanged();
         OnDeathStateChanged();
         ConfigureLocalPresentation();
+
         controlsLocalCamera = Object.HasInputAuthority;
 
         if (controlsLocalCamera)
             LocalPlayerCamera.Instance?.SetTarget(transform);
     }
+
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         if (controlsLocalCamera)
             LocalPlayerCamera.Instance?.ClearTarget(transform);
     }
+
     public void SetCharacter(CharacterProperties newCharacter)
     {
         if (!Object.HasStateAuthority || newCharacter == null)
             return;
 
         CharacterID = newCharacter.CharacterID;
+        ApplyDisplayColor();
+    }
+
+    public void SetTeam(int teamId, Color teamColor)
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        TeamId = teamId;
+        TeamColor = teamColor;
+        ApplyDisplayColor();
     }
 
     public override void FixedUpdateNetwork()
@@ -84,14 +109,20 @@ public class Player : NetworkBehaviour, IHitable
         Move(input.Move);
         ProcessFire(input);
         ProcessAim(input);
-
         PreviousButtons = input.Buttons;
     }
 
     private void ProcessAim(GameplayInput input)
     {
-        Vector3 aimPoint = new Vector3(input.AimPosition.x, transform.position.y, input.AimPosition.z);
-        transform.rotation = Quaternion.LookRotation(aimPoint - transform.position);
+        var aimPoint = new Vector3(
+            input.AimPosition.x,
+            transform.position.y,
+            input.AimPosition.z);
+
+        var aimDirection = aimPoint - transform.position;
+
+        if (aimDirection.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.LookRotation(aimDirection);
     }
 
     private void Move(Vector2 movementInput)
@@ -128,15 +159,8 @@ public class Player : NetworkBehaviour, IHitable
         if (!Object.HasStateAuthority)
             return;
 
-        var direction = transform.forward;
-        // direction.y = 0f;
-
-        // if (direction.sqrMagnitude < 0.0001f)
-        //     return;
-
         ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
 
-        //TODO: change this
         var placementManager = FindAnyObjectByType<PlacementManager>();
 
         if (placementManager == null)
@@ -145,7 +169,7 @@ public class Player : NetworkBehaviour, IHitable
         placementManager.SpawnProjectile(
             Object,
             transform.position,
-            direction.normalized);
+            transform.forward.normalized);
     }
 
     public void OnHit(DamageData data)
@@ -155,7 +179,9 @@ public class Player : NetworkBehaviour, IHitable
 
         if (data.damage < DamageData.MIN_POSSIBLE_DAMAGE ||
             data.damage > DamageData.MAX_POSSIBLE_DAMAGE)
+        {
             return;
+        }
 
         Hp = Mathf.Max(0f, Hp - data.damage);
 
@@ -207,12 +233,31 @@ public class Player : NetworkBehaviour, IHitable
     private void OnCharacterIdChanged()
     {
         character = CharacterProperties.GetByID(CharacterID);
+        ApplyDisplayColor();
+    }
 
-        if (character == null)
+    private void OnTeamColorChanged()
+    {
+        ApplyDisplayColor();
+    }
+
+    private void ApplyDisplayColor()
+    {
+        if (modelRenderer == null)
             return;
 
-        if (modelRenderer != null)
-            modelRenderer.material.color = character.characterColor;
+        var displayColor = TeamColor.a > 0f
+            ? TeamColor
+            : character != null
+                ? character.characterColor
+                : Color.white;
+
+        materialPropertyBlock ??= new MaterialPropertyBlock();
+
+        modelRenderer.GetPropertyBlock(materialPropertyBlock);
+        materialPropertyBlock.SetColor(BaseColorId, displayColor);
+        materialPropertyBlock.SetColor(ColorId, displayColor);
+        modelRenderer.SetPropertyBlock(materialPropertyBlock);
     }
 
     private void OnHpChanged()

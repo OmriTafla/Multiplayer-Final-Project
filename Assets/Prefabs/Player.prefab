@@ -547,8 +547,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24848061a6bb406419ad7da6c2cf3607, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  modelRenderer: {fileID: 0}
-  hitCollider: {fileID: 0}
+  modelRenderer: {fileID: 2467194879928138304}
+  hitCollider: {fileID: 1720934025811652085}
   rigidBody: {fileID: 3458336771368325197}
   playerUI: {fileID: 4275309682345805136}
   hpLabel: {fileID: 476318218719191834}
@@ -557,6 +557,8 @@ MonoBehaviour:
   shootingCooldown: 0.5
   respawnDelay: 3
   _CharacterID: 0
+  _TeamId: -1
+  _TeamColor: {r: 0, g: 0, b: 0, a: 0}
   _Hp: 0
   _IsDead:
     _value: 0

@@ -57,7 +57,22 @@ public class CharacterManager : NetworkBehaviour
             return;
         }
 
-        teamsManager.AutoAssignPlayerToTeam(player);
+        var teamId = teamsManager.AutoAssignPlayerToTeam(player);
+
+        if (teamId < 0)
+        {
+            SelectionFailedRpc(player, "Could not assign the player to a team.");
+            return;
+        }
+
+        var teamColor = teamsManager.GetTeamColor(teamId);
+        var playerDataObject = Runner.GetPlayerObject(player);
+
+        if (playerDataObject != null &&
+            playerDataObject.TryGetComponent(out UI.PlayerData playerData))
+        {
+            playerData.SetTeam(teamId, teamColor);
+        }
 
         var spawnPoint = validSpawnPoints[Random.Range(0, validSpawnPoints.Length)];
         var avatar = Runner.Spawn(
@@ -73,6 +88,15 @@ public class CharacterManager : NetworkBehaviour
             return;
         }
 
+        if (!avatar.TryGetComponent(out Player playerAvatar))
+        {
+            Runner.Despawn(avatar);
+            teamsManager.HandlePlayerLeft(player);
+            SelectionFailedRpc(player, "The Player prefab is missing the Player component.");
+            return;
+        }
+
+        playerAvatar.SetTeam(teamId, teamColor);
         spawnedPlayers[player] = avatar;
     }
 

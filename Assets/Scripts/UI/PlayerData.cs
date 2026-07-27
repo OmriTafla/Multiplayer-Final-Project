@@ -1,45 +1,86 @@
+using System;
 using Fusion;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UI
 {
     public class PlayerData : NetworkBehaviour
     {
-        [Networked] public NetworkString<_16> NickName { get; set; }
-        [Networked] public Color Color { get; set; }
+        public static event Action PlayerDataChanged;
+
+        [Networked, OnChangedRender(nameof(OnDataChanged))]
+        public NetworkString<_16> NickName { get; set; }
+
+        [Networked, OnChangedRender(nameof(OnDataChanged))]
+        public Color Color { get; set; }
+
+        [Networked]
+        public int TeamId { get; private set; } = -1;
 
         public override void Spawned()
         {
-            if (!HasInputAuthority) return;
+            NotifyChanged();
 
-            string pendingName = PlayerPrefs.GetString("PendingNickname", "");
-            string pendingColourName = PlayerPrefs.GetString("PendingColour", "White");
+            if (!HasInputAuthority)
+                return;
 
-            if (string.IsNullOrWhiteSpace(pendingName)) return;
+            var pendingName = PlayerPrefs.GetString("PendingNickname", "");
+            var pendingColourName = PlayerPrefs.GetString("PendingColour", "White");
 
-            Color pendingColor = ColorFromName(pendingColourName);
-            Rpc_SetNicknameAndColor(pendingName, pendingColor);
+            if (string.IsNullOrWhiteSpace(pendingName))
+                return;
+
+            Rpc_SetNicknameAndColor(
+                pendingName,
+                ColorFromName(pendingColourName));
+        }
+
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            NotifyChanged();
         }
 
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        public void Rpc_SetNicknameAndColor(string nickname, Color color)
+        private void Rpc_SetNicknameAndColor(string nickname, Color requestedColor)
         {
             NickName = nickname;
-            Color = color;
+
+            if (TeamId < 0)
+                Color = requestedColor;
+
+            NotifyChanged();
+        }
+
+        public void SetTeam(int teamId, Color teamColor)
+        {
+            if (!Object.HasStateAuthority)
+                return;
+
+            TeamId = teamId;
+            Color = teamColor;
+            NotifyChanged();
+        }
+
+        private void OnDataChanged()
+        {
+            if (!Object.HasStateAuthority)
+                NotifyChanged();
+        }
+
+        private static void NotifyChanged()
+        {
+            PlayerDataChanged?.Invoke();
         }
 
         private static Color ColorFromName(string name)
         {
             return name switch
             {
-                "Red" => Color.red,
-                "Blue" => Color.blue,
-                "Green" => Color.green,
-                "Yellow" => Color.yellow,
-                _ => Color.white,
+                "Red" => UnityEngine.Color.red,
+                "Blue" => UnityEngine.Color.blue,
+                "Green" => UnityEngine.Color.green,
+                "Yellow" => UnityEngine.Color.yellow,
+                _ => UnityEngine.Color.white
             };
         }
     }
