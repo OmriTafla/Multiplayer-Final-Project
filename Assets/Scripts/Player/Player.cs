@@ -13,9 +13,6 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private float movementSpeed = 5f;
     [SerializeField] private float shootingCooldown = 0.5f;
     [SerializeField] private float respawnDelay = 3f;
-    [SerializeField] private float placementDistance = 20f;
-    [SerializeField] private LayerMask placementMask = -1;
-    [SerializeField] private LayerMask deletionMask = -1;
 
     [Networked, OnChangedRender(nameof(OnCharacterIdChanged))]
     public int CharacterID { get; private set; }
@@ -77,8 +74,6 @@ public class Player : NetworkBehaviour, IHitable
 
         Move(input.Move);
         ProcessFire(input);
-        ProcessPlacement(input);
-        ProcessDeletion(input);
 
         PreviousButtons = input.Buttons;
     }
@@ -135,65 +130,6 @@ public class Player : NetworkBehaviour, IHitable
             CharacterID,
             transform.position,
             direction.normalized);
-    }
-
-    private void ProcessPlacement(GameplayInput input)
-    {
-        if (!input.Buttons.WasPressed(PreviousButtons, GameplayButton.Place))
-            return;
-
-        if (!Object.HasStateAuthority)
-            return;
-
-        var distance = Vector3.Distance(transform.position, input.AimPosition);
-
-        if (distance > placementDistance)
-            return;
-
-        if (!Physics.CheckSphere(input.AimPosition, 0.25f, placementMask))
-            return;
-
-        var placementManager = FindAnyObjectByType<PlacementManager>();
-
-        if (placementManager == null)
-            return;
-
-        placementManager.PlacePlaceable(Object, CharacterID, input.AimPosition);
-    }
-
-    private void ProcessDeletion(GameplayInput input)
-    {
-        if (!input.Buttons.WasPressed(PreviousButtons, GameplayButton.Delete))
-            return;
-
-        if (!Object.HasStateAuthority)
-            return;
-
-        var direction = input.AimPosition - transform.position;
-        var distance = direction.magnitude;
-
-        if (distance <= 0f || distance > placementDistance)
-            return;
-
-        if (!Physics.Raycast(
-                transform.position,
-                direction.normalized,
-                out var hit,
-                distance,
-                deletionMask))
-            return;
-
-        var target = hit.collider.GetComponentInParent<NetworkObject>();
-
-        if (target == null)
-            return;
-
-        var placementManager = FindAnyObjectByType<PlacementManager>();
-
-        if (placementManager == null)
-            return;
-
-        placementManager.DeletePlaceable(Object, target);
     }
 
     public void OnHit(DamageData data)
