@@ -4,44 +4,45 @@ using UnityEngine;
 
 public class PlacementManager : NetworkBehaviour
 {
-    [SerializeField] private float maximumPlacementDistance = 20f;
-    [SerializeField] private float projectileSpawnOffset = 1f;
-    [SerializeField] private int maximumPlaceablesPerPlayer = 20;
-
+    // [SerializeField] private float maximumPlacementDistance = 20f;
+    // [SerializeField] private float projectileSpawnOffset = 1f;
+    // [SerializeField] private int maximumPlaceablesPerPlayer = 20;
+    [SerializeField] private GameObject projectilePrefab;
+    
     private readonly Dictionary<PlayerRef, List<NetworkObject>> playerPlaceables = new();
 
-    public void PlacePlaceable(NetworkObject requestingPlayer, int characterId, Vector3 requestedPosition)
-    {
-        if (!Object.HasStateAuthority)
-            return;
-
-        if (!ValidatePlayer(requestingPlayer, characterId))
-            return;
-
-        var distance = Vector3.Distance(requestingPlayer.transform.position, requestedPosition);
-
-        if (distance > maximumPlacementDistance)
-            return;
-
-        var properties = CharacterProperties.GetByID(characterId);
-
-        if (properties == null)
-            return;
-
-        if (!properties.spawnObject.TryGetComponent(out PlaceableObject placeable))
-            return;
-
-        var spawnedObject = Runner.Spawn(
-            properties.spawnObject,
-            requestedPosition + placeable.GetGPOffset(),
-            Quaternion.identity,
-            requestingPlayer.InputAuthority);
-
-        if (spawnedObject == null)
-            return;
-
-        TrackPlaceable(requestingPlayer.InputAuthority, spawnedObject);
-    }
+    // public void PlacePlaceable(NetworkObject requestingPlayer, int characterId, Vector3 requestedPosition)
+    // {
+    //     if (!Object.HasStateAuthority)
+    //         return;
+    //
+    //     if (!ValidatePlayer(requestingPlayer, characterId))
+    //         return;
+    //
+    //     var distance = Vector3.Distance(requestingPlayer.transform.position, requestedPosition);
+    //
+    //     if (distance > maximumPlacementDistance)
+    //         return;
+    //
+    //     var properties = CharacterProperties.GetByID(characterId);
+    //
+    //     if (properties == null)
+    //         return;
+    //
+    //     if (!properties.spawnObject.TryGetComponent(out PlaceableObject placeable))
+    //         return;
+    //
+    //     var spawnedObject = Runner.Spawn(
+    //         properties.spawnObject,
+    //         requestedPosition + placeable.GetGPOffset(),
+    //         Quaternion.identity,
+    //         requestingPlayer.InputAuthority);
+    //
+    //     if (spawnedObject == null)
+    //         return;
+    //
+    //     TrackPlaceable(requestingPlayer.InputAuthority, spawnedObject);
+    // }
 
     public void DeletePlaceable(NetworkObject requestingPlayer, NetworkObject target)
     {
@@ -61,28 +62,28 @@ public class PlacementManager : NetworkBehaviour
         Runner.Despawn(target);
     }
 
-    public void SpawnProjectile(NetworkObject requestingPlayer, int characterId, Vector3 origin, Vector3 direction)
+    public void SpawnProjectile(NetworkObject requestingPlayer, Vector3 origin, Vector3 direction)
     {
         if (!Object.HasStateAuthority)
             return;
 
-        if (!ValidatePlayer(requestingPlayer, characterId))
-            return;
+        // if (!ValidatePlayer(requestingPlayer, characterId))
+        //     return;
 
         if (direction.sqrMagnitude < 0.0001f)
             return;
 
-        var properties = CharacterProperties.GetByID(characterId);
+        // var properties = CharacterProperties.GetByID(characterId);
 
-        if (properties == null)
-            return;
+        // if (properties == null)
+            // return;
 
         var normalizedDirection = direction.normalized;
-        var spawnPosition = origin + normalizedDirection * projectileSpawnOffset;
+        // var spawnPosition = origin + normalizedDirection * projectileSpawnOffset;
 
         Runner.Spawn(
-            properties.bullet,
-            spawnPosition,
+            projectilePrefab,
+            origin,
             Quaternion.LookRotation(normalizedDirection),
             requestingPlayer.InputAuthority);
     }
@@ -104,25 +105,25 @@ public class PlacementManager : NetworkBehaviour
         playerPlaceables.Remove(player);
     }
 
-    private void TrackPlaceable(PlayerRef player, NetworkObject placeable)
-    {
-        if (!playerPlaceables.TryGetValue(player, out var placeables))
-        {
-            placeables = new List<NetworkObject>();
-            playerPlaceables.Add(player, placeables);
-        }
-
-        placeables.Add(placeable);
-
-        while (placeables.Count > maximumPlaceablesPerPlayer)
-        {
-            var oldest = placeables[0];
-            placeables.RemoveAt(0);
-
-            if (oldest != null)
-                Runner.Despawn(oldest);
-        }
-    }
+    // private void TrackPlaceable(PlayerRef player, NetworkObject placeable)
+    // {
+    //     if (!playerPlaceables.TryGetValue(player, out var placeables))
+    //     {
+    //         placeables = new List<NetworkObject>();
+    //         playerPlaceables.Add(player, placeables);
+    //     }
+    //
+    //     placeables.Add(placeable);
+    //
+    //     while (placeables.Count > maximumPlaceablesPerPlayer)
+    //     {
+    //         var oldest = placeables[0];
+    //         placeables.RemoveAt(0);
+    //
+    //         if (oldest != null)
+    //             Runner.Despawn(oldest);
+    //     }
+    // }
 
     private void RemoveTrackedPlaceable(PlayerRef player, NetworkObject placeable)
     {

@@ -110,7 +110,6 @@ public class Player : NetworkBehaviour, IHitable
 
     private void ProcessFire(GameplayInput input)
     {
-        //TODO: fire forward only
         if (!input.Buttons.IsSet(GameplayButton.Fire))
             return;
 
@@ -120,14 +119,15 @@ public class Player : NetworkBehaviour, IHitable
         if (!Object.HasStateAuthority)
             return;
 
-        var direction = input.AimPosition - transform.position;
-        direction.y = 0f;
+        var direction = transform.forward;
+        // direction.y = 0f;
 
-        if (direction.sqrMagnitude < 0.0001f)
-            return;
+        // if (direction.sqrMagnitude < 0.0001f)
+        //     return;
 
         ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
 
+        //TODO: change this
         var placementManager = FindAnyObjectByType<PlacementManager>();
 
         if (placementManager == null)
@@ -135,7 +135,6 @@ public class Player : NetworkBehaviour, IHitable
 
         placementManager.SpawnProjectile(
             Object,
-            CharacterID,
             transform.position,
             direction.normalized);
     }
