@@ -74,8 +74,15 @@ public class Player : NetworkBehaviour, IHitable
 
         Move(input.Move);
         ProcessFire(input);
+        ProcessAim(input);
 
         PreviousButtons = input.Buttons;
+    }
+
+    private void ProcessAim(GameplayInput input)
+    {
+        Vector3 aimPoint = new Vector3(input.AimPosition.x, transform.position.y, input.AimPosition.z);
+        transform.rotation = Quaternion.LookRotation(aimPoint - transform.position);
     }
 
     private void Move(Vector2 movementInput)
@@ -103,6 +110,7 @@ public class Player : NetworkBehaviour, IHitable
 
     private void ProcessFire(GameplayInput input)
     {
+        //TODO: fire forward only
         if (!input.Buttons.IsSet(GameplayButton.Fire))
             return;
 
