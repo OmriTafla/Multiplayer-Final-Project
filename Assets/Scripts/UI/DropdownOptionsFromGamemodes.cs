@@ -14,10 +14,10 @@ public class DropdownOptionsFromGamemodes : MonoBehaviour
     {
         dropdown = GetComponent<TMP_Dropdown>();
 
-        var gameModes = (typeof(GameModes).GetEnumValues() as GameModes[]).Select(_ => _);
+        var gameModes = (typeof(IOGameMode).GetEnumValues() as IOGameMode[]).Select(_ => _);
 
         if (!includeAny)
-            gameModes = gameModes.Where(mode => mode != GameModes.Any);
+            gameModes = gameModes.Where(mode => mode != IOGameMode.Any);
         
         dropdown.options = gameModes.Select(
             mode => new TMP_Dropdown.OptionData(

@@ -10,7 +10,7 @@ public class SessionListUI : MonoBehaviour
     [SerializeField] private Transform listContainer;
     private List<SessionInfo> sessionList;
 
-    private GameModes FilterByGameMode
+    private IOGameMode FilterByGameMode
     {
         get => filterByGameMode;
         set
@@ -20,7 +20,7 @@ public class SessionListUI : MonoBehaviour
         }
     }
 
-    private GameModes filterByGameMode = GameModes.Any;
+    private IOGameMode filterByGameMode = IOGameMode.Any;
     
     public void ShowSessionList(List<SessionInfo> sessionList)
     {
@@ -51,7 +51,7 @@ public class SessionListUI : MonoBehaviour
         }
     }
 
-    public void SetFilterByGameMode(int gameMode) => FilterByGameMode = (GameModes)gameMode;
+    public void SetFilterByGameMode(int gameMode) => FilterByGameMode = (IOGameMode)gameMode;
 
     private void ClearList()
     {
@@ -65,7 +65,7 @@ public class SessionListUI : MonoBehaviour
 
     private bool SessionGameModeFitsFilter(SessionInfo session)
     {
-        if (FilterByGameMode == GameModes.Any) 
+        if (FilterByGameMode == IOGameMode.Any) 
             return true;
 
         if (!session.Properties.ContainsKey("GameMode"))
@@ -74,7 +74,7 @@ public class SessionListUI : MonoBehaviour
             return true;
         }
         
-        GameModes gameMode = (GameModes)session.Properties[SessionJoiner.GAMEMODE_PROPERTY_NAME].PropertyValue;
+        IOGameMode gameMode = (IOGameMode)session.Properties[SessionJoiner.GAMEMODE_PROPERTY_NAME].PropertyValue;
         return gameMode == FilterByGameMode;
     }
 }

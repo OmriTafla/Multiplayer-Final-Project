@@ -5,12 +5,12 @@ namespace EnumUtils
 {
     public static class GameModesUtils
     {
-        public static string GetDisplayName(this GameModes mode) => 
+        public static string GetDisplayName(this IOGameMode mode) => 
             mode switch
             {
-                GameModes.Any => "All Game Modes",
-                GameModes.Fun => "Fun Mode",
-                GameModes.Boring => "Boring Mode"
+                IOGameMode.Any => "All Game Modes",
+                IOGameMode.FreeForAll => "Fun Mode",
+                IOGameMode.TwoTeams => "Boring Mode"
             };
     }
 }

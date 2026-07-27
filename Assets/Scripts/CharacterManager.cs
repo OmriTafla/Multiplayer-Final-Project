@@ -32,7 +32,6 @@ public class CharacterManager : NetworkBehaviour
     //     if (spawnedPlayers.ContainsKey(player))
     //         return;
     //
-    //     //TODO: Spawn the player here
     //     SpawnPlayerAtRandomPoint(player);
     // }
 

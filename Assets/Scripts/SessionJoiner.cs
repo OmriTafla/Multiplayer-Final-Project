@@ -19,7 +19,7 @@ public class SessionJoiner : Singleton<SessionJoiner>
     [SerializeField] private int playerCapacity = 2;
     [SerializeField] private int maxCapacity = 8;
     [SerializeField] private bool isVisible = true;
-    [SerializeField] private GameModes gameMode = GameModes.Fun;
+    [SerializeField] private IOGameMode gameMode = IOGameMode.FreeForAll;
     [SerializeField] private string mapName;
     [SerializeField] private MapList mapList;
 
@@ -130,9 +130,9 @@ public class SessionJoiner : Singleton<SessionJoiner>
 
     public void SetGameMode(int gameModeInt)
     {
-        var chosenGameMode = (GameModes)(gameModeInt + 1);
+        var chosenGameMode = (IOGameMode)(gameModeInt + 1);
 
-        if (chosenGameMode == GameModes.Any)
+        if (chosenGameMode == IOGameMode.Any)
             throw new ArgumentOutOfRangeException(nameof(gameModeInt));
 
         gameMode = chosenGameMode;

@@ -21,7 +21,7 @@ public class SessionItemUI : MonoBehaviour
         bool canJoin = sessionInfo.MaxPlayers > sessionInfo.PlayerCount &&
                        sessionInfo.IsOpen;
         SetCanJoin(canJoin);
-        SetGameMode((GameModes)sessionInfo.Properties[SessionJoiner.GAMEMODE_PROPERTY_NAME].PropertyValue);
+        SetGameMode((IOGameMode)sessionInfo.Properties[SessionJoiner.GAMEMODE_PROPERTY_NAME].PropertyValue);
         SetMapName((string)sessionInfo.Properties[SessionJoiner.MAP_PROPERTY_NAME].PropertyValue);
     }
     
@@ -40,7 +40,7 @@ public class SessionItemUI : MonoBehaviour
         joinButton.interactable = canJoin;
     }
 
-    private void SetGameMode(GameModes gameMode)
+    private void SetGameMode(IOGameMode gameMode)
     {
         this.gameMode.text = gameMode.GetDisplayName();
     }

@@ -1,9 +1,15 @@
+using Enums;
 using Fusion;
 using UnityEngine;
 
 public class GameManager : PersistentSingleton<GameManager>, IGameManager
 {
+    public const int MAX_PLAYERS = 20; 
+    
     [SerializeField] private string connectionSceneName = "LobbyScene";
+    
+    [field: SerializeField]
+    public IOGameMode GameMode {get; private set;}
 
     public void QuitGame()
     {

@@ -3,7 +3,7 @@ using Fusion;
 using Singleton;
 using UnityEngine;
 
-public class ScoreManager : NetworkSingleton<ScoreManager>
+public class ScoreManager : NetworkedSingleton<ScoreManager>
 {
     [Networked, Capacity(64)]
     private NetworkDictionary<PlayerRef, int> Scores { get; } =
