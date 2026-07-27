@@ -1,3 +1,9 @@
+#if UNITY_SERVER
+#define DEDICATED_SERVER
+#else
+#define HOST_OR_CLIENT
+#endif
+
 using System;
 using System.Threading.Tasks;
 using Fusion;
@@ -32,9 +38,28 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
     public string PersistentSessionName => persistentSessionName;
     public string CustomLobbyName => customLobbyName;
 
-    private void Start()
+    public bool IsDedicatedBuild
     {
-        CreateRunner();
+        get
+        {
+#if DEDICATED_SERVER
+            return true;
+#else
+            return false;
+#endif
+        }
+    }
+
+    public string RuntimeMode
+    {
+        get
+        {
+#if DEDICATED_SERVER
+            return "Dedicated Server";
+#else
+            return "Host or Client";
+#endif
+        }
     }
 
     public NetworkRunner CreateRunner()
@@ -44,13 +69,18 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
 
         if (networkRunnerPrefab == null)
         {
-            Debug.LogError("NetworkRunner prefab is not assigned");
+            Debug.LogError("NetworkRunner prefab is not assigned", this);
             return null;
         }
 
         networkRunner = Instantiate(networkRunnerPrefab);
         networkRunner.name = "NetworkRunner";
-        networkRunner.ProvideInput = !Application.isBatchMode;
+
+#if DEDICATED_SERVER
+        networkRunner.ProvideInput = false;
+#else
+        networkRunner.ProvideInput = true;
+#endif
 
         if (networkRunner.GetComponent<RunnerSimulatePhysics3D>() == null)
             networkRunner.gameObject.AddComponent<RunnerSimulatePhysics3D>();
@@ -58,13 +88,14 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
         if (networkEvents != null)
             networkRunner.AddCallbacks(networkEvents);
 
+#if HOST_OR_CLIENT
         var inputProvider = networkRunner.GetComponent<FusionInputProvider>();
 
         if (inputProvider != null)
             inputProvider.RegisterCallbacks(networkRunner);
+#endif
 
         onRunnerInstantiated?.Invoke(networkRunner);
-
         return networkRunner;
     }
 
@@ -82,92 +113,113 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
             networkRunner.AddCallbacks(networkEvents);
     }
 
-    public Task<StartGameResult> JoinPersistentWorld()
+    public Task<StartGameResult> StartForCurrentBuild(string sessionNameOverride = null)
     {
-        return StartSession(new StartGameArgs
-        {
-            GameMode = GameMode.Client,
-            SessionName = persistentSessionName,
-            CustomLobbyName = customLobbyName,
-            EnableClientSessionCreation = false
-        });
+#if DEDICATED_SERVER
+        return StartDedicatedServer(sessionNameOverride);
+#else
+        return StartHostOrClient(sessionNameOverride);
+#endif
     }
 
-    public Task<StartGameResult> StartPersistentServer(string sessionNameOverride = null)
+    public Task<StartGameResult> StartHostOrClient(string sessionNameOverride = null)
     {
-        var sessionName = string.IsNullOrWhiteSpace(sessionNameOverride)
-            ? persistentSessionName
-            : sessionNameOverride.Trim();
+#if DEDICATED_SERVER
+        return Task.FromResult(default(StartGameResult));
+#else
+        if (!TryCreateGameSceneInfo(out var sceneInfo))
+            return Task.FromResult(default(StartGameResult));
 
+        return StartSession(new StartGameArgs
+        {
+            GameMode = GameMode.AutoHostOrClient,
+            SessionName = ResolveSessionName(sessionNameOverride),
+            PlayerCount = maximumPlayers,
+            IsOpen = true,
+            IsVisible = true,
+            EnableClientSessionCreation = true,
+            Scene = sceneInfo
+        });
+#endif
+    }
+
+    public Task<StartGameResult> StartDedicatedServer(string sessionNameOverride = null)
+    {
+#if DEDICATED_SERVER
         if (!TryCreateGameSceneInfo(out var sceneInfo))
             return Task.FromResult(default(StartGameResult));
 
         return StartSession(new StartGameArgs
         {
             GameMode = GameMode.Server,
-            SessionName = sessionName,
-            CustomLobbyName = customLobbyName,
+            SessionName = ResolveSessionName(sessionNameOverride),
             PlayerCount = maximumPlayers,
             IsOpen = true,
             IsVisible = true,
             EnableClientSessionCreation = true,
             Scene = sceneInfo
         });
+#else
+        Debug.LogWarning("StartDedicatedServer is available only in a Unity Dedicated Server build", this);
+        return Task.FromResult(default(StartGameResult));
+#endif
+    }
+
+    public Task<StartGameResult> JoinPersistentWorld()
+    {
+        return StartClient(persistentSessionName);
+    }
+
+    public Task<StartGameResult> StartPersistentServer(string sessionNameOverride = null)
+    {
+        return StartDedicatedServer(sessionNameOverride);
     }
 
     public Task<StartGameResult> StartPersistentHostForDevelopment()
     {
+        return StartHost(persistentSessionName);
+    }
+
+    public Task<StartGameResult> StartHost(string sessionName)
+    {
+#if DEDICATED_SERVER
+        return Task.FromResult(default(StartGameResult));
+#else
         if (!TryCreateGameSceneInfo(out var sceneInfo))
             return Task.FromResult(default(StartGameResult));
 
         return StartSession(new StartGameArgs
         {
             GameMode = GameMode.Host,
-            SessionName = persistentSessionName,
-            CustomLobbyName = customLobbyName,
+            SessionName = ResolveSessionName(sessionName),
             PlayerCount = maximumPlayers,
             IsOpen = true,
             IsVisible = true,
             EnableClientSessionCreation = true,
             Scene = sceneInfo
         });
-    }
-
-    public Task<StartGameResult> StartHost(string sessionName)
-    {
-        return StartSession(new StartGameArgs
-        {
-            GameMode = GameMode.Host,
-            SessionName = sessionName,
-            CustomLobbyName = customLobbyName,
-            PlayerCount = maximumPlayers,
-            IsOpen = true,
-            IsVisible = true,
-            EnableClientSessionCreation = true
-        });
+#endif
     }
 
     public Task<StartGameResult> StartClient(string sessionName)
     {
+#if DEDICATED_SERVER
+        return Task.FromResult(default(StartGameResult));
+#else
         return StartSession(new StartGameArgs
         {
             GameMode = GameMode.Client,
-            SessionName = sessionName,
-            CustomLobbyName = customLobbyName,
+            SessionName = ResolveSessionName(sessionName),
             EnableClientSessionCreation = false
         });
-    }
-
-    public Task<StartGameResult> StartDedicatedServer(string sessionName)
-    {
-        return StartPersistentServer(sessionName);
+#endif
     }
 
     public async Task<StartGameResult> StartSession(StartGameArgs args)
     {
         if (operationInProgress)
         {
-            Debug.LogWarning("A network operation is already in progress");
+            Debug.LogWarning("A network operation is already in progress", this);
             return default;
         }
 
@@ -219,6 +271,7 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
         if (result.Ok)
         {
             onConnectionSucceeded?.Invoke();
+            Debug.Log($"Network started as {runner.GameMode} in session '{args.SessionName}'");
             return result;
         }
 
@@ -228,7 +281,6 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
 
         onConnectionFailed?.Invoke(message);
         await ShutdownRunner(false);
-
         return result;
     }
 
@@ -242,10 +294,12 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
 
         try
         {
+#if HOST_OR_CLIENT
             var inputProvider = runnerToShutdown.GetComponent<FusionInputProvider>();
 
             if (inputProvider != null)
                 inputProvider.UnregisterCallbacks(runnerToShutdown);
+#endif
 
             if (networkEvents != null)
                 runnerToShutdown.RemoveCallbacks(networkEvents);
@@ -271,6 +325,13 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
         CreateRunner();
     }
 
+    private string ResolveSessionName(string sessionNameOverride)
+    {
+        return string.IsNullOrWhiteSpace(sessionNameOverride)
+            ? persistentSessionName
+            : sessionNameOverride.Trim();
+    }
+
     private bool TryCreateGameSceneInfo(out NetworkSceneInfo sceneInfo)
     {
         sceneInfo = default;
@@ -279,7 +340,9 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
 
         if (buildIndex < 0)
         {
-            Debug.LogError($"Game scene is not included in Build Profiles: {gameScenePath}");
+            var message = $"Game scene is not included in Build Profiles: {gameScenePath}";
+            Debug.LogError(message, this);
+            onConnectionFailed?.Invoke(message);
             return false;
         }
 

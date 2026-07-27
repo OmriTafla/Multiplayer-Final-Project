@@ -1,3 +1,9 @@
+#if UNITY_SERVER
+#define DEDICATED_SERVER
+#else
+#define HOST_OR_CLIENT
+#endif
+
 using System;
 using TMPro;
 using UnityEngine;
@@ -8,44 +14,54 @@ public class NicknameSubmitUI : MonoBehaviour
     [SerializeField] private TMP_InputField inputNicknameField;
     [SerializeField] private TMP_Dropdown dropdownColour;
     [SerializeField] private Button signInButton;
-    [SerializeField] private bool allowEditorHostFallback;
 
-    private bool signingIn;
+    private bool connecting;
 
     private void Awake()
     {
+#if DEDICATED_SERVER
+        gameObject.SetActive(false);
+#else
         if (signInButton == null)
             signInButton = FindSignInButton(transform);
 
         if (signInButton != null && signInButton.onClick.GetPersistentEventCount() == 0)
-            signInButton.onClick.AddListener(SignIn);
+            signInButton.onClick.AddListener(Connect);
+#endif
     }
 
     private void OnEnable()
     {
+#if HOST_OR_CLIENT
         if (inputNicknameField != null)
             inputNicknameField.onSubmit.AddListener(HandleSubmit);
+#endif
     }
 
     private void OnDisable()
     {
+#if HOST_OR_CLIENT
         if (inputNicknameField != null)
             inputNicknameField.onSubmit.RemoveListener(HandleSubmit);
+#endif
     }
 
-    public async void SignIn()
+    public void SignIn()
     {
-        Debug.Log("Sign In button pressed");
+        Connect();
+    }
 
-        if (signingIn)
-        {
-            Debug.LogWarning("Sign in is already in progress");
+    public async void Connect()
+    {
+#if DEDICATED_SERVER
+        return;
+#else
+        if (connecting)
             return;
-        }
 
         if (inputNicknameField == null)
         {
-            Debug.LogError("NicknameSubmitUI is missing the nickname input field reference");
+            Debug.LogError("NicknameSubmitUI is missing the nickname input field reference", this);
             return;
         }
 
@@ -53,14 +69,13 @@ public class NicknameSubmitUI : MonoBehaviour
 
         if (string.IsNullOrWhiteSpace(nickname))
         {
-            Debug.LogWarning("Enter a nickname before signing in");
             inputNicknameField.ActivateInputField();
             return;
         }
 
         if (dropdownColour == null || dropdownColour.options.Count == 0)
         {
-            Debug.LogError("NicknameSubmitUI is missing a valid colour dropdown");
+            Debug.LogError("NicknameSubmitUI is missing a valid colour dropdown", this);
             return;
         }
 
@@ -68,11 +83,11 @@ public class NicknameSubmitUI : MonoBehaviour
 
         if (manager == null)
         {
-            Debug.LogError("No active SinglePeer_NetworkRunnerManager exists");
+            Debug.LogError("No active SinglePeer_NetworkRunnerManager exists", this);
             return;
         }
 
-        signingIn = true;
+        connecting = true;
 
         if (signInButton != null)
             signInButton.interactable = false;
@@ -85,19 +100,11 @@ public class NicknameSubmitUI : MonoBehaviour
 
         try
         {
-            Debug.Log($"Joining persistent world '{manager.PersistentSessionName}'...");
-
-            var result = await manager.JoinPersistentWorld();
-
-            if (!result.Ok && allowEditorHostFallback && Application.isEditor && !Application.isBatchMode)
-            {
-                Debug.LogWarning("Persistent server was unavailable. Starting an Editor development host.");
-                result = await manager.StartPersistentHostForDevelopment();
-            }
+            var result = await manager.StartForCurrentBuild();
 
             if (result.Ok)
             {
-                Debug.Log($"Connected to persistent world '{manager.PersistentSessionName}'. Waiting for GameScene synchronization.");
+                Debug.Log($"Connected to '{manager.PersistentSessionName}' as {manager.NetworkRunner.GameMode}");
                 return;
             }
 
@@ -105,7 +112,7 @@ public class NicknameSubmitUI : MonoBehaviour
                 ? result.ShutdownReason.ToString()
                 : result.ErrorMessage;
 
-            Debug.LogError($"Could not join persistent world: {message}");
+            Debug.LogError($"Connection failed: {message}");
             UIManager.Instance?.ShowLobbyMenu();
         }
         catch (Exception exception)
@@ -115,16 +122,17 @@ public class NicknameSubmitUI : MonoBehaviour
         }
         finally
         {
-            signingIn = false;
+            connecting = false;
 
             if (signInButton != null)
                 signInButton.interactable = true;
         }
+#endif
     }
 
     private void HandleSubmit(string value)
     {
-        SignIn();
+        Connect();
     }
 
     private static Button FindSignInButton(Transform root)

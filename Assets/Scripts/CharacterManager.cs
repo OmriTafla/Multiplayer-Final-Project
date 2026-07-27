@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Fusion;
@@ -12,77 +11,33 @@ public class CharacterManager : NetworkBehaviour
     [SerializeField] private TeamsManager teamsManager;
 
     private readonly Dictionary<PlayerRef, NetworkObject> spawnedPlayers = new();
-    private PlayerRef localSelectingPlayer;
 
     private void OnValidate()
     {
-        if (spawnPoints == null || spawnPoints.Length == 0)
-            spawnPoints = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
+        ResolveReferences();
     }
 
     public override void Spawned()
     {
+        ResolveReferences();
+
         if (playerPrefab == null)
             Debug.LogError("CharacterManager requires the Player network prefab", this);
     }
 
-    // public void StartSelection(PlayerRef player)
-    // {
-    //     if (!Object.HasStateAuthority)
-    //         return;
-    //
-    //     if (spawnedPlayers.ContainsKey(player))
-    //         return;
-    //
-    //     SpawnPlayerAtRandomPoint(player);
-    // }
-
-    // [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    // private void RequestCharacterRpc(PlayerRef requestedPlayer, int characterId, RpcInfo info = default)
-    // {
-    //     var player = info.Source == PlayerRef.None ? requestedPlayer : info.Source;
-    //
-    //     if (player == PlayerRef.None)
-    //     {
-    //         Debug.LogWarning("Character selection request had no player source", this);
-    //         return;
-    //     }
-    //
-    //     if (info.Source != PlayerRef.None && requestedPlayer != info.Source)
-    //         return;
-    //
-    //     if (spawnedPlayers.ContainsKey(player))
-    //         return;
-    //
-    //     if (spawnPoints == null || spawnPoints.Length == 0)
-    //     {
-    //         SelectionFailedRpc(player, "No spawn points configured.");
-    //         return;
-    //     }
-    //
-    //     if (playerPrefab == null)
-    //     {
-    //         SelectionFailedRpc(player, "Player prefab is not assigned.");
-    //         return;
-    //     }
-    //
-    //     SpawnPlayerAtRandomPoint(player);
-    // }
-
     public void SpawnPlayerAtRandomPoint(PlayerRef player)
     {
-        if (player == PlayerRef.None)
-        {
-            Debug.LogWarning("Character selection request had no player source", this);
+        if (!Object.HasStateAuthority || player == PlayerRef.None)
             return;
-        }
-        
+
         if (spawnedPlayers.ContainsKey(player))
             return;
-        
-        print($"Spawning player {player.AsIndex}");
-        
-        var validSpawnPoints = spawnPoints.Where(x => x != null).ToArray();
+
+        ResolveReferences();
+
+        var validSpawnPoints = spawnPoints
+            .Where(spawnPoint => spawnPoint != null)
+            .ToArray();
 
         if (validSpawnPoints.Length == 0)
         {
@@ -90,11 +45,21 @@ public class CharacterManager : NetworkBehaviour
             return;
         }
 
+        if (playerPrefab == null)
+        {
+            SelectionFailedRpc(player, "Player prefab is not assigned.");
+            return;
+        }
+
+        if (teamsManager == null)
+        {
+            SelectionFailedRpc(player, "TeamsManager is not assigned.");
+            return;
+        }
+
         teamsManager.AutoAssignPlayerToTeam(player);
 
-        //TODO: Use team specific spawn points
-        var spawnPoint = validSpawnPoints[UnityEngine.Random.Range(0, validSpawnPoints.Length)];
-        
+        var spawnPoint = validSpawnPoints[Random.Range(0, validSpawnPoints.Length)];
         var avatar = Runner.Spawn(
             playerPrefab,
             spawnPoint.GetSpawnPosition(),
@@ -103,11 +68,43 @@ public class CharacterManager : NetworkBehaviour
 
         if (avatar == null)
         {
+            teamsManager.HandlePlayerLeft(player);
             SelectionFailedRpc(player, "Could not spawn the player prefab.");
             return;
         }
 
         spawnedPlayers[player] = avatar;
+    }
+
+    public void RemovePlayer(PlayerRef player)
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        if (spawnedPlayers.TryGetValue(player, out var avatar))
+        {
+            if (avatar != null)
+                Runner.Despawn(avatar);
+
+            spawnedPlayers.Remove(player);
+        }
+
+        if (teamsManager != null)
+            teamsManager.HandlePlayerLeft(player);
+    }
+
+    public Vector3 GetRandomSpawnPosition()
+    {
+        ResolveReferences();
+
+        var validSpawnPoints = spawnPoints
+            .Where(spawnPoint => spawnPoint != null)
+            .ToArray();
+
+        if (validSpawnPoints.Length == 0)
+            return Vector3.zero;
+
+        return validSpawnPoints[Random.Range(0, validSpawnPoints.Length)].GetSpawnPosition();
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -116,32 +113,12 @@ public class CharacterManager : NetworkBehaviour
         Debug.LogWarning(reason);
     }
 
-    public void RemovePlayer(PlayerRef player)
-    {
-        if (!Object.HasStateAuthority)
-            return;
-
-        if (!spawnedPlayers.TryGetValue(player, out var avatar))
-            return;
-
-        if (avatar != null)
-        {
-            Runner.Despawn(avatar);
-        }
-
-        spawnedPlayers.Remove(player);
-    }
-
-    public Vector3 GetRandomSpawnPosition()
+    private void ResolveReferences()
     {
         if (spawnPoints == null || spawnPoints.Length == 0)
-            return Vector3.zero;
+            spawnPoints = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
 
-        var validSpawnPoints = spawnPoints.Where(x => x != null).ToArray();
-
-        if (validSpawnPoints.Length == 0)
-            return Vector3.zero;
-
-        return validSpawnPoints[UnityEngine.Random.Range(0, validSpawnPoints.Length)].GetSpawnPosition();
+        if (teamsManager == null)
+            teamsManager = FindAnyObjectByType<TeamsManager>();
     }
 }

@@ -1,3 +1,7 @@
+#if UNITY_SERVER
+#define DEDICATED_SERVER
+#endif
+
 using System;
 using UnityEngine;
 
@@ -7,14 +11,12 @@ public class DedicatedServerBootstrap : MonoBehaviour
 
     private async void Start()
     {
-        if (!Application.isBatchMode)
-            return;
-
+#if DEDICATED_SERVER
         var manager = SinglePeer_NetworkRunnerManager.Instance;
 
         if (manager == null)
         {
-            Debug.LogError("Dedicated server cannot start because the runner manager is missing");
+            Debug.LogError("Dedicated server cannot start because the runner manager is missing", this);
             Application.Quit(1);
             return;
         }
@@ -23,16 +25,19 @@ public class DedicatedServerBootstrap : MonoBehaviour
             return;
 
         var sessionName = GetCommandLineValue("-session", defaultSessionName);
-        var result = await manager.StartPersistentServer(sessionName);
+        var result = await manager.StartForCurrentBuild(sessionName);
 
         if (!result.Ok)
         {
-            Debug.LogError($"Persistent world server start failed: {result.ShutdownReason}");
+            Debug.LogError($"Dedicated server start failed: {result.ShutdownReason}", this);
             Application.Quit(1);
             return;
         }
 
-        Debug.Log($"Persistent world server started: {sessionName}");
+        Debug.Log($"Dedicated server started session '{sessionName}'");
+#else
+        enabled = false;
+#endif
     }
 
     private static string GetCommandLineValue(string key, string fallback)
@@ -41,7 +46,7 @@ public class DedicatedServerBootstrap : MonoBehaviour
 
         for (var i = 0; i < arguments.Length - 1; i++)
         {
-            if (arguments[i] == key)
+            if (string.Equals(arguments[i], key, StringComparison.OrdinalIgnoreCase))
                 return arguments[i + 1];
         }
 

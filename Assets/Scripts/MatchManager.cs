@@ -7,7 +7,6 @@ public class MatchManager : Singleton<MatchManager>
 {
     [FormerlySerializedAs("cm")]
     [SerializeField] private CharacterManager characterManager;
-
     [SerializeField] private NetworkObject playerDataPrefab;
 
     protected override void Awake()
@@ -63,15 +62,13 @@ public class MatchManager : Singleton<MatchManager>
 
     public void EndMatch()
     {
-        Debug.Log("EndMatch is disabled because this is a persistent world.");
     }
 
     public Vector3 GetRandomSpawnPosition()
     {
-        if (!ResolveReferences())
-            return Vector3.zero;
-
-        return characterManager.GetRandomSpawnPosition();
+        return ResolveReferences()
+            ? characterManager.GetRandomSpawnPosition()
+            : Vector3.zero;
     }
 
     private void PreparePlayer(NetworkRunner runner, PlayerRef player)

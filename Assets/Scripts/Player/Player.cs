@@ -29,7 +29,8 @@ public class Player : NetworkBehaviour, IHitable
 
     private CharacterProperties character;
     private string cachedNickname;
-
+    private bool controlsLocalCamera;
+    
     public override void Spawned()
     {
         OnCharacterIdChanged();
@@ -47,8 +48,16 @@ public class Player : NetworkBehaviour, IHitable
         OnHpChanged();
         OnDeathStateChanged();
         ConfigureLocalPresentation();
-    }
+        controlsLocalCamera = Object.HasInputAuthority;
 
+        if (controlsLocalCamera)
+            LocalPlayerCamera.Instance?.SetTarget(transform);
+    }
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        if (controlsLocalCamera)
+            LocalPlayerCamera.Instance?.ClearTarget(transform);
+    }
     public void SetCharacter(CharacterProperties newCharacter)
     {
         if (!Object.HasStateAuthority || newCharacter == null)
@@ -222,6 +231,9 @@ public class Player : NetworkBehaviour, IHitable
 
         if (playerUI != null)
             playerUI.gameObject.SetActive(!IsDead && Object.HasInputAuthority);
+
+        if (controlsLocalCamera && !IsDead)
+            LocalPlayerCamera.Instance?.SnapToTarget();
     }
 
     private void ConfigureLocalPresentation()
