@@ -9,7 +9,6 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private DamageData damageData;
 
     //TODO: set this when spawning
-    public PlayerRef? shooter = null;
 
     [Networked]
     private TickTimer LifeTimer { get; set; }
@@ -64,14 +63,15 @@ public class Projectile : NetworkBehaviour
         if (target.TryGetComponent(out Projectile _))
             return;
 
+        var shooter = Object.InputAuthority;
+        
         if (target.TryGetComponent(out Player targetPlayer))
         {
-            var attacker = Object.InputAuthority;
             var targetPlayerRef = targetPlayer.Object.InputAuthority;
 
             teamsManager ??= FindAnyObjectByType<TeamsManager>();
 
-            if (teamsManager == null || !teamsManager.CanDamage(attacker, targetPlayerRef))
+            if (teamsManager == null || !teamsManager.CanDamage(shooter, targetPlayerRef))
             {
                 IgnoreCollisionsWith(targetPlayer);
                 return;
@@ -79,8 +79,8 @@ public class Projectile : NetworkBehaviour
 
             impactResolved = true;
 
-            if (targetPlayer.TryReceiveHit(attacker, damageData))
-                ScoreManager.Instance?.AddScoreForHit(attacker);
+            if (targetPlayer.TryReceiveHit(shooter, damageData))
+                ScoreManager.Instance?.AddScoreForHit(shooter);
 
             Runner.Despawn(Object);
             return;
