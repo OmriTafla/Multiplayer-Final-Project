@@ -8,10 +8,10 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
 
-    //TODO: set this when spawning
-
     [Networked]
     private TickTimer LifeTimer { get; set; }
+
+    [Networked] public PlayerRef OwnerPlayerRef { get; set; }
 
     private Collider[] projectileColliders;
     private TeamsManager teamsManager;
@@ -63,8 +63,8 @@ public class Projectile : NetworkBehaviour
         if (target.TryGetComponent(out Projectile _))
             return;
 
-        var shooter = Object.InputAuthority;
-        
+        var shooter = OwnerPlayerRef;
+
         if (target.TryGetComponent(out Player targetPlayer))
         {
             var targetPlayerRef = targetPlayer.Object.InputAuthority;
@@ -95,7 +95,7 @@ public class Projectile : NetworkBehaviour
 
     private void IgnoreOwnerAndFriendlyCollisions()
     {
-        var attacker = Object.InputAuthority;
+        var attacker = OwnerPlayerRef;
         var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
 
         foreach (var player in players)

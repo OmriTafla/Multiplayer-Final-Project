@@ -67,25 +67,23 @@ public class PlacementManager : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        // if (!ValidatePlayer(requestingPlayer, characterId))
-        //     return;
+        if (!requestingPlayer)
+            return;
 
         if (direction.sqrMagnitude < 0.0001f)
             return;
 
-        // var properties = CharacterProperties.GetByID(characterId);
-
-        // if (properties == null)
-            // return;
-
         var normalizedDirection = direction.normalized;
-        // var spawnPosition = origin + normalizedDirection * projectileSpawnOffset;
 
         Runner.Spawn(
             projectilePrefab,
             origin,
             Quaternion.LookRotation(normalizedDirection),
-            requestingPlayer.InputAuthority);
+            PlayerRef.None,
+            (spawnRunner, spawnedObject) =>
+            {
+                spawnedObject.GetComponent<Projectile>().OwnerPlayerRef = requestingPlayer.InputAuthority;
+            });
     }
 
     public void RemovePlayer(PlayerRef player)
