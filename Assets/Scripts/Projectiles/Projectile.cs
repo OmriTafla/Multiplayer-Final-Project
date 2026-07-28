@@ -8,9 +8,10 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
 
+    //TODO: set this when spawning
+
     [Networked]
     private TickTimer LifeTimer { get; set; }
-    [Networked] public PlayerRef OwnerPlayerRef { get; set; }
 
     private Collider[] projectileColliders;
     private TeamsManager teamsManager;
@@ -62,14 +63,15 @@ public class Projectile : NetworkBehaviour
         if (target.TryGetComponent(out Projectile _))
             return;
 
+        var shooter = Object.InputAuthority;
+        
         if (target.TryGetComponent(out Player targetPlayer))
         {
-            var attacker = OwnerPlayerRef;
             var targetPlayerRef = targetPlayer.Object.InputAuthority;
 
             teamsManager ??= FindAnyObjectByType<TeamsManager>();
 
-            if (teamsManager == null || !teamsManager.CanDamage(attacker, targetPlayerRef))
+            if (teamsManager == null || !teamsManager.CanDamage(shooter, targetPlayerRef))
             {
                 IgnoreCollisionsWith(targetPlayer);
                 return;
@@ -77,15 +79,15 @@ public class Projectile : NetworkBehaviour
 
             impactResolved = true;
 
-            if (targetPlayer.TryReceiveHit(attacker, damageData))
-                ScoreManager.Instance?.AddScoreForHit(attacker);
+            if (targetPlayer.TryReceiveHit(shooter, damageData))
+                ScoreManager.Instance?.AddScoreForHit(shooter);
 
             Runner.Despawn(Object);
             return;
         }
 
         if (target.TryGetComponent(out IHitable hittable))
-            hittable.OnHit(damageData);
+            hittable.OnHit(damageData, shooter);
 
         impactResolved = true;
         Runner.Despawn(Object);
@@ -93,7 +95,7 @@ public class Projectile : NetworkBehaviour
 
     private void IgnoreOwnerAndFriendlyCollisions()
     {
-        var attacker = OwnerPlayerRef;
+        var attacker = Object.InputAuthority;
         var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
 
         foreach (var player in players)

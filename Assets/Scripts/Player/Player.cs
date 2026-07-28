@@ -124,7 +124,7 @@ public class Player : NetworkBehaviour, IHitable
         }
 
         var previousHp = Hp;
-        OnHit(data);
+        OnHit(data, attacker);
         return Hp < previousHp;
     }
 
@@ -204,7 +204,7 @@ public class Player : NetworkBehaviour, IHitable
         }
     }
 
-    public void OnHit(DamageData data)
+    public void OnHit(DamageData data, PlayerRef? hitBy)
     {
         if (!Object.HasStateAuthority || IsDead)
             return;
