@@ -12,7 +12,6 @@ using UnityEngine.UI;
 public class NicknameSubmitUI : MonoBehaviour
 {
     [SerializeField] private TMP_InputField inputNicknameField;
-    [SerializeField] private TMP_Dropdown dropdownColour;
     [SerializeField] private Button signInButton;
 
     private bool connecting;
@@ -73,11 +72,6 @@ public class NicknameSubmitUI : MonoBehaviour
             return;
         }
 
-        if (dropdownColour == null || dropdownColour.options.Count == 0)
-        {
-            Debug.LogError("NicknameSubmitUI is missing a valid colour dropdown", this);
-            return;
-        }
 
         var manager = SinglePeer_NetworkRunnerManager.Instance;
 
@@ -93,7 +87,6 @@ public class NicknameSubmitUI : MonoBehaviour
             signInButton.interactable = false;
 
         PlayerPrefs.SetString("PendingNickname", nickname);
-        PlayerPrefs.SetString("PendingColour", dropdownColour.options[dropdownColour.value].text);
         PlayerPrefs.Save();
 
         UIManager.Instance?.ShowWaitingScreen();
