@@ -1,4 +1,4 @@
-#if DOTWEEN
+// #if DOTWEEN
 using DG.Tweening;
 using Singleton;
 using UnityEngine;
@@ -142,4 +142,4 @@ namespace Abb2kTools
         }
     }
 }
-#endif
+// #endif
