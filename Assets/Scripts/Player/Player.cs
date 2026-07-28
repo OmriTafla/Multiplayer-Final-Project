@@ -18,7 +18,8 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private float movementSpeed = 5f;
     [SerializeField] private float shootingCooldown = 0.5f;
     [SerializeField] private float respawnDelay = 3f;
-
+    [SerializeField] private SpriteRenderer miniMapIconColor;
+    
     [Networked, OnChangedRender(nameof(OnCharacterIdChanged))]
     public int CharacterID { get; private set; }
 

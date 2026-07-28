@@ -11,8 +11,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/CharacterManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/CharacterManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/GameManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Player/Player.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Player/Player.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/DisplayScores.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/DisplayScores.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/PlayerData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/PlayerData.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,19 +28,18 @@
     <option name="firstShow" value="false" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="3" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/7b/623e1368/SimulationBehaviourUpdater.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f713e1c3c5f545ce9b1df47230f4f85346ae00/ee/d540c7df/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Temp/910c7ad3-b393-4238-aad5-a27a37fc57b4_Team_Color_Renderer_Fix.zip.7b4/Team_Color_Renderer_Fix/Assets/Scripts/Player/Player.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/95/808a117f/TickTimer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/fc/dffdda82/NetworkEvents.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Photon/Fusion/Editor/Fusion.Unity.Editor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Camera/DisableOnDedicatedServer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Camera/LocalPlayerCamera.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Collectible/Collectible.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Enums/GameplayInput.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/LobbyPlayerDataSpawner.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs" root0="FORCE_HIGHLIGHTING" />
@@ -52,61 +56,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000000000000002" />
-      <entry key="MS500" value="1.0027205869295086" />
-      <entry key="S2" value="1.9666883264911275" />
-      <entry key="S5" value="4.166484389385564" />
-      <entry key="S10" value="5.7069318847471955" />
-      <entry key="S30" value="7.132286792813744" />
-      <entry key="S60" value="7.551752318517078" />
-      <entry key="M2" value="7.772157683153574" />
-      <entry key="M5" value="7.910346167206279" />
-      <entry key="M10" value="8.182615914867414" />
-      <entry key="M15" value="9.134919636527911" />
-      <entry key="M30" value="14.281156712533805" />
-      <entry key="H1" value="22.94406679767773" />
-      <entry key="H2" value="31.177149005143978" />
-      <entry key="H4" value="39.078552504353624" />
-      <entry key="D1" value="178.8565161614215" />
-      <entry key="W1" value="339.72670473945146" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="1.7442654746066198E-94" />
+      <entry key="S2" value="2.7032327136225855E-23" />
+      <entry key="S5" value="5.437975746495102E-9" />
+      <entry key="S10" value="3.3959343612672215E-4" />
+      <entry key="S30" value="0.5873752399979033" />
+      <entry key="S60" value="3.962593582927344" />
+      <entry key="M2" value="10.456554805023453" />
+      <entry key="M5" value="19.296882365395255" />
+      <entry key="M10" value="29.710836414445268" />
+      <entry key="M15" value="43.84352856766683" />
+      <entry key="M30" value="87.66036892485891" />
+      <entry key="H1" value="142.3550745001612" />
+      <entry key="H2" value="188.21240220450326" />
+      <entry key="H4" value="222.40085011016768" />
+      <entry key="D1" value="307.4090265542458" />
+      <entry key="W1" value="347.5711485653853" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="6.661643076449143E-106" />
-      <entry key="S5" value="8.50026654055166E-43" />
-      <entry key="S10" value="9.219689008069445E-22" />
-      <entry key="S30" value="9.732821474118352E-8" />
-      <entry key="S60" value="3.1197470208539266E-4" />
-      <entry key="M2" value="0.017662840117618463" />
-      <entry key="M5" value="0.2032838366923986" />
-      <entry key="M10" value="0.7018485079923134" />
-      <entry key="M15" value="1.6672315377070828" />
-      <entry key="M30" value="5.714250454398855" />
-      <entry key="H1" value="11.846079386335994" />
-      <entry key="H2" value="17.444617404549483" />
-      <entry key="H4" value="22.00418801302476" />
-      <entry key="D1" value="71.20372166391815" />
-      <entry key="W1" value="125.74802722562808" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0000000000037017" />
+      <entry key="S5" value="1.0000368291848054" />
+      <entry key="S10" value="1.0084539959581937" />
+      <entry key="S30" value="1.3708586560142875" />
+      <entry key="S60" value="2.203605798024191" />
+      <entry key="M2" value="3.505181392758598" />
+      <entry key="M5" value="5.480542584738926" />
+      <entry key="M10" value="9.187062319321138" />
+      <entry key="M15" value="14.239373639808745" />
+      <entry key="M30" value="28.74800433140673" />
+      <entry key="H1" value="46.16181352561637" />
+      <entry key="H2" value="60.9037631725247" />
+      <entry key="H4" value="72.58920244928183" />
+      <entry key="D1" value="101.91956949912854" />
+      <entry key="W1" value="115.23274024953812" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.008200911590805394" />
-      <entry key="MS500" value="0.38529766441169055" />
-      <entry key="S2" value="1.7492637288975903" />
-      <entry key="S5" value="4.0698236513636665" />
-      <entry key="S10" value="5.656287190481866" />
-      <entry key="S30" value="7.1147810693307925" />
-      <entry key="S60" value="7.543222669987823" />
-      <entry key="M2" value="7.785319100476006" />
-      <entry key="M5" value="8.11155307195378" />
-      <entry key="M10" value="8.882421780202094" />
-      <entry key="M15" value="10.798848192694923" />
-      <entry key="M30" value="19.98926826236411" />
-      <entry key="H1" value="34.78358982548144" />
-      <entry key="H2" value="48.616887048277185" />
-      <entry key="H4" value="61.07959118921946" />
-      <entry key="D1" value="250.0579695098183" />
-      <entry key="W1" value="465.4741276604496" />
+      <entry key="MS100" value="7.198580162554204E-4" />
+      <entry key="MS500" value="0.2352065268784469" />
+      <entry key="S2" value="0.6964057403369684" />
+      <entry key="S5" value="0.865286024615948" />
+      <entry key="S10" value="0.9379540733805266" />
+      <entry key="S30" value="1.9137333253569375" />
+      <entry key="S60" value="6.111541475759185" />
+      <entry key="M2" value="13.905021798881746" />
+      <entry key="M5" value="24.736273626805296" />
+      <entry key="M10" value="38.859917984334544" />
+      <entry key="M15" value="58.04076336606884" />
+      <entry key="M30" value="116.3618543265787" />
+      <entry key="H1" value="188.4778741866783" />
+      <entry key="H2" value="249.08992190140393" />
+      <entry key="H4" value="294.97430611132415" />
+      <entry key="D1" value="409.32492933714997" />
+      <entry key="W1" value="462.8032982731821" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -139,7 +143,7 @@
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;collectibles&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Eitan__Minimap&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -208,6 +212,7 @@
       <updated>1784813317149</updated>
       <workItem from="1784813322523" duration="1264000" />
       <workItem from="1785072599421" duration="8557000" />
+      <workItem from="1785227554974" duration="237000" />
     </task>
     <servers />
   </component>
@@ -231,17 +236,10 @@
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs</url>
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs</url>
           <line>54</line>
-          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Projectiles\Projectile.cs" containingFunctionPresentation="Method 'HandleImpact'">
-            <startOffsets>
-              <option value="1388" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1471" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="5" />
+          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Managers\TeamsManager.cs" containingFunctionPresentation="Method 'AutoAssignPlayerToTeam'" />
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
