@@ -1,4 +1,5 @@
 using Fusion;
+using Managers;
 using TMPro;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ public class Player : NetworkBehaviour, IHitable
 {
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
+    private static readonly int TintColorId = Shader.PropertyToID("_TintColor");
 
     [SerializeField] private Renderer modelRenderer;
     [SerializeField] private Collider hitCollider;
@@ -40,9 +42,13 @@ public class Player : NetworkBehaviour, IHitable
     private string cachedNickname;
     private bool controlsLocalCamera;
     private MaterialPropertyBlock materialPropertyBlock;
+    private Renderer[] modelRenderers;
+    private Collider[] collisionColliders;
+    private TeamsManager teamsManager;
 
     public override void Spawned()
     {
+        CacheReferences();
         OnCharacterIdChanged();
 
         if (Object.HasStateAuthority)
@@ -89,6 +95,33 @@ public class Player : NetworkBehaviour, IHitable
         TeamId = teamId;
         TeamColor = teamColor;
         ApplyDisplayColor();
+    }
+
+    public Collider[] GetCollisionColliders()
+    {
+        CacheReferences();
+        return collisionColliders;
+    }
+
+    public bool TryReceiveHit(PlayerRef attacker, DamageData data)
+    {
+        if (!Object.HasStateAuthority || IsDead)
+            return false;
+
+        teamsManager ??= FindAnyObjectByType<TeamsManager>();
+
+        if (teamsManager != null && !teamsManager.CanDamage(attacker, Object.InputAuthority))
+            return false;
+
+        if (data.damage < DamageData.MIN_POSSIBLE_DAMAGE ||
+            data.damage > DamageData.MAX_POSSIBLE_DAMAGE)
+        {
+            return false;
+        }
+
+        var previousHp = Hp;
+        OnHit(data);
+        return Hp < previousHp;
     }
 
     public override void FixedUpdateNetwork()
@@ -243,7 +276,9 @@ public class Player : NetworkBehaviour, IHitable
 
     private void ApplyDisplayColor()
     {
-        if (modelRenderer == null)
+        CacheReferences();
+
+        if (modelRenderers == null || modelRenderers.Length == 0)
             return;
 
         var displayColor = TeamColor.a > 0f
@@ -254,10 +289,34 @@ public class Player : NetworkBehaviour, IHitable
 
         materialPropertyBlock ??= new MaterialPropertyBlock();
 
-        modelRenderer.GetPropertyBlock(materialPropertyBlock);
-        materialPropertyBlock.SetColor(BaseColorId, displayColor);
-        materialPropertyBlock.SetColor(ColorId, displayColor);
-        modelRenderer.SetPropertyBlock(materialPropertyBlock);
+        foreach (var renderer in modelRenderers)
+        {
+            if (renderer == null)
+                continue;
+
+            var materials = renderer.sharedMaterials;
+
+            if (materials.Length == 0)
+            {
+                materialPropertyBlock.Clear();
+                renderer.GetPropertyBlock(materialPropertyBlock);
+                materialPropertyBlock.SetColor(BaseColorId, displayColor);
+                materialPropertyBlock.SetColor(ColorId, displayColor);
+                materialPropertyBlock.SetColor(TintColorId, displayColor);
+                renderer.SetPropertyBlock(materialPropertyBlock);
+                continue;
+            }
+
+            for (var materialIndex = 0; materialIndex < materials.Length; materialIndex++)
+            {
+                materialPropertyBlock.Clear();
+                renderer.GetPropertyBlock(materialPropertyBlock, materialIndex);
+                materialPropertyBlock.SetColor(BaseColorId, displayColor);
+                materialPropertyBlock.SetColor(ColorId, displayColor);
+                materialPropertyBlock.SetColor(TintColorId, displayColor);
+                renderer.SetPropertyBlock(materialPropertyBlock, materialIndex);
+            }
+        }
     }
 
     private void OnHpChanged()
@@ -268,11 +327,25 @@ public class Player : NetworkBehaviour, IHitable
 
     private void OnDeathStateChanged()
     {
-        if (modelRenderer != null)
-            modelRenderer.enabled = !IsDead;
+        CacheReferences();
 
-        if (hitCollider != null)
-            hitCollider.enabled = !IsDead;
+        if (modelRenderers != null)
+        {
+            foreach (var renderer in modelRenderers)
+            {
+                if (renderer != null)
+                    renderer.enabled = !IsDead;
+            }
+        }
+
+        if (collisionColliders != null)
+        {
+            foreach (var collider in collisionColliders)
+            {
+                if (collider != null)
+                    collider.enabled = !IsDead;
+            }
+        }
 
         if (playerUI != null)
             playerUI.gameObject.SetActive(!IsDead && Object.HasInputAuthority);
@@ -285,6 +358,23 @@ public class Player : NetworkBehaviour, IHitable
     {
         if (playerUI != null)
             playerUI.gameObject.SetActive(Object.HasInputAuthority && !IsDead);
+    }
+
+    private void CacheReferences()
+    {
+        if (modelRenderers == null || modelRenderers.Length == 0)
+            modelRenderers = GetComponentsInChildren<Renderer>(true);
+
+        if (collisionColliders == null || collisionColliders.Length == 0)
+            collisionColliders = GetComponentsInChildren<Collider>(true);
+
+        if (modelRenderer == null && modelRenderers.Length > 0)
+            modelRenderer = modelRenderers[0];
+
+        if (hitCollider == null && collisionColliders.Length > 0)
+            hitCollider = collisionColliders[0];
+
+        teamsManager ??= FindAnyObjectByType<TeamsManager>();
     }
 
     private string GetNickname()

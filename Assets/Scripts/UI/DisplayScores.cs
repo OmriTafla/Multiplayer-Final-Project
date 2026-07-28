@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Linq;
 using Fusion;
+using Managers;
 using TMPro;
 using UnityEngine;
 
@@ -7,10 +9,13 @@ public class DisplayScores : NetworkBehaviour
 {
     [SerializeField] private TMP_Text scoresText;
 
+    private TeamsManager teamsManager;
+
     private void OnEnable()
     {
         ScoreManager.ScoresChanged += RefreshScores;
         UI.PlayerData.PlayerDataChanged += RefreshScores;
+        TeamsManager.RulesChanged += RefreshScores;
         ShowEmptyScores();
         RefreshScores();
     }
@@ -19,10 +24,12 @@ public class DisplayScores : NetworkBehaviour
     {
         ScoreManager.ScoresChanged -= RefreshScores;
         UI.PlayerData.PlayerDataChanged -= RefreshScores;
+        TeamsManager.RulesChanged -= RefreshScores;
     }
 
     public override void Spawned()
     {
+        ResolveTeamsManager();
         RefreshScores();
     }
 
@@ -51,16 +58,101 @@ public class DisplayScores : NetworkBehaviour
             return;
         }
 
-        var runner = scoreManager.Runner;
-        var scoreLines = scores
-            .OrderByDescending(score => score.Value)
-            .ThenBy(score => score.Key.PlayerId)
-            .Select(score => BuildScoreLine(runner, score.Key, score.Value));
+        ResolveTeamsManager();
 
-        var body = string.Join("\n", scoreLines);
+        var entries = BuildEntries(scoreManager.Runner, scores);
+
+        if (teamsManager != null && teamsManager.IsTwoTeams)
+            DisplayTeamScores(entries);
+        else
+            DisplayFreeForAllScores(entries);
+    }
+
+    private void DisplayFreeForAllScores(List<PlayerScoreEntry> entries)
+    {
+        var lines = entries
+            .OrderByDescending(entry => entry.Score)
+            .ThenBy(entry => entry.Player.PlayerId)
+            .Select(BuildPlayerLine);
+
+        var body = string.Join("\n", lines);
         scoresText.text = string.IsNullOrEmpty(body)
-            ? "Scores:"
-            : $"Scores:\n{body}";
+            ? "Free For All"
+            : $"Free For All\n{body}";
+    }
+
+    private void DisplayTeamScores(List<PlayerScoreEntry> entries)
+    {
+        var sections = new List<string>();
+
+        for (var teamId = 0; teamId <= 1; teamId++)
+        {
+            var teamEntries = entries
+                .Where(entry => entry.TeamId == teamId)
+                .OrderByDescending(entry => entry.Score)
+                .ThenBy(entry => entry.Player.PlayerId)
+                .ToList();
+
+            var teamScore = teamEntries.Sum(entry => entry.Score);
+            var teamName = teamsManager.GetTeamName(teamId);
+            var teamColor = teamsManager.GetTeamColor(teamId);
+            var teamColorHex = ColorUtility.ToHtmlStringRGB(teamColor);
+            var lines = new List<string>
+            {
+                $"<color=#{teamColorHex}><b>{teamName}: {teamScore}</b></color>"
+            };
+
+            lines.AddRange(teamEntries.Select(BuildPlayerLine));
+            sections.Add(string.Join("\n", lines));
+        }
+
+        scoresText.text = $"Two Teams\n{string.Join("\n\n", sections)}";
+    }
+
+    private static List<PlayerScoreEntry> BuildEntries(
+        NetworkRunner runner,
+        Dictionary<PlayerRef, int> scores)
+    {
+        var entries = new List<PlayerScoreEntry>();
+
+        foreach (var score in scores)
+        {
+            var playerName = $"Player {score.Key.PlayerId}";
+            var playerColor = Color.white;
+            var teamId = -1;
+
+            if (runner != null)
+            {
+                var playerObject = runner.GetPlayerObject(score.Key);
+
+                if (playerObject != null &&
+                    playerObject.TryGetComponent(out UI.PlayerData playerData))
+                {
+                    var nickname = playerData.NickName.ToString();
+
+                    if (!string.IsNullOrWhiteSpace(nickname))
+                        playerName = nickname;
+
+                    playerColor = playerData.Color;
+                    teamId = playerData.TeamId;
+                }
+            }
+
+            entries.Add(new PlayerScoreEntry(
+                score.Key,
+                playerName,
+                playerColor,
+                teamId,
+                score.Value));
+        }
+
+        return entries;
+    }
+
+    private static string BuildPlayerLine(PlayerScoreEntry entry)
+    {
+        var colorHex = ColorUtility.ToHtmlStringRGB(entry.Color);
+        return $"<color=#{colorHex}>  {entry.Name}: {entry.Score}</color>";
     }
 
     private void ShowEmptyScores()
@@ -69,31 +161,32 @@ public class DisplayScores : NetworkBehaviour
             scoresText.text = "Scores:";
     }
 
-    private static string BuildScoreLine(
-        NetworkRunner runner,
-        PlayerRef player,
-        int score)
+    private void ResolveTeamsManager()
     {
-        var playerName = $"Player {player.PlayerId}";
-        var playerColor = Color.white;
+        if (teamsManager == null)
+            teamsManager = FindAnyObjectByType<TeamsManager>();
+    }
 
-        if (runner != null)
+    private sealed class PlayerScoreEntry
+    {
+        public PlayerRef Player { get; }
+        public string Name { get; }
+        public Color Color { get; }
+        public int TeamId { get; }
+        public int Score { get; }
+
+        public PlayerScoreEntry(
+            PlayerRef player,
+            string name,
+            Color color,
+            int teamId,
+            int score)
         {
-            var playerObject = runner.GetPlayerObject(player);
-
-            if (playerObject != null &&
-                playerObject.TryGetComponent(out UI.PlayerData playerData))
-            {
-                var nickname = playerData.NickName.ToString();
-
-                if (!string.IsNullOrWhiteSpace(nickname))
-                    playerName = nickname;
-
-                playerColor = playerData.Color;
-            }
+            Player = player;
+            Name = name;
+            Color = color;
+            TeamId = teamId;
+            Score = score;
         }
-
-        var colorHex = ColorUtility.ToHtmlStringRGB(playerColor);
-        return $"<color=#{colorHex}>{playerName}: {score}</color>";
     }
 }

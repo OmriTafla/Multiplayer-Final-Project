@@ -1,4 +1,5 @@
 using Fusion;
+using Managers;
 using UnityEngine;
 
 public class Projectile : NetworkBehaviour
@@ -10,12 +11,19 @@ public class Projectile : NetworkBehaviour
     [Networked]
     private TickTimer LifeTimer { get; set; }
 
+    private Collider[] projectileColliders;
+    private TeamsManager teamsManager;
+    private bool impactResolved;
+
     public override void Spawned()
     {
         if (!Object.HasStateAuthority)
             return;
 
         LifeTimer = TickTimer.CreateFromSeconds(Runner, lifetime);
+        projectileColliders = GetComponentsInChildren<Collider>(true);
+        teamsManager = FindAnyObjectByType<TeamsManager>();
+        IgnoreOwnerAndFriendlyCollisions();
     }
 
     public override void FixedUpdateNetwork()
@@ -31,7 +39,18 @@ public class Projectile : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (Object == null || !Object.HasStateAuthority)
+        HandleImpact(other);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider != null)
+            HandleImpact(collision.collider);
+    }
+
+    private void HandleImpact(Collider other)
+    {
+        if (impactResolved || Object == null || !Object.HasStateAuthority || other == null)
             return;
 
         var target = other.GetComponentInParent<NetworkObject>();
@@ -39,18 +58,76 @@ public class Projectile : NetworkBehaviour
         if (target == null || target == Object)
             return;
 
-        if (target.InputAuthority == Object.InputAuthority && target.TryGetComponent(out Player _))
-            return;
-
         if (target.TryGetComponent(out Projectile _))
             return;
 
-        if (target.TryGetComponent(out IHitable hittable))
+        if (target.TryGetComponent(out Player targetPlayer))
         {
-            hittable.OnHit(damageData);
-            ScoreManager.Instance?.AddScoreForHit(Object.InputAuthority);
+            var attacker = Object.InputAuthority;
+            var targetPlayerRef = targetPlayer.Object.InputAuthority;
+
+            teamsManager ??= FindAnyObjectByType<TeamsManager>();
+
+            if (teamsManager == null || !teamsManager.CanDamage(attacker, targetPlayerRef))
+            {
+                IgnoreCollisionsWith(targetPlayer);
+                return;
+            }
+
+            impactResolved = true;
+
+            if (targetPlayer.TryReceiveHit(attacker, damageData))
+                ScoreManager.Instance?.AddScoreForHit(attacker);
+
+            Runner.Despawn(Object);
+            return;
         }
 
+        if (target.TryGetComponent(out IHitable hittable))
+            hittable.OnHit(damageData);
+
+        impactResolved = true;
         Runner.Despawn(Object);
+    }
+
+    private void IgnoreOwnerAndFriendlyCollisions()
+    {
+        var attacker = Object.InputAuthority;
+        var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+
+        foreach (var player in players)
+        {
+            if (player == null || player.Object == null)
+                continue;
+
+            var target = player.Object.InputAuthority;
+
+            if (target == attacker ||
+                teamsManager != null && !teamsManager.CanDamage(attacker, target))
+            {
+                IgnoreCollisionsWith(player);
+            }
+        }
+    }
+
+    private void IgnoreCollisionsWith(Player player)
+    {
+        if (player == null)
+            return;
+
+        projectileColliders ??= GetComponentsInChildren<Collider>(true);
+        var playerColliders = player.GetCollisionColliders();
+
+        foreach (var projectileCollider in projectileColliders)
+        {
+            if (projectileCollider == null)
+                continue;
+
+            foreach (var playerCollider in playerColliders)
+            {
+                if (playerCollider != null)
+                    Physics.IgnoreCollision(projectileCollider, playerCollider, true);
+            }
+        }
     }
 }
