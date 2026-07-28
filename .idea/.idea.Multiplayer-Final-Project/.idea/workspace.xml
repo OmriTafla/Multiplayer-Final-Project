@@ -11,12 +11,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Collectible/DensityObjectSpawner.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Collectible/DensityObjectSpawner.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/RenderTextures/MiniMapRenderTexture.renderTexture" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/RenderTextures/MiniMapRenderTexture.renderTexture" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Collectible Spawner.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Collectible Spawner.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Collectible/DensityObjectSpawner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Collectible/DensityObjectSpawner.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,6 +31,10 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/494cfb45237f4d9d8ae455761adae515214400/21/235bad5e/SetupCoroutine.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/494cfb45237f4d9d8ae455761adae515214400/37/ed8fd77d/MonoBehaviour.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/494cfb45237f4d9d8ae455761adae515214400/53/c89a9d9b/CustomYieldInstruction.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/494cfb45237f4d9d8ae455761adae515214400/c0/788ca879/WaitUntil.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/7b/623e1368/SimulationBehaviourUpdater.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f713e1c3c5f545ce9b1df47230f4f85346ae00/ee/d540c7df/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Photon/Fusion/Editor/Fusion.Unity.Editor.cs" root0="SKIP_HIGHLIGHTING" />
@@ -49,6 +51,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/HostModeSessionUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/PlayerData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/SessionConnectionUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.mathematics@19a9377c4ffa/Unity.Mathematics/math.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -56,61 +59,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="7.247659593100045E-118" />
-      <entry key="MS500" value="3.732841567336279E-24" />
-      <entry key="S2" value="1.3977573258934439E-6" />
-      <entry key="S5" value="0.005973265957539703" />
-      <entry key="S10" value="0.16395003707456632" />
-      <entry key="S30" value="2.0740690820419765" />
-      <entry key="S60" value="4.051516872892154" />
-      <entry key="M2" value="5.738392607895821" />
-      <entry key="M5" value="12.761095999944411" />
-      <entry key="M10" value="46.624270940413595" />
-      <entry key="M15" value="88.91038206845053" />
-      <entry key="M30" value="197.6315682383715" />
-      <entry key="H1" value="334.8427494387794" />
-      <entry key="H2" value="468.8663189440033" />
-      <entry key="H4" value="573.7204875170668" />
-      <entry key="D1" value="740.5753401581838" />
-      <entry key="W1" value="799.9936060049438" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000194386176" />
+      <entry key="S2" value="1.0139249808860957" />
+      <entry key="S5" value="1.2545878881392425" />
+      <entry key="S10" value="1.703469834307353" />
+      <entry key="S30" value="2.4072006539918247" />
+      <entry key="S60" value="2.676954421734907" />
+      <entry key="M2" value="2.8478468755277206" />
+      <entry key="M5" value="3.8388465115072377" />
+      <entry key="M10" value="7.155438349373273" />
+      <entry key="M15" value="13.27792911741518" />
+      <entry key="M30" value="55.96157508125559" />
+      <entry key="H1" value="172.55112783554634" />
+      <entry key="H2" value="340.1877519560536" />
+      <entry key="H4" value="497.43460196332296" />
+      <entry key="D1" value="745.1683648660055" />
+      <entry key="W1" value="825.1793637701277" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.000000000318056" />
-      <entry key="MS500" value="1.012603777487876" />
-      <entry key="S2" value="1.3354836625137665" />
-      <entry key="S5" value="1.6999298307267092" />
-      <entry key="S10" value="2.168962075117846" />
-      <entry key="S30" value="3.878673352388195" />
-      <entry key="S60" value="5.280404858361397" />
-      <entry key="M2" value="6.462734496755066" />
-      <entry key="M5" value="8.594333467210438" />
-      <entry key="M10" value="14.460109762267814" />
-      <entry key="M15" value="21.586929001229322" />
-      <entry key="M30" value="41.377634024920134" />
-      <entry key="H1" value="70.67127117923168" />
-      <entry key="H2" value="103.16193437412981" />
-      <entry key="H4" value="131.01581865936714" />
-      <entry key="D1" value="180.73071245680413" />
-      <entry key="W1" value="199.24585393577712" />
+      <entry key="MS100" value="1.9461466939766536E-47" />
+      <entry key="MS500" value="4.5481535092099934E-10" />
+      <entry key="S2" value="0.0046180515726134425" />
+      <entry key="S5" value="0.11635480005155521" />
+      <entry key="S10" value="0.34156873756835304" />
+      <entry key="S30" value="0.7759526856954846" />
+      <entry key="S60" value="1.1138284058027714" />
+      <entry key="M2" value="1.4494177894924438" />
+      <entry key="M5" value="2.136166334360176" />
+      <entry key="M10" value="3.558046122017484" />
+      <entry key="M15" value="5.3869100049888194" />
+      <entry key="M30" value="14.844630436095251" />
+      <entry key="H1" value="39.902564831025714" />
+      <entry key="H2" value="78.31534026661382" />
+      <entry key="H4" value="116.91914312820303" />
+      <entry key="D1" value="184.77307367756768" />
+      <entry key="W1" value="208.29603784163717" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.009099481144284811" />
-      <entry key="MS500" value="0.3907035988710236" />
-      <entry key="S2" value="0.8699534093797173" />
-      <entry key="S5" value="1.2926441539724216" />
-      <entry key="S10" value="1.9241386259428315" />
-      <entry key="S30" value="5.557585317438382" />
-      <entry key="S60" value="9.0297227226604" />
-      <entry key="M2" value="12.007047672241109" />
-      <entry key="M5" value="21.25111339428424" />
-      <entry key="M10" value="60.99510508208995" />
-      <entry key="M15" value="110.4073935648651" />
-      <entry key="M30" value="238.92341709098469" />
-      <entry key="H1" value="405.4425830840048" />
-      <entry key="H2" value="571.9772046982545" />
-      <entry key="H4" value="704.7043392385415" />
-      <entry key="D1" value="921.2988904783621" />
-      <entry key="W1" value="999.2383418623067" />
+      <entry key="MS100" value="3.911474011668074E-4" />
+      <entry key="MS500" value="0.20819394407796518" />
+      <entry key="S2" value="0.6856374304648556" />
+      <entry key="S5" value="1.1516106963104358" />
+      <entry key="S10" value="1.8627023593086778" />
+      <entry key="S30" value="3.083245302244786" />
+      <entry key="S60" value="3.731848855395954" />
+      <entry key="M2" value="4.264506138272478" />
+      <entry key="M5" value="5.9582027369639565" />
+      <entry key="M10" value="10.69999957994099" />
+      <entry key="M15" value="18.65012000085997" />
+      <entry key="M30" value="70.78082127261027" />
+      <entry key="H1" value="212.4164662376846" />
+      <entry key="H2" value="418.46598621335926" />
+      <entry key="H4" value="614.3260598909319" />
+      <entry key="D1" value="929.9342537289468" />
+      <entry key="W1" value="1033.4742520729014" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -128,33 +131,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to": "Unity Editor",
-    "DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider": "Unity Editor",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Unity Attach To.Attach to.executor": "Debug",
-    "cidr.known.project.marker": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "collectibles-spawner",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "ml.llm.LLMThirdPartyAiProvidersConfigurable",
-    "to.speed.mode.migration.done": "true",
-    "unity.profiler.toolWindow.autoShown": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to&quot;: &quot;Unity Editor&quot;,
+    &quot;DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider&quot;: &quot;Unity Editor&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Unity Attach To.Attach to.executor&quot;: &quot;Debug&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;collectibles-spawner&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMThirdPartyAiProvidersConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;unity.profiler.toolWindow.autoShown&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Unity Attach To.Attach to">
     <configuration name="Standalone Player" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="$PROJECT_DIR$/Builds\unity_multliplayer_course.exe" />
@@ -236,10 +239,17 @@
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs</url>
-          <line>54</line>
-          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Managers\TeamsManager.cs" containingFunctionPresentation="Method 'AutoAssignPlayerToTeam'" />
-          <option name="timeStamp" value="4" />
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Collectible/DensityObjectSpawner.cs</url>
+          <line>59</line>
+          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Collectible\DensityObjectSpawner.cs" containingFunctionPresentation="Method 'SpawnObjectsCoroutine'">
+            <startOffsets>
+              <option value="1885" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1902" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="33" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

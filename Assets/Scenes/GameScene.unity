@@ -4339,15 +4339,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 639601791528214876, guid: af8c8a394091fa0479528f11f9464201, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -5.54852
-      objectReference: {fileID: 0}
-    - target: {fileID: 639601791528214876, guid: af8c8a394091fa0479528f11f9464201, type: 3}
-      propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 639601791528214876, guid: af8c8a394091fa0479528f11f9464201, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 639601791528214876, guid: af8c8a394091fa0479528f11f9464201, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.29926
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 639601791528214876, guid: af8c8a394091fa0479528f11f9464201, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4380,6 +4380,22 @@ PrefabInstance:
     - target: {fileID: 4310177825390990518, guid: af8c8a394091fa0479528f11f9464201, type: 3}
       propertyPath: SortKey
       value: 794366696
+      objectReference: {fileID: 0}
+    - target: {fileID: 6215982476965820632, guid: af8c8a394091fa0479528f11f9464201, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -22.501
+      objectReference: {fileID: 0}
+    - target: {fileID: 6215982476965820632, guid: af8c8a394091fa0479528f11f9464201, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -22.503
+      objectReference: {fileID: 0}
+    - target: {fileID: 7701390970183924868, guid: af8c8a394091fa0479528f11f9464201, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 22.498
+      objectReference: {fileID: 0}
+    - target: {fileID: 7701390970183924868, guid: af8c8a394091fa0479528f11f9464201, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 22.5009
       objectReference: {fileID: 0}
     - target: {fileID: 8415833201795509373, guid: af8c8a394091fa0479528f11f9464201, type: 3}
       propertyPath: m_Name
