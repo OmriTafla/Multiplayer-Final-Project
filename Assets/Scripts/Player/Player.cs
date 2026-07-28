@@ -174,18 +174,20 @@ public class Player : NetworkBehaviour, IHitable
             0f,
             movementInput.y);
 
-        var nextPosition = transform.position +
-                           direction *
-                           movementSpeed *
-                           Runner.DeltaTime;
-
-        if (rigidBody)
-        {
-            rigidBody.MovePosition(nextPosition);
-            return;
-        }
-
-        transform.position = nextPosition;
+        rigidBody.AddForce(direction * movementSpeed - rigidBody.linearVelocity, ForceMode.VelocityChange);
+        
+        // var nextPosition = transform.position +
+        //                    direction *
+        //                    movementSpeed *
+        //                    Runner.DeltaTime;
+        //
+        // if (rigidBody)
+        // {
+        //     rigidBody.MovePosition(nextPosition);
+        //     return;
+        // }
+        //
+        // transform.position = nextPosition;
     }
 
     private void ProcessFire(GameplayInput input)
