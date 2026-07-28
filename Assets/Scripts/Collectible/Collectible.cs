@@ -23,7 +23,7 @@ namespace Collectible
 
         private void SelfDestruct()
         {
-            SinglePeer_NetworkRunnerManager.Instance.NetworkRunner.Despawn(Object);
+            Runner.Despawn(Object);
         }
     }
 }
