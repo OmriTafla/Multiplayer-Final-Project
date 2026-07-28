@@ -618,7 +618,7 @@ MonoBehaviour:
   playerUI: {fileID: 4275309682345805136}
   hpLabel: {fileID: 476318218719191834}
   startingHp: 10
-  movementSpeed: 10
+  movementSpeed: 3
   shootingCooldown: 1
   respawnDelay: 3
   miniMapIconColor: {fileID: 2533349612935277087}
