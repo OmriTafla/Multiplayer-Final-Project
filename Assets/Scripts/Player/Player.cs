@@ -38,6 +38,9 @@ public class Player : NetworkBehaviour, IHitable
     [Networked] private TickTimer ShootCooldownTimer { get; set; }
     [Networked] private TickTimer RespawnTimer { get; set; }
     [Networked] private NetworkButtons PreviousButtons { get; set; }
+    public int LastFireTick { get; private set; }
+
+    [Networked] public Vector3 LastFireDirection { get; private set; }
 
     private CharacterProperties character;
     private string cachedNickname;
@@ -173,7 +176,7 @@ public class Player : NetworkBehaviour, IHitable
                            movementSpeed *
                            Runner.DeltaTime;
 
-        if (rigidBody != null)
+        if (rigidBody)
         {
             rigidBody.MovePosition(nextPosition);
             return;
@@ -190,20 +193,15 @@ public class Player : NetworkBehaviour, IHitable
         if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
             return;
 
-        if (!Object.HasStateAuthority)
-            return;
-
         ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
+        LastFireTick = Runner.Tick;
+        LastFireDirection = transform.forward.normalized;
 
-        var placementManager = FindAnyObjectByType<PlacementManager>();
-
-        if (placementManager == null)
-            return;
-
-        placementManager.SpawnProjectile(
-            Object,
-            transform.position,
-            transform.forward.normalized);
+        if (Object.HasStateAuthority)
+        {
+            var placementManager = FindAnyObjectByType<PlacementManager>();
+            placementManager?.SpawnProjectile(Object, transform.position, LastFireDirection);
+        }
     }
 
     public void OnHit(DamageData data)
@@ -246,7 +244,7 @@ public class Player : NetworkBehaviour, IHitable
     {
         var spawnPosition = MatchManager.Instance.GetRandomSpawnPosition();
 
-        if (rigidBody != null)
+        if (rigidBody)
         {
             rigidBody.position = spawnPosition;
             rigidBody.linearVelocity = Vector3.zero;
@@ -292,7 +290,7 @@ public class Player : NetworkBehaviour, IHitable
 
         foreach (var renderer in modelRenderers)
         {
-            if (renderer == null)
+            if (!renderer)
                 continue;
 
             var materials = renderer.sharedMaterials;
@@ -322,7 +320,7 @@ public class Player : NetworkBehaviour, IHitable
 
     private void OnHpChanged()
     {
-        if (hpLabel != null)
+        if (hpLabel)
             hpLabel.text = $"Health: {Hp:F0}";
     }
 
@@ -334,7 +332,7 @@ public class Player : NetworkBehaviour, IHitable
         {
             foreach (var renderer in modelRenderers)
             {
-                if (renderer != null)
+                if (renderer)
                     renderer.enabled = !IsDead;
             }
         }
@@ -343,12 +341,12 @@ public class Player : NetworkBehaviour, IHitable
         {
             foreach (var collider in collisionColliders)
             {
-                if (collider != null)
+                if (collider)
                     collider.enabled = !IsDead;
             }
         }
 
-        if (playerUI != null)
+        if (playerUI)
             playerUI.gameObject.SetActive(!IsDead && Object.HasInputAuthority);
 
         if (controlsLocalCamera && !IsDead)
@@ -357,7 +355,7 @@ public class Player : NetworkBehaviour, IHitable
 
     private void ConfigureLocalPresentation()
     {
-        if (playerUI != null)
+        if (playerUI)
             playerUI.gameObject.SetActive(Object.HasInputAuthority && !IsDead);
     }
 
@@ -382,7 +380,7 @@ public class Player : NetworkBehaviour, IHitable
     {
         var dataObject = Runner.GetPlayerObject(Object.InputAuthority);
 
-        if (dataObject == null)
+        if (!dataObject)
             return $"Player {Object.InputAuthority.PlayerId}";
 
         var playerData = dataObject.GetComponent<UI.PlayerData>();

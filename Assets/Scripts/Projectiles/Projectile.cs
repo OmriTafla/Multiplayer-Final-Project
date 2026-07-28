@@ -10,6 +10,7 @@ public class Projectile : NetworkBehaviour
 
     [Networked]
     private TickTimer LifeTimer { get; set; }
+    [Networked] public PlayerRef OwnerPlayerRef { get; set; }
 
     private Collider[] projectileColliders;
     private TeamsManager teamsManager;
@@ -63,7 +64,7 @@ public class Projectile : NetworkBehaviour
 
         if (target.TryGetComponent(out Player targetPlayer))
         {
-            var attacker = Object.InputAuthority;
+            var attacker = OwnerPlayerRef;
             var targetPlayerRef = targetPlayer.Object.InputAuthority;
 
             teamsManager ??= FindAnyObjectByType<TeamsManager>();
@@ -92,7 +93,7 @@ public class Projectile : NetworkBehaviour
 
     private void IgnoreOwnerAndFriendlyCollisions()
     {
-        var attacker = Object.InputAuthority;
+        var attacker = OwnerPlayerRef;
         var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
 
         foreach (var player in players)
