@@ -49,6 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Collectible.Collectible
   scoreForHit: 5
+  myRenderer: {fileID: 9030119252747714916}
 --- !u!114 &7153478171367295400
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -179,6 +179,7 @@ MonoBehaviour:
   lifetime: 20
   damageData:
     damage: 3
+  myRenderer: {fileID: 6705946750247265395}
 --- !u!114 &4651100386155500513
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -622,6 +622,21 @@ MonoBehaviour:
   shootingCooldown: 1
   respawnDelay: 3
   miniMapIconColor: {fileID: 2533349612935277087}
+  hurtShake:
+    positionShake:
+      duration: 0.4
+      strength: {x: 0.5, y: 0.5, z: 0.5}
+      vibrato: 10
+      randomness: 90
+      fadeOut: 1
+      randomnessMode: 0
+    rotationShake:
+      duration: 0
+      strength: {x: 0, y: 0, z: 0}
+      vibrato: 10
+      randomness: 90
+      fadeOut: 1
+      randomnessMode: 0
   _CharacterID: 0
   _TeamId: -1
   _TeamColor: {r: 0, g: 0, b: 0, a: 0}

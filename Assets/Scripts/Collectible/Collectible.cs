@@ -1,11 +1,13 @@
+using DG.Tweening;
 using Fusion;
+using UnityEngine;
 
 namespace Collectible
 {
     public class Collectible : NetworkBehaviour, IHitable
     {
         public int scoreForHit;
-        
+
         public void OnHit(DamageData data, PlayerRef? hitBy)
         {
             if (!Object.HasStateAuthority)
@@ -17,7 +19,7 @@ namespace Collectible
             {
                 ScoreManager.Instance.AddScore(hitBy.Value, scoreForHit);
             }
-            
+
             SelfDestruct();
         }
 

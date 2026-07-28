@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Fusion;
 using Managers;
 using UnityEngine;
@@ -7,6 +8,9 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float speed = 20f;
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
+
+    [SerializeField]
+    private Renderer myRenderer;
 
     [Networked]
     private TickTimer LifeTimer { get; set; }
@@ -82,7 +86,7 @@ public class Projectile : NetworkBehaviour
             if (targetPlayer.TryReceiveHit(shooter, damageData))
                 ScoreManager.Instance?.AddScoreForHit(shooter);
 
-            Runner.Despawn(Object);
+            PlayHitAnimAndkillRPC(target.transform.position);
             return;
         }
 
@@ -90,7 +94,7 @@ public class Projectile : NetworkBehaviour
             hittable.OnHit(damageData, shooter);
 
         impactResolved = true;
-        Runner.Despawn(Object);
+        PlayHitAnimAndkillRPC(target.transform.position);
     }
 
     private void IgnoreOwnerAndFriendlyCollisions()
@@ -132,5 +136,23 @@ public class Projectile : NetworkBehaviour
                     Physics.IgnoreCollision(projectileCollider, playerCollider, true);
             }
         }
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    void PlayHitAnimAndkillRPC(Vector3 hitPos)
+    {
+        speed = 0;
+
+        transform.rotation = Quaternion.LookRotation((transform.position - hitPos).normalized);
+
+        myRenderer.material.DOColor(Color.white, .15f);
+
+        var seq = DOTween.Sequence()
+            .Append(transform.DOScaleY(transform.localScale.y / 1.4f, .1f).SetEase(Ease.OutExpo))
+            .Join(transform.DOScaleX(transform.localScale.x * 1.4f, .2f).SetEase(Ease.OutExpo))
+            .Append(transform.DOScale(0, .1f).SetEase(Ease.OutExpo))
+            .SetLink(gameObject);
+        if (Object.HasStateAuthority)
+            seq.AppendCallback(() => Runner.Despawn(Object));
     }
 }

@@ -1,3 +1,5 @@
+using Abb2kTools;
+using DG.Tweening;
 using Fusion;
 using Managers;
 using TMPro;
@@ -19,6 +21,7 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private float shootingCooldown = 0.5f;
     [SerializeField] private float respawnDelay = 3f;
     [SerializeField] private SpriteRenderer miniMapIconColor;
+    [SerializeField] private CamShakeData hurtShake;
     
     [Networked, OnChangedRender(nameof(OnCharacterIdChanged))]
     public int CharacterID { get; private set; }
@@ -219,6 +222,66 @@ public class Player : NetworkBehaviour, IHitable
 
         if (Hp <= 0f)
             Die();
+        else
+        {
+            HurtShakeRPC();
+
+            ApplyBodyFlashRPC();
+
+        }
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+    void HurtShakeRPC()
+    {
+        CameraShaker.Instance.Shake(hurtShake);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    void ApplyBodyFlashRPC()
+    {
+        Color ogColor = TeamColor.a > 0f 
+            ? TeamColor 
+            : (character != null ? character.characterColor : Color.white);
+
+        foreach (var model in modelRenderers)
+        {
+            DOTween.Kill(model);
+
+            DOTween.Sequence()
+                .Append(DOTween.To(() => ogColor, x => UpdateHitColor(model, x), Color.white, .05f))
+                .Append(DOTween.To(() => Color.white, x => UpdateHitColor(model, x), Color.red, .1f))
+                .Append(DOTween.To(() => Color.red, x => UpdateHitColor(model, x), ogColor, .15f))
+                .SetTarget(model)
+                .SetLink(model.gameObject);
+        }
+    }
+
+    private void UpdateHitColor(Renderer renderer, Color color)
+    {
+        if (!renderer) return;
+
+        materialPropertyBlock ??= new MaterialPropertyBlock();
+        var materials = renderer.sharedMaterials;
+
+        if (materials.Length == 0)
+        {
+            renderer.GetPropertyBlock(materialPropertyBlock);
+            materialPropertyBlock.SetColor(BaseColorId, color);
+            materialPropertyBlock.SetColor(ColorId, color);
+            materialPropertyBlock.SetColor(TintColorId, color);
+            renderer.SetPropertyBlock(materialPropertyBlock);
+            return;
+        }
+
+        for (var i = 0; i < materials.Length; i++)
+        {
+            renderer.GetPropertyBlock(materialPropertyBlock, i);
+            materialPropertyBlock.SetColor(BaseColorId, color);
+            materialPropertyBlock.SetColor(ColorId, color);
+            materialPropertyBlock.SetColor(TintColorId, color);
+            renderer.SetPropertyBlock(materialPropertyBlock, i);
+        }
     }
 
     private void Die()
