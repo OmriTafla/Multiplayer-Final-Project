@@ -16,7 +16,8 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private float movementSpeed = 5f;
     [SerializeField] private float shootingCooldown = 0.5f;
     [SerializeField] private float respawnDelay = 3f;
-
+    [SerializeField] private SpriteRenderer miniMapIconColor;
+    
     [Networked, OnChangedRender(nameof(OnCharacterIdChanged))]
     public int CharacterID { get; private set; }
 
@@ -258,6 +259,7 @@ public class Player : NetworkBehaviour, IHitable
         materialPropertyBlock.SetColor(BaseColorId, displayColor);
         materialPropertyBlock.SetColor(ColorId, displayColor);
         modelRenderer.SetPropertyBlock(materialPropertyBlock);
+        miniMapIconColor.color = TeamColor;
     }
 
     private void OnHpChanged()
