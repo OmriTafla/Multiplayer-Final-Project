@@ -14,7 +14,7 @@ namespace UI
         [Networked, OnChangedRender(nameof(OnDataChanged))]
         public Color Color { get; set; }
 
-        [Networked]
+        [Networked, OnChangedRender(nameof(OnDataChanged))]
         public int TeamId { get; private set; } = -1;
 
         public override void Spawned()
@@ -51,13 +51,13 @@ namespace UI
             NotifyChanged();
         }
 
-        public void SetTeam(int teamId, Color teamColor)
+        public void SetTeam(int teamId, Color playerColor)
         {
             if (!Object.HasStateAuthority)
                 return;
 
             TeamId = teamId;
-            Color = teamColor;
+            Color = playerColor;
             NotifyChanged();
         }
 

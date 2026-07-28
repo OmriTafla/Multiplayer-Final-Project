@@ -65,13 +65,13 @@ public class CharacterManager : NetworkBehaviour
             return;
         }
 
-        var teamColor = teamsManager.GetTeamColor(teamId);
+        var playerColor = teamsManager.GetPlayerColor(teamId);
         var playerDataObject = Runner.GetPlayerObject(player);
 
         if (playerDataObject != null &&
             playerDataObject.TryGetComponent(out UI.PlayerData playerData))
         {
-            playerData.SetTeam(teamId, teamColor);
+            playerData.SetTeam(teamId, playerColor);
         }
 
         var spawnPoint = validSpawnPoints[Random.Range(0, validSpawnPoints.Length)];
@@ -96,7 +96,7 @@ public class CharacterManager : NetworkBehaviour
             return;
         }
 
-        playerAvatar.SetTeam(teamId, teamColor);
+        playerAvatar.SetTeam(teamId, playerColor);
         spawnedPlayers[player] = avatar;
     }
 

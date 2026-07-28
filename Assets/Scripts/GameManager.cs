@@ -8,7 +8,14 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
     [SerializeField] private string connectionSceneName = "LobbyScene";
     [SerializeField] private IOGameMode gameMode = IOGameMode.TwoTeams;
 
-    public IOGameMode GameMode => gameMode;
+    public IOGameMode GameMode => NormalizeGameMode(gameMode);
+    public bool IsFreeForAll => GameMode == IOGameMode.FreeForAll;
+    public bool IsTwoTeams => GameMode == IOGameMode.TwoTeams;
+
+    public void SetGameMode(IOGameMode newGameMode)
+    {
+        gameMode = NormalizeGameMode(newGameMode);
+    }
 
     public void QuitGame()
     {
@@ -32,5 +39,12 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
 
         if (manager != null)
             manager.CreateRunner();
+    }
+
+    private static IOGameMode NormalizeGameMode(IOGameMode mode)
+    {
+        return mode == IOGameMode.TwoTeams
+            ? IOGameMode.TwoTeams
+            : IOGameMode.FreeForAll;
     }
 }
