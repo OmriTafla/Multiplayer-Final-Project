@@ -8,6 +8,9 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
 
+    //TODO: set this when spawning
+    public PlayerRef? shooter = null;
+
     [Networked]
     private TickTimer LifeTimer { get; set; }
 
@@ -84,7 +87,7 @@ public class Projectile : NetworkBehaviour
         }
 
         if (target.TryGetComponent(out IHitable hittable))
-            hittable.OnHit(damageData);
+            hittable.OnHit(damageData, shooter);
 
         impactResolved = true;
         Runner.Despawn(Object);

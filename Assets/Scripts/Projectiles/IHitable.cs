@@ -11,5 +11,5 @@ public struct DamageData : INetworkStruct
 
 public interface IHitable
 {
-    void OnHit(DamageData data);
+    void OnHit(DamageData data, PlayerRef? hitBy);
 }

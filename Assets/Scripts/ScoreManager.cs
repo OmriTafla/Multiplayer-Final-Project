@@ -55,7 +55,9 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         MarkScoresChanged();
     }
 
-    public void AddScoreForHit(PlayerRef player)
+    public void AddScoreForHit(PlayerRef player) => AddScore(player, scoreForHit);
+
+    public void AddScore(PlayerRef player, int score)
     {
         if (!isSpawned || !Object.HasStateAuthority || player == PlayerRef.None)
             return;
@@ -63,7 +65,7 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         if (!Scores.ContainsKey(player))
             Scores.Add(player, 0);
 
-        Scores.Set(player, Scores.Get(player) + scoreForHit);
+        Scores.Set(player, Scores.Get(player) + score);
         MarkScoresChanged();
     }
 
