@@ -52,6 +52,33 @@ public class Player : NetworkBehaviour, IHitable
     private Renderer[] modelRenderers;
     private Collider[] collisionColliders;
     private TeamsManager teamsManager;
+    
+    [SerializeField] private Transform visualRoot;
+    [SerializeField] private float visualLeadStrength = 1f;
+    [SerializeField] private float visualCatchUpSpeed = 10f;
+
+    private Vector3 visualLeadOffset;
+
+    private void Update()
+    {
+        if (!Object || !Object.HasInputAuthority || IsDead || visualRoot == null)
+            return;
+
+        var rawInput = FusionInputProvider.Instance != null
+            ? FusionInputProvider.Instance.CurrentMoveInput
+            : Vector2.zero;
+
+        var desiredDirection = new Vector3(rawInput.x, 0f, rawInput.y);
+
+        visualLeadOffset += desiredDirection * (visualLeadStrength * Time.deltaTime);
+
+        visualLeadOffset = Vector3.Lerp(
+            visualLeadOffset,
+            Vector3.zero,
+            visualCatchUpSpeed * Time.deltaTime);
+
+        visualRoot.localPosition = visualLeadOffset;
+    }
 
     public override void Spawned()
     {

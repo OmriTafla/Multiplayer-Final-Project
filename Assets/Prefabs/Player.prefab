@@ -612,7 +612,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24848061a6bb406419ad7da6c2cf3607, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  modelRenderer: {fileID: 0}
+  modelRenderer: {fileID: 8607429086634601754}
   hitCollider: {fileID: 1720934025811652085}
   rigidBody: {fileID: 3458336771368325197}
   playerUI: {fileID: 4275309682345805136}
@@ -644,6 +644,9 @@ MonoBehaviour:
   _IsDead:
     _value: 0
   _LastFireDirection: {x: 0, y: 0, z: 0}
+  visualRoot: {fileID: 4568523811385076386}
+  visualLeadStrength: 1
+  visualCatchUpSpeed: 10
 --- !u!114 &2437361841328486602
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -36,13 +36,29 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
     private bool callbacksRegistered;
     private bool actionsResolved;
 
+    public static FusionInputProvider Instance { get; private set; }
+
     private void Awake()
     {
+        Instance = this;
+
         if (inputActions != null)
             runtimeInputActions = Instantiate(inputActions);
 
         ResolveActions();
     }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+
+        if (runtimeInputActions != null)
+            Destroy(runtimeInputActions);
+    }
+
+    public Vector2 CurrentMoveInput =>
+        actionsResolved ? moveAction.ReadValue<Vector2>() : Vector2.zero;
 
     private void OnEnable()
     {
@@ -57,12 +73,6 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
     {
         DisableActions();
         ClearInput();
-    }
-
-    private void OnDestroy()
-    {
-        if (runtimeInputActions != null)
-            Destroy(runtimeInputActions);
     }
 
     private void Update()
