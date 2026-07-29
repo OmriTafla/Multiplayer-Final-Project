@@ -1,3 +1,4 @@
+using System;
 using Abb2kTools;
 using DG.Tweening;
 using Fusion;
@@ -52,6 +53,9 @@ public class Player : NetworkBehaviour, IHitable
     private Renderer[] modelRenderers;
     private Collider[] collisionColliders;
     private TeamsManager teamsManager;
+    private Vector3 _direction;
+    private bool _pendingRespawn;
+    private Vector3 _pendingRespawnPosition;
     
     [SerializeField] private Transform visualRoot;
     [SerializeField] private float visualLeadStrength = 1f;
@@ -78,6 +82,40 @@ public class Player : NetworkBehaviour, IHitable
             visualCatchUpSpeed * Time.deltaTime);
 
         visualRoot.localPosition = visualLeadOffset;
+    }
+    
+    public override void FixedUpdateNetwork()
+    {
+        if (!GetInput<GameplayInput>(out var input))
+        {
+            ProcessRespawn();
+            return;
+        }
+
+        if (IsDead)
+        {
+            ProcessRespawn();
+            PreviousButtons = input.Buttons;
+            return;
+        }
+
+        Move(input.Move);
+        ProcessFire(input);
+        ProcessAim(input);
+        PreviousButtons = input.Buttons;
+    }
+
+    private void FixedUpdate()
+    {
+        if (_pendingRespawn)
+        {
+            rigidBody.position = _pendingRespawnPosition;
+            rigidBody.linearVelocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
+            _pendingRespawn = false;
+        }
+
+        rigidBody.AddForce(_direction * movementSpeed - rigidBody.linearVelocity, ForceMode.VelocityChange);
     }
 
     public override void Spawned()
@@ -158,27 +196,6 @@ public class Player : NetworkBehaviour, IHitable
         return Hp < previousHp;
     }
 
-    public override void FixedUpdateNetwork()
-    {
-        if (!GetInput<GameplayInput>(out var input))
-        {
-            ProcessRespawn();
-            return;
-        }
-
-        if (IsDead)
-        {
-            ProcessRespawn();
-            PreviousButtons = input.Buttons;
-            return;
-        }
-
-        Move(input.Move);
-        ProcessFire(input);
-        ProcessAim(input);
-        PreviousButtons = input.Buttons;
-    }
-
     private void ProcessAim(GameplayInput input)
     {
         var aimPoint = new Vector3(
@@ -196,25 +213,10 @@ public class Player : NetworkBehaviour, IHitable
     {
         movementInput = Vector2.ClampMagnitude(movementInput, 1f);
 
-        var direction = new Vector3(
+        _direction = new Vector3(
             movementInput.x,
             0f,
             movementInput.y);
-
-        rigidBody.AddForce(direction * movementSpeed - rigidBody.linearVelocity, ForceMode.VelocityChange);
-        
-        // var nextPosition = transform.position +
-        //                    direction *
-        //                    movementSpeed *
-        //                    Runner.DeltaTime;
-        //
-        // if (rigidBody)
-        // {
-        //     rigidBody.MovePosition(nextPosition);
-        //     return;
-        // }
-        //
-        // transform.position = nextPosition;
     }
 
     private void ProcessFire(GameplayInput input)
@@ -334,18 +336,8 @@ public class Player : NetworkBehaviour, IHitable
 
     private void Respawn()
     {
-        var spawnPosition = MatchManager.Instance.GetRandomSpawnPosition();
-
-        if (rigidBody)
-        {
-            rigidBody.position = spawnPosition;
-            rigidBody.linearVelocity = Vector3.zero;
-            rigidBody.angularVelocity = Vector3.zero;
-        }
-        else
-        {
-            transform.position = spawnPosition;
-        }
+        _pendingRespawnPosition = MatchManager.Instance.GetRandomSpawnPosition();
+        _pendingRespawn = true;
 
         Hp = startingHp;
         IsDead = false;
