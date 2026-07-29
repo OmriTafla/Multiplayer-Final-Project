@@ -54,7 +54,6 @@ public class Player : NetworkBehaviour, IHitable
     private Collider[] collisionColliders;
     private TeamsManager teamsManager;
     
-    // Physics movement buffer
     private Vector3 _direction;
     private bool _pendingRespawn;
     private Vector3 _pendingRespawnPosition;
@@ -103,7 +102,6 @@ public class Player : NetworkBehaviour, IHitable
             return;
         }
 
-        // Cache direction from networked input to be processed in FixedUpdate
         Move(input.Move);
         ProcessFire(input);
         ProcessAim(input);
@@ -112,7 +110,6 @@ public class Player : NetworkBehaviour, IHitable
 
     private void FixedUpdate()
     {
-        // Handle pending respawn position reset
         if (_pendingRespawn && rigidBody != null)
         {
             rigidBody.position = _pendingRespawnPosition;
@@ -121,7 +118,6 @@ public class Player : NetworkBehaviour, IHitable
             _pendingRespawn = false;
         }
 
-        // Apply forces to Rigidbody strictly in Unity's FixedUpdate
         if (rigidBody != null && !IsDead)
         {
             rigidBody.AddForce(_direction * movementSpeed - rigidBody.linearVelocity, ForceMode.VelocityChange);
