@@ -9,6 +9,8 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
 
+    public int piercingLeft = 0;
+
     [SerializeField]
     private Renderer myRenderer;
 
@@ -17,7 +19,6 @@ public class Projectile : NetworkBehaviour
 
     [Networked] public PlayerRef OwnerPlayerRef { get; set; }
 
-    private Collider[] projectileColliders;
     private TeamsManager teamsManager;
     private bool impactResolved;
 
@@ -27,9 +28,7 @@ public class Projectile : NetworkBehaviour
             return;
 
         LifeTimer = TickTimer.CreateFromSeconds(Runner, lifetime);
-        projectileColliders = GetComponentsInChildren<Collider>(true);
         teamsManager = FindAnyObjectByType<TeamsManager>();
-        // IgnoreOwnerAndFriendlyCollisions();
     }
 
     public override void FixedUpdateNetwork()
@@ -48,20 +47,14 @@ public class Projectile : NetworkBehaviour
         HandleImpact(other);
     }
 
-    // private void OnCollisionEnter(Collision collision)
-    // {
-    //     if (collision.collider)
-    //         HandleImpact(collision.collider);
-    // }
-
     private void HandleImpact(Collider other)
     {
-        if (impactResolved || Object == null || !Object.HasStateAuthority || other == null)
+        if (impactResolved || !Object || !Object.HasStateAuthority || !other)
             return;
 
         var target = other.GetComponentInParent<NetworkObject>();
 
-        if (target == null || target == Object)
+        if (!target || target == Object)
             return;
 
         if (target.TryGetComponent(out Projectile _))
@@ -77,70 +70,29 @@ public class Projectile : NetworkBehaviour
             teamsManager ??= FindAnyObjectByType<TeamsManager>();
 
             if (teamsManager && !teamsManager.CanDamage(shooter, targetPlayerRef))
-            {
-                // IgnoreCollisionsWith(targetPlayer);
                 return;
-            }
 
-            impactResolved = true;
-
-            targetPlayer.OnHit(damageData, shooter);
-            
-            // if (targetPlayer.TryReceiveHit(shooter, damageData))
-            //     ScoreManager.Instance?.AddScoreForHit(shooter);
-
-            PlayHitAnimAndkillRPC(target.transform.position);
+            ResolveCollision(targetPlayer, shooter, target);
             return;
         }
 
         if (target.TryGetComponent(out IHitable hittable))
         {
-            hittable.OnHit(damageData, shooter);
-            impactResolved = true;
-            PlayHitAnimAndkillRPC(target.transform.position);
+            ResolveCollision(hittable, shooter, target);
         }
     }
 
-    // private void IgnoreOwnerAndFriendlyCollisions()
-    // {
-    //     var attacker = OwnerPlayerRef;
-    //     var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
-    //
-    //     foreach (var player in players)
-    //     {
-    //         if (player == null || player.Object == null)
-    //             continue;
-    //
-    //         var target = player.Object.InputAuthority;
-    //
-    //         if (target == attacker ||
-    //             teamsManager != null && !teamsManager.CanDamage(attacker, target))
-    //         {
-    //             IgnoreCollisionsWith(player);
-    //         }
-    //     }
-    // }
-
-    // private void IgnoreCollisionsWith(Player player)
-    // {
-    //     if (!player)
-    //         return;
-    //
-    //     projectileColliders ??= GetComponentsInChildren<Collider>(true);
-    //     var playerColliders = player.GetCollisionColliders();
-    //
-    //     foreach (var projectileCollider in projectileColliders)
-    //     {
-    //         if (projectileCollider == null)
-    //             continue;
-    //
-    //         foreach (var playerCollider in playerColliders)
-    //         {
-    //             if (playerCollider != null)
-    //                 Physics.IgnoreCollision(projectileCollider, playerCollider, true);
-    //         }
-    //     }
-    // }
+    private void ResolveCollision(IHitable targetPlayer, PlayerRef shooter, NetworkObject target)
+    {
+        targetPlayer.OnHit(damageData, shooter);
+        if (piercingLeft == 0)
+        {
+            impactResolved = true;
+            PlayHitAnimAndkillRPC(target.transform.position);
+            return;
+        }
+        piercingLeft--;
+    }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     void PlayHitAnimAndkillRPC(Vector3 hitPos)
