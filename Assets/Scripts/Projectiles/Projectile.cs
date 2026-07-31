@@ -29,7 +29,7 @@ public class Projectile : NetworkBehaviour
         LifeTimer = TickTimer.CreateFromSeconds(Runner, lifetime);
         projectileColliders = GetComponentsInChildren<Collider>(true);
         teamsManager = FindAnyObjectByType<TeamsManager>();
-        IgnoreOwnerAndFriendlyCollisions();
+        // IgnoreOwnerAndFriendlyCollisions();
     }
 
     public override void FixedUpdateNetwork()
@@ -75,9 +75,9 @@ public class Projectile : NetworkBehaviour
 
             teamsManager ??= FindAnyObjectByType<TeamsManager>();
 
-            if (teamsManager == null || !teamsManager.CanDamage(shooter, targetPlayerRef))
+            if (teamsManager && !teamsManager.CanDamage(shooter, targetPlayerRef))
             {
-                IgnoreCollisionsWith(targetPlayer);
+                // IgnoreCollisionsWith(targetPlayer);
                 return;
             }
 
@@ -97,46 +97,46 @@ public class Projectile : NetworkBehaviour
         PlayHitAnimAndkillRPC(target.transform.position);
     }
 
-    private void IgnoreOwnerAndFriendlyCollisions()
-    {
-        var attacker = OwnerPlayerRef;
-        var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+    // private void IgnoreOwnerAndFriendlyCollisions()
+    // {
+    //     var attacker = OwnerPlayerRef;
+    //     var players = FindObjectsByType<Player>(FindObjectsSortMode.None);
+    //
+    //     foreach (var player in players)
+    //     {
+    //         if (player == null || player.Object == null)
+    //             continue;
+    //
+    //         var target = player.Object.InputAuthority;
+    //
+    //         if (target == attacker ||
+    //             teamsManager != null && !teamsManager.CanDamage(attacker, target))
+    //         {
+    //             IgnoreCollisionsWith(player);
+    //         }
+    //     }
+    // }
 
-        foreach (var player in players)
-        {
-            if (player == null || player.Object == null)
-                continue;
-
-            var target = player.Object.InputAuthority;
-
-            if (target == attacker ||
-                teamsManager != null && !teamsManager.CanDamage(attacker, target))
-            {
-                IgnoreCollisionsWith(player);
-            }
-        }
-    }
-
-    private void IgnoreCollisionsWith(Player player)
-    {
-        if (player == null)
-            return;
-
-        projectileColliders ??= GetComponentsInChildren<Collider>(true);
-        var playerColliders = player.GetCollisionColliders();
-
-        foreach (var projectileCollider in projectileColliders)
-        {
-            if (projectileCollider == null)
-                continue;
-
-            foreach (var playerCollider in playerColliders)
-            {
-                if (playerCollider != null)
-                    Physics.IgnoreCollision(projectileCollider, playerCollider, true);
-            }
-        }
-    }
+    // private void IgnoreCollisionsWith(Player player)
+    // {
+    //     if (!player)
+    //         return;
+    //
+    //     projectileColliders ??= GetComponentsInChildren<Collider>(true);
+    //     var playerColliders = player.GetCollisionColliders();
+    //
+    //     foreach (var projectileCollider in projectileColliders)
+    //     {
+    //         if (projectileCollider == null)
+    //             continue;
+    //
+    //         foreach (var playerCollider in playerColliders)
+    //         {
+    //             if (playerCollider != null)
+    //                 Physics.IgnoreCollision(projectileCollider, playerCollider, true);
+    //         }
+    //     }
+    // }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     void PlayHitAnimAndkillRPC(Vector3 hitPos)
