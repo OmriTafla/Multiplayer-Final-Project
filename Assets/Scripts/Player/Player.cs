@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Abb2kTools;
+using Abb2kTools.Projectiles;
 using DG.Tweening;
 using Fusion;
 using Managers;
@@ -23,6 +24,7 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private Rigidbody rigidBody;
     [SerializeField] private SpriteRenderer miniMapIconColor;
     [SerializeField] private CamShakeData hurtShake;
+    [SerializeField] private Shooter shooter;
     #endregion
 
     #region Inspector References - Owner HUD
@@ -47,7 +49,7 @@ public class Player : NetworkBehaviour, IHitable
     #region Inspector Tunables - Gameplay
     [SerializeField] private float startingHp = 10f;
     [SerializeField] private float movementSpeed = 5f;
-    [SerializeField] private float shootingCooldown = 0.5f;
+    // [SerializeField] private float shootingCooldown = 0.5f;
     [SerializeField] private float respawnDelay = 3f;
     #endregion
 
@@ -67,10 +69,10 @@ public class Player : NetworkBehaviour, IHitable
     [Networked, OnChangedRender(nameof(OnDeathStateChanged))]
     public NetworkBool IsDead { get; private set; }
 
-    [Networked] private TickTimer ShootCooldownTimer { get; set; }
+    // [Networked] private TickTimer ShootCooldownTimer { get; set; }
     [Networked] private TickTimer RespawnTimer { get; set; }
     [Networked] private NetworkButtons PreviousButtons { get; set; }
-    [Networked] public Vector3 LastFireDirection { get; private set; }
+    // [Networked] public Vector3 LastFireDirection { get; private set; }
 
     public int LastFireTick { get; private set; }
     #endregion
@@ -147,7 +149,6 @@ public class Player : NetworkBehaviour, IHitable
         {
             Hp = startingHp;
             IsDead = false;
-            ShootCooldownTimer = TickTimer.None;
             RespawnTimer = TickTimer.None;
         }
 
@@ -302,18 +303,20 @@ public class Player : NetworkBehaviour, IHitable
         if (!input.Buttons.IsSet(GameplayButton.Fire))
             return;
 
-        if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
-            return;
-
-        ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
-        LastFireTick = Runner.Tick;
-        LastFireDirection = transform.forward.normalized;
-
-        if (Object.HasStateAuthority)
-        {
-            var placementManager = FindAnyObjectByType<PlacementManager>();
-            placementManager?.SpawnProjectile(Object, transform.position, LastFireDirection);
-        }
+        shooter.TryShoot();
+        
+        // if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
+        //     return;
+        //
+        // ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
+        // LastFireTick = Runner.Tick;
+        // LastFireDirection = transform.forward.normalized;
+        //
+        // if (Object.HasStateAuthority)
+        // {
+        //     var placementManager = FindAnyObjectByType<PlacementManager>();
+        //     placementManager?.SpawnProjectile(Object, transform.position, LastFireDirection);
+        // }
     }
     #endregion
 

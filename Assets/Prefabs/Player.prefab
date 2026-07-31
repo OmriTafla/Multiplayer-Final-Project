@@ -575,6 +575,7 @@ GameObject:
   - component: {fileID: 2437361841328486602}
   - component: {fileID: 3458336771368325197}
   - component: {fileID: -3512152510963605281}
+  - component: {fileID: 6855898725558941665}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -616,16 +617,6 @@ MonoBehaviour:
   modelRenderer: {fileID: 8607429086634601754}
   hitCollider: {fileID: 1720934025811652085}
   rigidBody: {fileID: 3458336771368325197}
-  playerUI: {fileID: 4275309682345805136}
-  hpLabel: {fileID: 476318218719191834}
-  overheadUI: {fileID: 1664950065571512197}
-  overheadNicknameLabel: {fileID: 2136165468820885055}
-  overheadHpLabel: {fileID: 2849114065553330534}
-  overheadUIRoot: {fileID: 5161717482653698084}
-  startingHp: 10
-  movementSpeed: 3
-  shootingCooldown: 1
-  respawnDelay: 3
   miniMapIconColor: {fileID: 2533349612935277087}
   hurtShake:
     positionShake:
@@ -642,16 +633,25 @@ MonoBehaviour:
       randomness: 90
       fadeOut: 1
       randomnessMode: 0
+  shooter: {fileID: 6855898725558941665}
+  playerUI: {fileID: 4275309682345805136}
+  hpLabel: {fileID: 476318218719191834}
+  overheadUI: {fileID: 1664950065571512197}
+  overheadNicknameLabel: {fileID: 2136165468820885055}
+  overheadHpLabel: {fileID: 2849114065553330534}
+  overheadUIRoot: {fileID: 5161717482653698084}
+  visualRoot: {fileID: 4568523811385076386}
+  visualLeadStrength: 1
+  visualCatchUpSpeed: 10
+  startingHp: 10
+  movementSpeed: 3
+  respawnDelay: 3
   _CharacterID: 0
   _TeamId: -1
   _TeamColor: {r: 0, g: 0, b: 0, a: 0}
   _Hp: 0
   _IsDead:
     _value: 0
-  _LastFireDirection: {x: 0, y: 0, z: 0}
-  visualRoot: {fileID: 4568523811385076386}
-  visualLeadStrength: 1
-  visualCatchUpSpeed: 10
 --- !u!114 &2437361841328486602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -671,6 +671,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 2524672585982938568}
   - {fileID: -3512152510963605281}
+  - {fileID: 6855898725558941665}
   ForceRemoteRenderTimeframe: 0
 --- !u!54 &3458336771368325197
 Rigidbody:
@@ -716,6 +717,20 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
+--- !u!114 &6855898725558941665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6059781578005178534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 400c5a3fe3f24ed884c3834bafed9a90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Abb2kTools.Projectiles.Shooter
+  _LastFireDirection: {x: 0, y: 0, z: 0}
+  shootingCooldown: 0.5
 --- !u!1001 &6144210997923989984
 PrefabInstance:
   m_ObjectHideFlags: 0

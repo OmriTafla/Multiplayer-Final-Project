@@ -11,10 +11,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Shooter.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Shooter.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Player/Player.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Player/Player.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,61 +65,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000000000056" />
-      <entry key="S10" value="1.0000000784062142" />
-      <entry key="S30" value="1.0058996056528218" />
-      <entry key="S60" value="1.1256715807599378" />
-      <entry key="M2" value="2.0244503255462076" />
-      <entry key="M5" value="12.179951230678647" />
-      <entry key="M10" value="38.0027496748024" />
-      <entry key="M15" value="59.785363172383555" />
-      <entry key="M30" value="115.0581585759794" />
-      <entry key="H1" value="230.28844129523" />
-      <entry key="H2" value="407.3681733674641" />
-      <entry key="H4" value="585.312253871556" />
-      <entry key="D1" value="871.605191313244" />
-      <entry key="W1" value="962.199997466704" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="1.516725964550741E-128" />
+      <entry key="S2" value="1.8926279577425138E-32" />
+      <entry key="S5" value="4.892754112291358E-13" />
+      <entry key="S10" value="1.7084290439462792E-6" />
+      <entry key="S30" value="0.043184761708424675" />
+      <entry key="S60" value="0.5775437751640619" />
+      <entry key="M2" value="2.2748488364952215" />
+      <entry key="M5" value="6.257768017818797" />
+      <entry key="M10" value="11.174036745153801" />
+      <entry key="M15" value="16.817436678419845" />
+      <entry key="M30" value="44.96844958010011" />
+      <entry key="H1" value="132.87220057309293" />
+      <entry key="H2" value="306.73914525266105" />
+      <entry key="H4" value="512.0632855976381" />
+      <entry key="D1" value="868.994419092492" />
+      <entry key="W1" value="981.1118873533851" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="1.2552648967680812E-167" />
-      <entry key="S2" value="1.8822783456912494E-42" />
-      <entry key="S5" value="2.0411435004364236E-17" />
-      <entry key="S10" value="4.517908701305389E-9" />
-      <entry key="S30" value="0.0017251064144658055" />
-      <entry key="S60" value="0.06979216724012251" />
-      <entry key="M2" value="0.8526932962660329" />
-      <entry key="M5" value="5.844965029899583" />
-      <entry key="M10" value="14.159326368764292" />
-      <entry key="M15" value="20.629493085638405" />
-      <entry key="M30" value="35.453699646096226" />
-      <entry key="H1" value="62.41634476346367" />
-      <entry key="H2" value="103.84862820692315" />
-      <entry key="H4" value="147.45475022984192" />
-      <entry key="D1" value="224.59767746996417" />
-      <entry key="W1" value="250.7885913748986" />
+      <entry key="MS100" value="1.0000003145957572" />
+      <entry key="MS500" value="1.0536069530457082" />
+      <entry key="S2" value="1.7169522115015652" />
+      <entry key="S5" value="2.3099572715176224" />
+      <entry key="S10" value="2.6150875173389885" />
+      <entry key="S30" value="2.8747555420399666" />
+      <entry key="S60" value="3.111840079080191" />
+      <entry key="M2" value="3.739924816493074" />
+      <entry key="M5" value="5.0637441822429095" />
+      <entry key="M10" value="6.263088731188452" />
+      <entry key="M15" value="7.754967044102673" />
+      <entry key="M30" value="15.724322517897471" />
+      <entry key="H1" value="38.19849863308967" />
+      <entry key="H2" value="80.52886930648076" />
+      <entry key="H4" value="131.30617279224458" />
+      <entry key="D1" value="226.01600452264702" />
+      <entry key="W1" value="257.7256767216198" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="6.035597772456551E-7" />
-      <entry key="MS500" value="0.05703534303396574" />
-      <entry key="S2" value="0.48869288320540266" />
-      <entry key="S5" value="0.7509558516678944" />
-      <entry key="S10" value="0.8665771672683036" />
-      <entry key="S30" value="0.9608752343676574" />
-      <entry key="S60" value="1.1701329766532713" />
-      <entry key="M2" value="2.8565295310206835" />
-      <entry key="M5" value="17.98872252643221" />
-      <entry key="M10" value="52.11141229952487" />
-      <entry key="M15" value="80.36207612290794" />
-      <entry key="M30" value="150.46105034089803" />
-      <entry key="H1" value="292.6545061694755" />
-      <entry key="H2" value="511.1720895341221" />
-      <entry key="H4" value="732.7343994555756" />
-      <entry key="D1" value="1096.1945059072068" />
-      <entry key="W1" value="1212.9872563953888" />
+      <entry key="MS100" value="0.0011140308698468185" />
+      <entry key="MS500" value="0.2785762449651344" />
+      <entry key="S2" value="1.2772468571874178" />
+      <entry key="S5" value="2.0618661974406742" />
+      <entry key="S10" value="2.472474551882092" />
+      <entry key="S30" value="2.864156006703852" />
+      <entry key="S60" value="3.6545669437881707" />
+      <entry key="M2" value="5.986477228658158" />
+      <entry key="M5" value="11.301706127314464" />
+      <entry key="M10" value="17.42275315041654" />
+      <entry key="M15" value="24.558798345882167" />
+      <entry key="M30" value="60.67425852824668" />
+      <entry key="H1" value="171.04255660761004" />
+      <entry key="H2" value="387.23486368018575" />
+      <entry key="H4" value="643.3412295728406" />
+      <entry key="D1" value="1095.002145021495" />
+      <entry key="W1" value="1238.8362143035408" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -137,33 +137,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to&quot;: &quot;Unity Editor&quot;,
-    &quot;DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider&quot;: &quot;Unity Editor&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;Unity Attach To.Attach to.executor&quot;: &quot;Debug&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;rebalance-score&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMThirdPartyAiProvidersConfigurable&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;unity.profiler.toolWindow.autoShown&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to": "Unity Editor",
+    "DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider": "Unity Editor",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Unity Attach To.Attach to.executor": "Debug",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "ml.llm.LLMThirdPartyAiProvidersConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "unity.profiler.toolWindow.autoShown": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Unity Attach To.Attach to">
     <configuration name="Standalone Player" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="$PROJECT_DIR$/Builds/Server\unity_multliplayer_course.exe" />
@@ -226,7 +226,7 @@
       <workItem from="1785311435673" duration="60000" />
       <workItem from="1785311509451" duration="7204000" />
       <workItem from="1785519814253" duration="947000" />
-      <workItem from="1785520835328" duration="2475000" />
+      <workItem from="1785520835328" duration="5599000" />
     </task>
     <servers />
   </component>
@@ -248,19 +248,6 @@
           <line>135</line>
           <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Managers\TeamsManager.cs" containingFunctionPresentation="Method 'AutoAssignPlayerToTeam'" />
           <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs</url>
-          <line>57</line>
-          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\ScoreManager.cs" containingFunctionPresentation="Method 'AddScoreForKillingPlayer'">
-            <startOffsets>
-              <option value="1476" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1477" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="34" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
