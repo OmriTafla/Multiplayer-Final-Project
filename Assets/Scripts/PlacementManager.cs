@@ -7,7 +7,7 @@ public class PlacementManager : NetworkBehaviour
     // [SerializeField] private float maximumPlacementDistance = 20f;
     // [SerializeField] private float projectileSpawnOffset = 1f;
     // [SerializeField] private int maximumPlaceablesPerPlayer = 20;
-    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Projectile projectilePrefab;
     
     private readonly Dictionary<PlayerRef, List<NetworkObject>> playerPlaceables = new();
 
@@ -44,38 +44,38 @@ public class PlacementManager : NetworkBehaviour
     //     TrackPlaceable(requestingPlayer.InputAuthority, spawnedObject);
     // }
 
-    public void DeletePlaceable(NetworkObject requestingPlayer, NetworkObject target)
+    // public void DeletePlaceable(NetworkObject requestingPlayer, NetworkObject target)
+    // {
+    //     if (!Object.HasStateAuthority)
+    //         return;
+    //
+    //     if (requestingPlayer == null || target == null)
+    //         return;
+    //
+    //     if (target.GetComponentInChildren<PlaceableObject>() == null)
+    //         return;
+    //
+    //     if (target.InputAuthority != requestingPlayer.InputAuthority)
+    //         return;
+    //
+    //     RemoveTrackedPlaceable(target.InputAuthority, target);
+    //     Runner.Despawn(target);
+    // }
+
+    public Projectile SpawnProjectile(NetworkObject requestingPlayer, Vector3 origin, Vector3 direction)
     {
         if (!Object.HasStateAuthority)
-            return;
-
-        if (requestingPlayer == null || target == null)
-            return;
-
-        if (target.GetComponentInChildren<PlaceableObject>() == null)
-            return;
-
-        if (target.InputAuthority != requestingPlayer.InputAuthority)
-            return;
-
-        RemoveTrackedPlaceable(target.InputAuthority, target);
-        Runner.Despawn(target);
-    }
-
-    public void SpawnProjectile(NetworkObject requestingPlayer, Vector3 origin, Vector3 direction)
-    {
-        if (!Object.HasStateAuthority)
-            return;
+            return null;
 
         if (!requestingPlayer)
-            return;
+            return null;
 
         if (direction.sqrMagnitude < 0.0001f)
-            return;
+            return null;
 
         var normalizedDirection = direction.normalized;
 
-        Runner.Spawn(
+        return Runner.Spawn(
             projectilePrefab,
             origin,
             Quaternion.LookRotation(normalizedDirection),

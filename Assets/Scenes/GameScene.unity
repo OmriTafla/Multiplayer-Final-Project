@@ -2077,7 +2077,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2253fe2e68a2c241b4164069350e6df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  scoreForHit: 1
 --- !u!4 &563555597
 Transform:
   m_ObjectHideFlags: 0
@@ -3215,7 +3214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f4f5004b9651c1499d156a2426b74e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlacementManager
-  projectilePrefab: {fileID: 1039216601492686992, guid: 565e4d86bbc68984cb7ec1353a414ac4, type: 3}
+  projectilePrefab: {fileID: 2117687961676920522, guid: 565e4d86bbc68984cb7ec1353a414ac4, type: 3}
 --- !u!4 &1420328154
 Transform:
   m_ObjectHideFlags: 0

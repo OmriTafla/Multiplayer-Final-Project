@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Fusion;
 using UnityEngine;
 
@@ -9,7 +11,8 @@ namespace Abb2kTools.Projectiles
         [Networked] public Vector3 LastFireDirection { get; private set; }
         public int LastFireTick { get; private set; }
         [SerializeField] private float shootingCooldown = 0.5f;
-
+        public HashSet<BulletUpgrade> bulletUpgrades = new();
+        
         public override void Spawned()
         {
             base.Spawned();
@@ -22,6 +25,9 @@ namespace Abb2kTools.Projectiles
 
         public void TryShoot()
         {
+            if (!Object.HasStateAuthority)
+                return;
+            
             if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
                 return;
 
@@ -32,7 +38,13 @@ namespace Abb2kTools.Projectiles
             if (Object.HasStateAuthority)
             {
                 var placementManager = FindAnyObjectByType<PlacementManager>();
-                placementManager?.SpawnProjectile(Object, transform.position, LastFireDirection);
+                var newProjectile = placementManager?.SpawnProjectile(
+                    Object, transform.position, LastFireDirection);
+
+                foreach (var bulletUpgrade in bulletUpgrades)
+                {
+                    bulletUpgrade.ApplyUpgrade(newProjectile);
+                }
             }
         }
     }
