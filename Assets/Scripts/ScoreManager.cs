@@ -15,9 +15,8 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
     [Networked, OnChangedRender(nameof(OnScoreRevisionChanged))]
     private int ScoreRevision { get; set; }
 
-    [SerializeField] private int scoreForHit = 1;
-
     private bool isSpawned;
+    private const double RATIO_SCORE_ON_KILL = 0.5;
 
     public bool IsReady => isSpawned;
 
@@ -55,7 +54,12 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         MarkScoresChanged();
     }
 
-    public void AddScoreForHit(PlayerRef player) => AddScore(player, scoreForHit);
+    public void AddScoreForKillingPlayer(PlayerRef killer, PlayerRef killed)
+    {
+        AddScore(killer, (int)(Scores.Get(killed) * RATIO_SCORE_ON_KILL));
+    }
+    
+    public void ResetPlayerScore(PlayerRef player) => AddScore(player, -Scores.Get(player));
 
     public void AddScore(PlayerRef player, int score)
     {

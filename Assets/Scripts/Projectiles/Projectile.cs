@@ -48,11 +48,11 @@ public class Projectile : NetworkBehaviour
         HandleImpact(other);
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.collider != null)
-            HandleImpact(collision.collider);
-    }
+    // private void OnCollisionEnter(Collision collision)
+    // {
+    //     if (collision.collider)
+    //         HandleImpact(collision.collider);
+    // }
 
     private void HandleImpact(Collider other)
     {
@@ -73,6 +73,7 @@ public class Projectile : NetworkBehaviour
         {
             var targetPlayerRef = targetPlayer.Object.InputAuthority;
 
+            //TODO: get the reference from the spawning player
             teamsManager ??= FindAnyObjectByType<TeamsManager>();
 
             if (teamsManager && !teamsManager.CanDamage(shooter, targetPlayerRef))
@@ -83,18 +84,21 @@ public class Projectile : NetworkBehaviour
 
             impactResolved = true;
 
-            if (targetPlayer.TryReceiveHit(shooter, damageData))
-                ScoreManager.Instance?.AddScoreForHit(shooter);
+            targetPlayer.OnHit(damageData, shooter);
+            
+            // if (targetPlayer.TryReceiveHit(shooter, damageData))
+            //     ScoreManager.Instance?.AddScoreForHit(shooter);
 
             PlayHitAnimAndkillRPC(target.transform.position);
             return;
         }
 
         if (target.TryGetComponent(out IHitable hittable))
+        {
             hittable.OnHit(damageData, shooter);
-
-        impactResolved = true;
-        PlayHitAnimAndkillRPC(target.transform.position);
+            impactResolved = true;
+            PlayHitAnimAndkillRPC(target.transform.position);
+        }
     }
 
     // private void IgnoreOwnerAndFriendlyCollisions()

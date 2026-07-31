@@ -9,6 +9,8 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour, IHitable
 {
+    private const int SCORE_FOR_KILL = 10;
+
     #region Shader Property IDs
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -259,7 +261,10 @@ public class Player : NetworkBehaviour, IHitable
         Hp = Mathf.Max(0f, Hp - data.damage);
 
         if (Hp <= 0f)
-            Die();
+            if (hitBy.HasValue)
+                Die(hitBy.Value);
+            else
+                Die();
         else
         {
             HurtShakeRPC();
@@ -321,6 +326,17 @@ public class Player : NetworkBehaviour, IHitable
         IsDead = true;
         RespawnTimer = TickTimer.CreateFromSeconds(Runner, respawnDelay);
         Debug.Log($"{cachedNickname} died");
+    }
+
+    private void Die(PlayerRef killer)
+    {
+        if (!Object.HasStateAuthority)
+            return;
+        
+        ScoreManager.Instance?.AddScoreForKillingPlayer(killer, Object.InputAuthority);
+        ScoreManager.Instance?.ResetPlayerScore(Object.InputAuthority);
+        
+        Die();
     }
 
     private void ProcessRespawn()
