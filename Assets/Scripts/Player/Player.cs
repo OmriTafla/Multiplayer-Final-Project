@@ -3,6 +3,7 @@ using System.Collections;
 using Abb2kTools;
 using DG.Tweening;
 using Fusion;
+using Fusion.Addons.Physics;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -19,6 +20,8 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private Renderer modelRenderer;
     [SerializeField] private Collider hitCollider;
     [SerializeField] private Rigidbody rigidBody;
+    private readonly int animWalkId = Animator.StringToHash("IsWalking");
+    [SerializeField] private Animator animator;
     [SerializeField] private SpriteRenderer miniMapIconColor;
     [SerializeField] private CamShakeData hurtShake;
     #endregion
@@ -196,6 +199,11 @@ public class Player : NetworkBehaviour, IHitable
         ProcessFire(input);
         ProcessAim(input);
         PreviousButtons = input.Buttons;
+    }
+
+    public override void Render()
+    {
+        animator.SetBool(animWalkId, _direction.sqrMagnitude > 0.0001f);
     }
     #endregion
 

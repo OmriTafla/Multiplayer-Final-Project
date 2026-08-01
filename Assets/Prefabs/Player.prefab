@@ -65,6 +65,7 @@ GameObject:
   - component: {fileID: 4568523811385076386}
   - component: {fileID: 6306463387014701691}
   - component: {fileID: 8607429086634601754}
+  - component: {fileID: 408643528584894971}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -144,6 +145,28 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!95 &408643528584894971
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779771277288112435}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a499ce0876bcf634cbe3cbe1ada2e12e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &2820688136697627684
 GameObject:
   m_ObjectHideFlags: 0
@@ -575,6 +598,7 @@ GameObject:
   - component: {fileID: 2437361841328486602}
   - component: {fileID: 3458336771368325197}
   - component: {fileID: -3512152510963605281}
+  - component: {fileID: 3840523597240702830}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -616,6 +640,7 @@ MonoBehaviour:
   modelRenderer: {fileID: 8607429086634601754}
   hitCollider: {fileID: 1720934025811652085}
   rigidBody: {fileID: 3458336771368325197}
+  animator: {fileID: 408643528584894971}
   miniMapIconColor: {fileID: 2533349612935277087}
   hurtShake:
     positionShake:
@@ -638,6 +663,8 @@ MonoBehaviour:
   overheadNicknameLabel: {fileID: 2136165468820885055}
   overheadHpLabel: {fileID: 2849114065553330534}
   overheadUIRoot: {fileID: 5161717482653698084}
+  overheadOffset: {x: 0, y: 1, z: 1}
+  overheadEulerAngles: {x: 90, y: 0, z: 0}
   visualRoot: {fileID: 4568523811385076386}
   visualLeadStrength: 1
   visualCatchUpSpeed: 10
@@ -671,6 +698,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 2524672585982938568}
   - {fileID: -3512152510963605281}
+  - {fileID: 3840523597240702830}
   ForceRemoteRenderTimeframe: 0
 --- !u!54 &3458336771368325197
 Rigidbody:
@@ -716,6 +744,24 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
+--- !u!114 &3840523597240702830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6059781578005178534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 506319458, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkMecanimAnimator
+  Animator: {fileID: 408643528584894971}
+  ApplyTiming: 2
+  SyncSettings: 79
+  StateHashes: 00000000f2425c4cc1f1797bb28de91d813ecc2a
+  TriggerHashes: 00000000
+  TotalWords: 1
 --- !u!1001 &6144210997923989984
 PrefabInstance:
   m_ObjectHideFlags: 0
