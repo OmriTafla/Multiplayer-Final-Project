@@ -2077,6 +2077,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2253fe2e68a2c241b4164069350e6df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  leaderboardPublishDelay: 0.25
 --- !u!4 &563555597
 Transform:
   m_ObjectHideFlags: 0
@@ -2999,7 +3000,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32cff85bea332114ea22130c5d2c6e90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  spawnPoints:
+  freeForAllSpawnPoints:
   - {fileID: 4044876574832629433}
   - {fileID: 557820351}
   - {fileID: 926866847}
@@ -3010,6 +3011,8 @@ MonoBehaviour:
   - {fileID: 1869922869}
   - {fileID: 2125133656}
   - {fileID: 513462134}
+  teamZeroSpawnPoints: []
+  teamOneSpawnPoints: []
   playerPrefab: {fileID: 2437361841328486602, guid: f86056493afc0914aa19cf51b5b36cae, type: 3}
   teamsManager: {fileID: 1260233003}
 --- !u!4 &1292589680
