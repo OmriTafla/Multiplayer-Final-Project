@@ -616,16 +616,6 @@ MonoBehaviour:
   modelRenderer: {fileID: 8607429086634601754}
   hitCollider: {fileID: 1720934025811652085}
   rigidBody: {fileID: 3458336771368325197}
-  playerUI: {fileID: 4275309682345805136}
-  hpLabel: {fileID: 476318218719191834}
-  overheadUI: {fileID: 1664950065571512197}
-  overheadNicknameLabel: {fileID: 2136165468820885055}
-  overheadHpLabel: {fileID: 2849114065553330534}
-  overheadUIRoot: {fileID: 5161717482653698084}
-  startingHp: 10
-  movementSpeed: 3
-  shootingCooldown: 1
-  respawnDelay: 3
   miniMapIconColor: {fileID: 2533349612935277087}
   hurtShake:
     positionShake:
@@ -642,6 +632,19 @@ MonoBehaviour:
       randomness: 90
       fadeOut: 1
       randomnessMode: 0
+  playerUI: {fileID: 4275309682345805136}
+  hpLabel: {fileID: 476318218719191834}
+  overheadUI: {fileID: 1664950065571512197}
+  overheadNicknameLabel: {fileID: 2136165468820885055}
+  overheadHpLabel: {fileID: 2849114065553330534}
+  overheadUIRoot: {fileID: 5161717482653698084}
+  visualRoot: {fileID: 4568523811385076386}
+  visualLeadStrength: 1
+  visualCatchUpSpeed: 10
+  startingHp: 10
+  movementSpeed: 3
+  shootingCooldown: 1
+  respawnDelay: 3
   _CharacterID: 0
   _TeamId: -1
   _TeamColor: {r: 0, g: 0, b: 0, a: 0}
@@ -649,9 +652,6 @@ MonoBehaviour:
   _IsDead:
     _value: 0
   _LastFireDirection: {x: 0, y: 0, z: 0}
-  visualRoot: {fileID: 4568523811385076386}
-  visualLeadStrength: 1
-  visualCatchUpSpeed: 10
 --- !u!114 &2437361841328486602
 MonoBehaviour:
   m_ObjectHideFlags: 0
