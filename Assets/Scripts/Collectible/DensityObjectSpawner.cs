@@ -26,7 +26,7 @@ namespace Collectible
 
         private void OnValidate()
         {
-            if (areaCorners == null || areaCorners.Length < 2)
+            if (areaCorners is null || areaCorners.Length < 2)
             {
                 return;
             }

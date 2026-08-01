@@ -17,43 +17,42 @@ namespace UI
         [Networked, OnChangedRender(nameof(OnDataChanged))]
         public int TeamId { get; private set; } = -1;
 
+        private bool isSpawned;
+
+        public bool IsReady => isSpawned;
+
         public override void Spawned()
         {
+            isSpawned = true;
             NotifyChanged();
 
             if (!HasInputAuthority)
                 return;
 
-            var pendingName = PlayerPrefs.GetString("PendingNickname", "");
-            var pendingColourName = PlayerPrefs.GetString("PendingColour", "White");
+            var pendingName = PlayerPrefs.GetString("PendingNickname", string.Empty);
 
             if (string.IsNullOrWhiteSpace(pendingName))
                 return;
 
-            Rpc_SetNicknameAndColor(
-                pendingName,
-                ColorFromName(pendingColourName));
+            RpcSetNickname(pendingName.Trim());
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
+            isSpawned = false;
             NotifyChanged();
         }
 
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        private void Rpc_SetNicknameAndColor(string nickname, Color requestedColor)
+        private void RpcSetNickname(string nickname)
         {
             NickName = nickname;
-
-            if (TeamId < 0)
-                Color = requestedColor;
-
             NotifyChanged();
         }
 
         public void SetTeam(int teamId, Color playerColor)
         {
-            if (!Object.HasStateAuthority)
+            if (!isSpawned || !Object.HasStateAuthority)
                 return;
 
             TeamId = teamId;
@@ -63,25 +62,13 @@ namespace UI
 
         private void OnDataChanged()
         {
-            if (!Object.HasStateAuthority)
+            if (isSpawned && !Object.HasStateAuthority)
                 NotifyChanged();
         }
 
         private static void NotifyChanged()
         {
             PlayerDataChanged?.Invoke();
-        }
-
-        private static Color ColorFromName(string name)
-        {
-            return name switch
-            {
-                "Red" => UnityEngine.Color.red,
-                "Blue" => UnityEngine.Color.blue,
-                "Green" => UnityEngine.Color.green,
-                "Yellow" => UnityEngine.Color.yellow,
-                _ => UnityEngine.Color.white
-            };
         }
     }
 }

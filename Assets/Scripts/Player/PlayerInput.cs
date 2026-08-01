@@ -12,10 +12,16 @@ namespace DefaultNamespace
         public override void Spawned()
         {
             if (!Object.HasInputAuthority) return;
-            Runner?.AddCallbacks(this);
+
+            if (Runner)
+                Runner.AddCallbacks(this);
         }
 
-        public override void Despawned(NetworkRunner runner, bool hasState) => runner?.RemoveCallbacks(this);
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            if (runner)
+                runner.RemoveCallbacks(this);
+        }
 
         private GameplayInput _input;
 

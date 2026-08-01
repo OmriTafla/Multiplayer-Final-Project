@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Enums;
+using EnumUtils;
 using Fusion;
 using Managers;
 using TMPro;
@@ -16,7 +18,6 @@ public class DisplayScores : NetworkBehaviour
         ScoreManager.ScoresChanged += RefreshScores;
         UI.PlayerData.PlayerDataChanged += RefreshScores;
         TeamsManager.RulesChanged += RefreshScores;
-        ShowEmptyScores();
         RefreshScores();
     }
 
@@ -38,19 +39,16 @@ public class DisplayScores : NetworkBehaviour
         ShowEmptyScores();
     }
 
-    public void DisplayScoresTextRPC()
-    {
-        RefreshScores();
-    }
-
     public void RefreshScores()
     {
-        if (scoresText == null)
+        if (!scoresText)
             return;
+
+        ResolveTeamsManager();
 
         var scoreManager = ScoreManager.Instance;
 
-        if (scoreManager == null ||
+        if (!scoreManager ||
             !scoreManager.IsReady ||
             !scoreManager.TryGetScores(out var scores))
         {
@@ -58,30 +56,28 @@ public class DisplayScores : NetworkBehaviour
             return;
         }
 
-        ResolveTeamsManager();
-
         var entries = BuildEntries(scoreManager.Runner, scores);
+        var body = teamsManager &&
+                   teamsManager.IsReady &&
+                   teamsManager.IsTwoTeams
+            ? BuildTwoTeamsBody(entries)
+            : BuildFreeForAllBody(entries);
 
-        if (teamsManager != null && teamsManager.IsTwoTeams)
-            DisplayTeamScores(entries);
-        else
-            DisplayFreeForAllScores(entries);
+        scoresText.text = BuildDisplayText(body);
     }
 
-    private void DisplayFreeForAllScores(List<PlayerScoreEntry> entries)
+    private string BuildFreeForAllBody(List<PlayerScoreEntry> entries)
     {
-        var lines = entries
-            .OrderByDescending(entry => entry.Score)
-            .ThenBy(entry => entry.Player.PlayerId)
-            .Select(BuildPlayerLine);
-
-        var body = string.Join("\n", lines);
-        scoresText.text = string.IsNullOrEmpty(body)
-            ? "Free For All"
-            : $"Free For All\n{body}";
+        return string.Join(
+            "\n",
+            entries
+                .OrderByDescending(entry => entry.Score)
+                .ThenBy(entry => entry.Player.PlayerId)
+                .Select((entry, index) =>
+                    $"{index + 1}. {BuildPlayerScoreLine(entry)}"));
     }
 
-    private void DisplayTeamScores(List<PlayerScoreEntry> entries)
+    private string BuildTwoTeamsBody(List<PlayerScoreEntry> entries)
     {
         var sections = new List<string>();
 
@@ -91,25 +87,41 @@ public class DisplayScores : NetworkBehaviour
                 .Where(entry => entry.TeamId == teamId)
                 .OrderByDescending(entry => entry.Score)
                 .ThenBy(entry => entry.Player.PlayerId)
-                .ToList();
+                .ToArray();
 
-            var teamScore = teamEntries.Sum(entry => entry.Score);
             var teamName = teamsManager.GetTeamName(teamId);
-            var teamColor = teamsManager.GetTeamColor(teamId);
-            var teamColorHex = ColorUtility.ToHtmlStringRGB(teamColor);
+            var teamColor = ColorUtility.ToHtmlStringRGB(
+                teamsManager.GetTeamColor(teamId));
+            var teamTotal = teamEntries.Sum(entry => entry.Score);
             var lines = new List<string>
             {
-                $"<color=#{teamColorHex}><b>{teamName}: {teamScore}</b></color>"
+                $"<color=#{teamColor}><b>{teamName}: {teamTotal}</b></color>"
             };
 
-            lines.AddRange(teamEntries.Select(BuildPlayerLine));
+            lines.AddRange(teamEntries.Select(entry =>
+                $"  {BuildPlayerScoreLine(entry)}"));
             sections.Add(string.Join("\n", lines));
         }
 
-        scoresText.text = $"Two Teams\n{string.Join("\n\n", sections)}";
+        var unassigned = entries
+            .Where(entry => entry.TeamId < 0 || entry.TeamId > 1)
+            .OrderByDescending(entry => entry.Score)
+            .ThenBy(entry => entry.Player.PlayerId)
+            .ToArray();
+
+        if (unassigned.Length > 0)
+        {
+            sections.Add(string.Join(
+                "\n",
+                new[] { "<b>Unassigned</b>" }
+                    .Concat(unassigned.Select(entry =>
+                        $"  {BuildPlayerScoreLine(entry)}"))));
+        }
+
+        return string.Join("\n\n", sections);
     }
 
-    private static List<PlayerScoreEntry> BuildEntries(
+    private List<PlayerScoreEntry> BuildEntries(
         NetworkRunner runner,
         Dictionary<PlayerRef, int> scores)
     {
@@ -121,12 +133,13 @@ public class DisplayScores : NetworkBehaviour
             var playerColor = Color.white;
             var teamId = -1;
 
-            if (runner != null)
+            if (runner)
             {
                 var playerObject = runner.GetPlayerObject(score.Key);
 
-                if (playerObject != null &&
-                    playerObject.TryGetComponent(out UI.PlayerData playerData))
+                if (playerObject &&
+                    playerObject.TryGetComponent(out UI.PlayerData playerData) &&
+                    playerData.IsReady)
                 {
                     var nickname = playerData.NickName.ToString();
 
@@ -136,6 +149,15 @@ public class DisplayScores : NetworkBehaviour
                     playerColor = playerData.Color;
                     teamId = playerData.TeamId;
                 }
+            }
+
+            if (teamId < 0 &&
+                teamsManager &&
+                teamsManager.IsReady &&
+                teamsManager.TryGetTeam(score.Key, out var assignedTeam))
+            {
+                teamId = assignedTeam;
+                playerColor = teamsManager.GetPlayerColor(assignedTeam);
             }
 
             entries.Add(new PlayerScoreEntry(
@@ -149,21 +171,38 @@ public class DisplayScores : NetworkBehaviour
         return entries;
     }
 
-    private static string BuildPlayerLine(PlayerScoreEntry entry)
+    private string BuildDisplayText(string body)
+    {
+        var gameMode = teamsManager && teamsManager.IsReady
+            ? teamsManager.ActiveGameMode
+            : GameManager.Instance
+                ? GameManager.Instance.GameMode
+                : IOGameMode.FreeForAll;
+        var modeName = gameMode.GetDisplayName();
+
+        return string.IsNullOrWhiteSpace(body)
+            ? $"<b>Mode: {modeName}</b>\n\nPlayers"
+            : $"<b>Mode: {modeName}</b>\n\n{body}";
+    }
+
+    private static string BuildPlayerScoreLine(PlayerScoreEntry entry)
     {
         var colorHex = ColorUtility.ToHtmlStringRGB(entry.Color);
-        return $"<color=#{colorHex}>  {entry.Name}: {entry.Score}</color>";
+        var playerName = entry.Name
+            .Replace("<", "‹")
+            .Replace(">", "›");
+        return $"<color=#{colorHex}>{playerName}: {entry.Score}</color>";
     }
 
     private void ShowEmptyScores()
     {
-        if (scoresText != null)
-            scoresText.text = "Scores:";
+        if (scoresText)
+            scoresText.text = BuildDisplayText(string.Empty);
     }
 
     private void ResolveTeamsManager()
     {
-        if (teamsManager == null)
+        if (!teamsManager)
             teamsManager = FindAnyObjectByType<TeamsManager>();
     }
 

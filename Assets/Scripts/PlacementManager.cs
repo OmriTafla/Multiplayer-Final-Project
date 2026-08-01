@@ -26,7 +26,7 @@ public class PlacementManager : NetworkBehaviour
     //
     //     var properties = CharacterProperties.GetByID(characterId);
     //
-    //     if (properties == null)
+    //     if (!properties)
     //         return;
     //
     //     if (!properties.spawnObject.TryGetComponent(out PlaceableObject placeable))
@@ -38,7 +38,7 @@ public class PlacementManager : NetworkBehaviour
     //         Quaternion.identity,
     //         requestingPlayer.InputAuthority);
     //
-    //     if (spawnedObject == null)
+    //     if (!spawnedObject)
     //         return;
     //
     //     TrackPlaceable(requestingPlayer.InputAuthority, spawnedObject);
@@ -49,10 +49,10 @@ public class PlacementManager : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        if (requestingPlayer == null || target == null)
+        if (!requestingPlayer || !target)
             return;
 
-        if (target.GetComponentInChildren<PlaceableObject>() == null)
+        if (!target.GetComponentInChildren<PlaceableObject>())
             return;
 
         if (target.InputAuthority != requestingPlayer.InputAuthority)
@@ -96,7 +96,7 @@ public class PlacementManager : NetworkBehaviour
 
         foreach (var placeable in placeables)
         {
-            if (placeable != null)
+            if (placeable)
                 Runner.Despawn(placeable);
         }
 
@@ -118,7 +118,7 @@ public class PlacementManager : NetworkBehaviour
     //         var oldest = placeables[0];
     //         placeables.RemoveAt(0);
     //
-    //         if (oldest != null)
+    //         if (oldest)
     //             Runner.Despawn(oldest);
     //     }
     // }
@@ -136,7 +136,7 @@ public class PlacementManager : NetworkBehaviour
 
     private static bool ValidatePlayer(NetworkObject requestingPlayer, int characterId)
     {
-        if (requestingPlayer == null)
+        if (!requestingPlayer)
             return false;
 
         if (!requestingPlayer.TryGetComponent(out Player player))

@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using Enums;
 using Fusion;
+using Managers;
 using Singleton;
 using UnityEngine;
 
@@ -15,8 +18,14 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
     [Networked, OnChangedRender(nameof(OnScoreRevisionChanged))]
     private int ScoreRevision { get; set; }
 
+    [SerializeField, Min(0f)] private float leaderboardPublishDelay = 0.25f;
+
+    private const float ScoreRatioOnKill = 0.5f;
+
     private bool isSpawned;
-    private const double RATIO_SCORE_ON_KILL = 0.5;
+    private bool leaderboardEventsSubscribed;
+    private Coroutine leaderboardPublishRoutine;
+    private string lastPublishedLeaderboard;
 
     public bool IsReady => isSpawned;
 
@@ -26,11 +35,15 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
 
         if (Object.HasStateAuthority)
         {
+            SubscribeLeaderboardEvents();
+
             foreach (var player in Runner.ActivePlayers)
             {
                 if (!Scores.ContainsKey(player))
                     Scores.Add(player, 0);
             }
+
+            RequestLeaderboardPublish(true);
         }
 
         NotifyScoresChanged();
@@ -38,6 +51,8 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        StopLeaderboardPublishRoutine();
+        UnsubscribeLeaderboardEvents();
         isSpawned = false;
         NotifyScoresChanged();
     }
@@ -51,15 +66,40 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
             return;
 
         Scores.Add(player, 0);
-        MarkScoresChanged();
+        MarkScoresChanged(true);
     }
 
     public void AddScoreForKillingPlayer(PlayerRef killer, PlayerRef killed)
     {
-        AddScore(killer, (int)(Scores.Get(killed) * RATIO_SCORE_ON_KILL));
+        if (!isSpawned ||
+            !Object.HasStateAuthority ||
+            killer == PlayerRef.None ||
+            killed == PlayerRef.None ||
+            killer == killed ||
+            !Scores.ContainsKey(killed))
+        {
+            return;
+        }
+
+        AddScore(killer, (int)(Scores.Get(killed) * ScoreRatioOnKill));
     }
-    
-    public void ResetPlayerScore(PlayerRef player) => AddScore(player, -Scores.Get(player));
+
+    public void ResetPlayerScore(PlayerRef player)
+    {
+        if (!isSpawned ||
+            !Object.HasStateAuthority ||
+            player == PlayerRef.None ||
+            !Scores.ContainsKey(player))
+        {
+            return;
+        }
+
+        if (Scores.Get(player) == 0)
+            return;
+
+        Scores.Set(player, 0);
+        MarkScoresChanged(false);
+    }
 
     public void AddScore(PlayerRef player, int score)
     {
@@ -70,7 +110,7 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
             Scores.Add(player, 0);
 
         Scores.Set(player, Scores.Get(player) + score);
-        MarkScoresChanged();
+        MarkScoresChanged(false);
     }
 
     public void RemovePlayer(PlayerRef player)
@@ -79,7 +119,7 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
             return;
 
         if (Scores.Remove(player))
-            MarkScoresChanged();
+            MarkScoresChanged(true);
     }
 
     public bool TryGetScores(out Dictionary<PlayerRef, int> scores)
@@ -99,13 +139,14 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         return scores;
     }
 
-    private void MarkScoresChanged()
+    private void MarkScoresChanged(bool publishImmediately)
     {
         if (!isSpawned)
             return;
 
         ScoreRevision++;
         NotifyScoresChanged();
+        RequestLeaderboardPublish(publishImmediately);
     }
 
     private void OnScoreRevisionChanged()
@@ -119,8 +160,117 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         ScoresChanged?.Invoke();
     }
 
+    private void SubscribeLeaderboardEvents()
+    {
+        if (leaderboardEventsSubscribed)
+            return;
+
+        UI.PlayerData.PlayerDataChanged += HandleLeaderboardDataChanged;
+        TeamsManager.RulesChanged += HandleLeaderboardDataChanged;
+        leaderboardEventsSubscribed = true;
+    }
+
+    private void UnsubscribeLeaderboardEvents()
+    {
+        if (!leaderboardEventsSubscribed)
+            return;
+
+        UI.PlayerData.PlayerDataChanged -= HandleLeaderboardDataChanged;
+        TeamsManager.RulesChanged -= HandleLeaderboardDataChanged;
+        leaderboardEventsSubscribed = false;
+    }
+
+    private void HandleLeaderboardDataChanged()
+    {
+        RequestLeaderboardPublish(false);
+    }
+
+    private void RequestLeaderboardPublish(bool immediately)
+    {
+        if (!isSpawned ||
+            !Object.HasStateAuthority ||
+            !Runner ||
+            !Runner.IsServer)
+        {
+            return;
+        }
+
+        if (immediately)
+        {
+            StopLeaderboardPublishRoutine();
+            PublishLeaderboard();
+            return;
+        }
+
+        if (leaderboardPublishRoutine is null)
+        {
+            leaderboardPublishRoutine =
+                StartCoroutine(PublishLeaderboardAfterDelay());
+        }
+    }
+
+    private IEnumerator PublishLeaderboardAfterDelay()
+    {
+        if (leaderboardPublishDelay > 0f)
+            yield return new WaitForSecondsRealtime(leaderboardPublishDelay);
+
+        leaderboardPublishRoutine = null;
+        PublishLeaderboard();
+    }
+
+    private void PublishLeaderboard()
+    {
+        if (!isSpawned ||
+            !Object.HasStateAuthority ||
+            !Runner ||
+            !Runner.IsRunning ||
+            !Runner.IsServer ||
+            !Runner.SessionInfo)
+        {
+            return;
+        }
+
+        var teamsManager = FindAnyObjectByType<TeamsManager>();
+        var readyTeamsManager = teamsManager && teamsManager.IsReady
+            ? teamsManager
+            : null;
+        var gameMode = readyTeamsManager
+            ? readyTeamsManager.ActiveGameMode
+            : GameManager.Instance
+                ? GameManager.Instance.GameMode
+                : IOGameMode.FreeForAll;
+
+        var leaderboard = LiveLeaderboardSnapshot.Capture(
+            Runner,
+            new Dictionary<PlayerRef, int>(Scores),
+            readyTeamsManager,
+            gameMode);
+
+        if (leaderboard == lastPublishedLeaderboard)
+            return;
+
+        Runner.SessionInfo.UpdateCustomProperties(
+            new Dictionary<string, SessionProperty>
+            {
+                { SessionPropertyKeys.Leaderboard, leaderboard }
+            });
+
+        lastPublishedLeaderboard = leaderboard;
+    }
+
+    private void StopLeaderboardPublishRoutine()
+    {
+        if (leaderboardPublishRoutine is null)
+            return;
+
+        StopCoroutine(leaderboardPublishRoutine);
+        leaderboardPublishRoutine = null;
+    }
+
     private void OnDestroy()
     {
+        StopLeaderboardPublishRoutine();
+        UnsubscribeLeaderboardEvents();
         isSpawned = false;
 
         if (Instance == this)

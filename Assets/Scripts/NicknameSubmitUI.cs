@@ -1,19 +1,28 @@
 #if UNITY_SERVER
 #define DEDICATED_SERVER
 #else
-#define HOST_OR_CLIENT
+#define CLIENT_BUILD
 #endif
 
-using System;
+using System.Threading.Tasks;
+using Enums;
+using EnumUtils;
+using Fusion;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class NicknameSubmitUI : MonoBehaviour
 {
     [SerializeField] private TMP_InputField inputNicknameField;
-    [SerializeField] private Button signInButton;
+    [FormerlySerializedAs("dropdownColour")]
+    [SerializeField] private TMP_Dropdown gameModeDropdown;
+    [SerializeField] private string mapName = "GameScene";
+    [FormerlySerializedAs("signInButton")]
+    [SerializeField] private Button startGameButton;
 
+    private DropdownOptionsFromGamemodes gameModeOptions;
     private bool connecting;
 
     private void Awake()
@@ -21,36 +30,35 @@ public class NicknameSubmitUI : MonoBehaviour
 #if DEDICATED_SERVER
         gameObject.SetActive(false);
 #else
-        if (signInButton == null)
-            signInButton = FindSignInButton(transform);
+        ResolveReferences();
 
-        if (signInButton != null && signInButton.onClick.GetPersistentEventCount() == 0)
-            signInButton.onClick.AddListener(Connect);
+        if (startGameButton &&
+            startGameButton.onClick.GetPersistentEventCount() == 0)
+        {
+            startGameButton.onClick.AddListener(StartGame);
+        }
 #endif
     }
 
     private void OnEnable()
     {
-#if HOST_OR_CLIENT
-        if (inputNicknameField != null)
+#if CLIENT_BUILD
+        ResolveReferences();
+
+        if (inputNicknameField)
             inputNicknameField.onSubmit.AddListener(HandleSubmit);
 #endif
     }
 
     private void OnDisable()
     {
-#if HOST_OR_CLIENT
-        if (inputNicknameField != null)
+#if CLIENT_BUILD
+        if (inputNicknameField)
             inputNicknameField.onSubmit.RemoveListener(HandleSubmit);
 #endif
     }
 
-    public void SignIn()
-    {
-        Connect();
-    }
-
-    public async void Connect()
+    public async void StartGame()
     {
 #if DEDICATED_SERVER
         return;
@@ -58,7 +66,9 @@ public class NicknameSubmitUI : MonoBehaviour
         if (connecting)
             return;
 
-        if (inputNicknameField == null)
+        ResolveReferences();
+
+        if (!inputNicknameField)
         {
             Debug.LogError("NicknameSubmitUI is missing the nickname input field reference", this);
             return;
@@ -72,69 +82,149 @@ public class NicknameSubmitUI : MonoBehaviour
             return;
         }
 
-
-        var manager = SinglePeer_NetworkRunnerManager.Instance;
-
-        if (manager == null)
+        if (!TryGetSelectedGameMode(out var gameMode))
         {
-            Debug.LogError("No active SinglePeer_NetworkRunnerManager exists", this);
+            Debug.LogError("NicknameSubmitUI is missing a valid game mode dropdown", this);
             return;
         }
 
-        connecting = true;
+        var manager = SinglePeer_NetworkRunnerManager.Instance;
 
-        if (signInButton != null)
-            signInButton.interactable = false;
+        if (!manager)
+        {
+            Debug.LogError("The network runner manager is missing", this);
+            return;
+        }
+
+        if (manager.OperationInProgress)
+            return;
+
+        var sessionName = manager.GetSessionNameForMode(gameMode, mapName);
+        var modeName = gameMode.GetDisplayName();
+
+        var gameManager = GameManager.Instance;
+
+        if (gameManager)
+            gameManager.SetGameMode(gameMode);
 
         PlayerPrefs.SetString("PendingNickname", nickname);
+        PlayerPrefs.SetInt("PendingGameMode", (int)gameMode);
+        PlayerPrefs.DeleteKey("PendingColour");
         PlayerPrefs.Save();
 
-        UIManager.Instance?.ShowWaitingScreen();
+        connecting = true;
+        SetControlsInteractable(false);
+
+        var uiManager = UIManager.Instance;
+
+        if (uiManager)
+            uiManager.ShowStatus($"Joining or hosting {modeName}...");
+
+        string failureReason;
 
         try
         {
-            var result = await manager.StartForCurrentBuild();
+            StartGameResult result = await manager.StartHostOrClient(sessionName);
 
             if (result.Ok)
-            {
-                Debug.Log($"Connected to '{manager.PersistentSessionName}' as {manager.NetworkRunner.GameMode}");
                 return;
-            }
 
-            var message = string.IsNullOrWhiteSpace(result.ErrorMessage)
-                ? result.ShutdownReason.ToString()
-                : result.ErrorMessage;
-
-            Debug.LogError($"Connection failed: {message}");
-            UIManager.Instance?.ShowLobbyMenu();
+            failureReason = GetFailureReason(result);
         }
-        catch (Exception exception)
+        catch (System.Exception exception)
         {
             Debug.LogException(exception);
-            UIManager.Instance?.ShowLobbyMenu();
+            failureReason = exception.Message;
         }
-        finally
-        {
-            connecting = false;
 
-            if (signInButton != null)
-                signInButton.interactable = true;
+        connecting = false;
+        SetControlsInteractable(true);
+
+        Debug.LogError(
+            $"Connection to '{sessionName}' failed: {failureReason}",
+            this);
+
+        if (uiManager)
+        {
+            uiManager.ShowStatus(
+                $"Could not join or host {modeName}.\n{failureReason}");
         }
+
+        await Task.Delay(2500);
+
+        if (this && uiManager)
+            uiManager.ShowStartMenu();
 #endif
+    }
+
+    private bool TryGetSelectedGameMode(out IOGameMode gameMode)
+    {
+        if (gameModeOptions &&
+            gameModeOptions.TryGetSelectedGameMode(out gameMode))
+        {
+            return true;
+        }
+
+        gameMode = default;
+
+        if (!gameModeDropdown)
+            return false;
+
+        if (!System.Enum.IsDefined(typeof(IOGameMode), gameModeDropdown.value))
+            return false;
+
+        gameMode = (IOGameMode)gameModeDropdown.value;
+        return true;
     }
 
     private void HandleSubmit(string value)
     {
-        Connect();
+        StartGame();
     }
 
-    private static Button FindSignInButton(Transform root)
+    private void ResolveReferences()
+    {
+        if (!startGameButton)
+            startGameButton = FindStartGameButton(transform);
+
+        if (!gameModeOptions)
+            gameModeOptions = GetComponentInChildren<DropdownOptionsFromGamemodes>(true);
+
+        if (!gameModeDropdown && gameModeOptions)
+            gameModeDropdown = gameModeOptions.Dropdown;
+    }
+
+    private void SetControlsInteractable(bool interactable)
+    {
+        if (startGameButton)
+            startGameButton.interactable = interactable;
+
+        if (gameModeDropdown)
+            gameModeDropdown.interactable = interactable;
+
+        if (inputNicknameField)
+            inputNicknameField.interactable = interactable;
+    }
+
+    private static string GetFailureReason(StartGameResult result)
+    {
+        if (!string.IsNullOrWhiteSpace(result.ErrorMessage))
+            return result.ErrorMessage;
+
+        var shutdownReason = result.ShutdownReason.ToString();
+
+        return string.IsNullOrWhiteSpace(shutdownReason)
+            ? "Unknown connection error"
+            : shutdownReason;
+    }
+
+    private static Button FindStartGameButton(Transform root)
     {
         var buttons = root.GetComponentsInChildren<Button>(true);
 
         foreach (var button in buttons)
         {
-            if (button.name == "SignIn")
+            if (button.name == "Start Game" || button.name == "SignIn")
                 return button;
         }
 

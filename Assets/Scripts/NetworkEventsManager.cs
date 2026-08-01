@@ -14,10 +14,10 @@ public class NetworkEventsManager : Singleton<NetworkEventsManager>
 
     private void Start()
     {
-        if (networkEvents == null)
+        if (!networkEvents)
             networkEvents = GetComponent<NetworkEvents>();
 
-        if (SinglePeer_NetworkRunnerManager.Instance != null)
+        if (SinglePeer_NetworkRunnerManager.Instance)
             SinglePeer_NetworkRunnerManager.Instance.ConfigureNetworkEvents(networkEvents);
     }
 }

@@ -1,16 +1,24 @@
-﻿using System.Diagnostics;
 using Enums;
 
 namespace EnumUtils
 {
     public static class GameModesUtils
     {
-        public static string GetDisplayName(this IOGameMode mode) => 
-            mode switch
+        public static string GetDisplayName(this IOGameMode mode)
+        {
+            return mode switch
             {
-                IOGameMode.Any => "All Game Modes",
-                IOGameMode.FreeForAll => "Fun Mode",
-                IOGameMode.TwoTeams => "Boring Mode"
+                IOGameMode.FreeForAll => "Free For All",
+                IOGameMode.TwoTeams => "Two Teams",
+                _ => mode.ToString()
             };
+        }
+
+        public static string GetSessionSuffix(this IOGameMode mode)
+        {
+            return mode == IOGameMode.FreeForAll
+                ? "ffa"
+                : "teams";
+        }
     }
 }

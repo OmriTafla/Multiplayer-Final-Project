@@ -9,8 +9,6 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour, IHitable
 {
-    private const int SCORE_FOR_KILL = 10;
-
     #region Shader Property IDs
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -35,7 +33,8 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private TMP_Text overheadNicknameLabel;
     [SerializeField] private TMP_Text overheadHpLabel;
     [SerializeField] private Transform overheadUIRoot;
-    private Vector3 overheadUIFixedEulerAngles = new Vector3(90f, 0f, 0f);
+    [SerializeField] private Vector3 overheadOffset = new Vector3(0f, 1f, 1f);
+    [SerializeField] private Vector3 overheadEulerAngles = new Vector3(90f, 0f, 0f);
     #endregion
 
     #region Inspector References - Local Movement Prediction
@@ -96,7 +95,7 @@ public class Player : NetworkBehaviour, IHitable
         if (!Object || !Object.HasInputAuthority || IsDead || !visualRoot)
             return;
 
-        var rawInput = FusionInputProvider.Instance != null
+        var rawInput = FusionInputProvider.Instance
             ? FusionInputProvider.Instance.CurrentMoveInput
             : Vector2.zero;
 
@@ -117,7 +116,9 @@ public class Player : NetworkBehaviour, IHitable
         if (!overheadUIRoot)
             return;
 
-        overheadUIRoot.position = transform.position + new Vector3(0, 1, 1);
+        overheadUIRoot.SetPositionAndRotation(
+            transform.position + overheadOffset,
+            Quaternion.Euler(overheadEulerAngles));
     }
 
     private void FixedUpdate()
@@ -153,12 +154,6 @@ public class Player : NetworkBehaviour, IHitable
 
         StartCoroutine(ResolveNicknameWhenReady());
 
-        if (overheadUIRoot)
-        {
-            overheadUIRoot.SetParent(null, true);
-            overheadUIRoot.rotation = Quaternion.Euler(overheadUIFixedEulerAngles);
-        }
-
         OnTeamColorChanged();
         OnHpChanged();
         OnDeathStateChanged();
@@ -166,14 +161,18 @@ public class Player : NetworkBehaviour, IHitable
 
         controlsLocalCamera = Object.HasInputAuthority;
 
-        if (controlsLocalCamera)
-            LocalPlayerCamera.Instance?.SetTarget(transform);
+        var localCamera = LocalPlayerCamera.Instance;
+
+        if (controlsLocalCamera && localCamera)
+            localCamera.SetTarget(transform);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        if (controlsLocalCamera)
-            LocalPlayerCamera.Instance?.ClearTarget(transform);
+        var localCamera = LocalPlayerCamera.Instance;
+
+        if (controlsLocalCamera && localCamera)
+            localCamera.ClearTarget(transform);
     }
 
     public override void FixedUpdateNetwork()
@@ -203,7 +202,7 @@ public class Player : NetworkBehaviour, IHitable
     #region Public API
     public void SetCharacter(CharacterProperties newCharacter)
     {
-        if (!Object.HasStateAuthority || newCharacter == null)
+        if (!Object.HasStateAuthority || !newCharacter)
             return;
 
         CharacterID = newCharacter.CharacterID;
@@ -233,7 +232,7 @@ public class Player : NetworkBehaviour, IHitable
 
         teamsManager ??= FindAnyObjectByType<TeamsManager>();
 
-        if (teamsManager != null && !teamsManager.CanDamage(attacker, Object.InputAuthority))
+        if (teamsManager && !teamsManager.CanDamage(attacker, Object.InputAuthority))
             return false;
 
         if (data.damage < DamageData.MIN_POSSIBLE_DAMAGE ||
@@ -261,10 +260,12 @@ public class Player : NetworkBehaviour, IHitable
         Hp = Mathf.Max(0f, Hp - data.damage);
 
         if (Hp <= 0f)
+        {
             if (hitBy.HasValue)
                 Die(hitBy.Value);
             else
                 Die();
+        }
         else
         {
             HurtShakeRPC();
@@ -312,7 +313,14 @@ public class Player : NetworkBehaviour, IHitable
         if (Object.HasStateAuthority)
         {
             var placementManager = FindAnyObjectByType<PlacementManager>();
-            placementManager?.SpawnProjectile(Object, transform.position, LastFireDirection);
+
+            if (placementManager)
+            {
+                placementManager.SpawnProjectile(
+                    Object,
+                    transform.position,
+                    LastFireDirection);
+            }
         }
     }
     #endregion
@@ -332,10 +340,15 @@ public class Player : NetworkBehaviour, IHitable
     {
         if (!Object.HasStateAuthority)
             return;
-        
-        ScoreManager.Instance?.AddScoreForKillingPlayer(killer, Object.InputAuthority);
-        ScoreManager.Instance?.ResetPlayerScore(Object.InputAuthority);
-        
+
+        var scoreManager = ScoreManager.Instance;
+
+        if (scoreManager)
+        {
+            scoreManager.AddScoreForKillingPlayer(killer, Object.InputAuthority);
+            scoreManager.ResetPlayerScore(Object.InputAuthority);
+        }
+
         Die();
     }
 
@@ -350,7 +363,7 @@ public class Player : NetworkBehaviour, IHitable
 
     private void Respawn()
     {
-        _pendingRespawnPosition = MatchManager.Instance.GetRandomSpawnPosition();
+        _pendingRespawnPosition = MatchManager.Instance.GetSpawnPosition(Object.InputAuthority);
         _pendingRespawn = true;
 
         Hp = startingHp;
@@ -373,7 +386,7 @@ public class Player : NetworkBehaviour, IHitable
     {
         Color ogColor = TeamColor.a > 0f
             ? TeamColor
-            : (character != null ? character.characterColor : Color.white);
+            : (character ? character.characterColor : Color.white);
 
         foreach (var model in modelRenderers)
         {
@@ -405,12 +418,12 @@ public class Player : NetworkBehaviour, IHitable
     {
         CacheReferences();
 
-        if (modelRenderers == null || modelRenderers.Length == 0)
+        if (modelRenderers is null || modelRenderers.Length == 0)
             return;
 
         var displayColor = TeamColor.a > 0f
             ? TeamColor
-            : character != null
+            : character
                 ? character.characterColor
                 : Color.white;
 
@@ -488,7 +501,7 @@ public class Player : NetworkBehaviour, IHitable
     {
         CacheReferences();
 
-        if (modelRenderers != null)
+        if (modelRenderers is not null)
         {
             foreach (var renderer in modelRenderers)
             {
@@ -497,7 +510,7 @@ public class Player : NetworkBehaviour, IHitable
             }
         }
 
-        if (collisionColliders != null)
+        if (collisionColliders is not null)
         {
             foreach (var collider in collisionColliders)
             {
@@ -512,8 +525,10 @@ public class Player : NetworkBehaviour, IHitable
         if (overheadUI)
             overheadUI.gameObject.SetActive(!IsDead);
 
-        if (controlsLocalCamera && !IsDead)
-            LocalPlayerCamera.Instance?.SnapToTarget();
+        var localCamera = LocalPlayerCamera.Instance;
+
+        if (controlsLocalCamera && !IsDead && localCamera)
+            localCamera.SnapToTarget();
     }
 
     private void ConfigureLocalPresentation()
@@ -558,7 +573,7 @@ public class Player : NetworkBehaviour, IHitable
 
         var playerData = dataObject.GetComponent<UI.PlayerData>();
 
-        return playerData != null
+        return playerData
             ? playerData.NickName.ToString()
             : $"Player {Object.InputAuthority.PlayerId}";
     }
@@ -567,16 +582,16 @@ public class Player : NetworkBehaviour, IHitable
     #region Shared Helpers
     private void CacheReferences()
     {
-        if (modelRenderers == null || modelRenderers.Length == 0)
+        if (modelRenderers is null || modelRenderers.Length == 0)
             modelRenderers = GetComponentsInChildren<Renderer>(true);
 
-        if (collisionColliders == null || collisionColliders.Length == 0)
+        if (collisionColliders is null || collisionColliders.Length == 0)
             collisionColliders = GetComponentsInChildren<Collider>(true);
 
-        if (modelRenderer == null && modelRenderers.Length > 0)
+        if (!modelRenderer && modelRenderers.Length > 0)
             modelRenderer = modelRenderers[0];
 
-        if (hitCollider == null && collisionColliders.Length > 0)
+        if (!hitCollider && collisionColliders.Length > 0)
             hitCollider = collisionColliders[0];
 
         teamsManager ??= FindAnyObjectByType<TeamsManager>();

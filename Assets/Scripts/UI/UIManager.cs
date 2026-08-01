@@ -3,60 +3,56 @@
 #endif
 
 using Singleton;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class UIManager : Singleton<UIManager>
 {
-    [SerializeField] private GameObject signInMenu;
-    [SerializeField] private GameObject sessionsMenu;
-    [SerializeField] private GameObject playersMenu;
+    [FormerlySerializedAs("signInMenu")]
+    [SerializeField] private GameObject startMenu;
+    [SerializeField] private GameObject leaderboards;
     [SerializeField] private GameObject waitingScreen;
+    [SerializeField] private TMP_Text waitingText;
 
     protected override void Awake()
     {
         base.Awake();
 
 #if DEDICATED_SERVER
-        SetActive(signInMenu, false);
-        SetActive(sessionsMenu, false);
-        SetActive(playersMenu, false);
-        SetActive(waitingScreen, false);
+        HideAll();
 #else
-        ShowLobbyMenu();
+        ShowStartMenu();
 #endif
     }
 
-    public void ShowLobbyMenu()
+    public void ShowStartMenu()
     {
-        SetState(true, false);
+        SetActive(startMenu, true);
+        SetActive(leaderboards, true);
+        SetActive(waitingScreen, false);
     }
 
-    public void ShowWaitingScreen()
+    public void ShowStatus(string message)
     {
-        SetState(false, true);
+        if (waitingText)
+            waitingText.text = message;
+
+        SetActive(startMenu, false);
+        SetActive(leaderboards, false);
+        SetActive(waitingScreen, true);
     }
 
-    public void ShowSessionsMenu()
+    private void HideAll()
     {
-        ShowLobbyMenu();
-    }
-
-    public void ShowPlayersMenu()
-    {
-        ShowLobbyMenu();
-    }
-
-    private void SetState(bool showLobby, bool showWaiting)
-    {
-        SetActive(signInMenu, showLobby);
-        SetActive(waitingScreen, showWaiting);
-        SetActive(sessionsMenu, false);
-        SetActive(playersMenu, false);
+        SetActive(startMenu, false);
+        SetActive(leaderboards, false);
+        SetActive(waitingScreen, false);
     }
 
     private static void SetActive(GameObject target, bool active)
     {
-        if (target != null)
+        if (target)
             target.SetActive(active);
     }
 }

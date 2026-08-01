@@ -24,10 +24,18 @@ namespace Managers
         [Networked, OnChangedRender(nameof(OnRulesChanged))]
         private int TeamRevision { get; set; }
 
+        private bool isSpawned;
+        private IOGameMode fallbackGameMode = IOGameMode.FreeForAll;
+
+        public bool IsReady => isSpawned;
+
         public IOGameMode ActiveGameMode
         {
             get
             {
+                if (!isSpawned)
+                    return fallbackGameMode;
+
                 return (IOGameMode)ActiveGameModeValue == IOGameMode.TwoTeams
                     ? IOGameMode.TwoTeams
                     : IOGameMode.FreeForAll;
@@ -39,22 +47,33 @@ namespace Managers
 
         public override void Spawned()
         {
+            fallbackGameMode = GameManager.Instance
+                ? GameManager.Instance.GameMode
+                : IOGameMode.FreeForAll;
+            isSpawned = true;
+
             if (Object.HasStateAuthority)
             {
-                var configuredMode = GameManager.Instance != null
-                    ? GameManager.Instance.GameMode
-                    : IOGameMode.TwoTeams;
-
-                ActiveGameModeValue = (int)configuredMode;
+                ActiveGameModeValue = (int)fallbackGameMode;
             }
 
             NotifyRulesChanged();
         }
 
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            isSpawned = false;
+            NotifyRulesChanged();
+        }
+
         public int AutoAssignPlayerToTeam(PlayerRef player)
         {
-            if (!Object.HasStateAuthority || player == PlayerRef.None)
+            if (!isSpawned ||
+                !Object.HasStateAuthority ||
+                player == PlayerRef.None)
+            {
                 return -1;
+            }
 
             if (PlayersInTeams.TryGet(player, out var existingTeam))
                 return existingTeam;
@@ -70,13 +89,24 @@ namespace Managers
 
         public bool TryGetTeam(PlayerRef player, out int teamId)
         {
+            if (!isSpawned)
+            {
+                teamId = -1;
+                return false;
+            }
+
             return PlayersInTeams.TryGet(player, out teamId);
         }
 
         public bool AreTeammates(PlayerRef firstPlayer, PlayerRef secondPlayer)
         {
-            if (!IsTwoTeams || firstPlayer == PlayerRef.None || secondPlayer == PlayerRef.None)
+            if (!isSpawned ||
+                !IsTwoTeams ||
+                firstPlayer == PlayerRef.None ||
+                secondPlayer == PlayerRef.None)
+            {
                 return false;
+            }
 
             return PlayersInTeams.TryGet(firstPlayer, out var firstTeam) &&
                    PlayersInTeams.TryGet(secondPlayer, out var secondTeam) &&
@@ -85,8 +115,13 @@ namespace Managers
 
         public bool CanDamage(PlayerRef attacker, PlayerRef target)
         {
-            if (attacker == PlayerRef.None || target == PlayerRef.None || attacker == target)
+            if (!isSpawned ||
+                attacker == PlayerRef.None ||
+                target == PlayerRef.None ||
+                attacker == target)
+            {
                 return false;
+            }
 
             if (IsFreeForAll)
                 return true;
@@ -131,7 +166,7 @@ namespace Managers
 
         public void HandlePlayerLeft(PlayerRef player)
         {
-            if (!Object.HasStateAuthority)
+            if (!isSpawned || !Object.HasStateAuthority)
                 return;
 
             if (PlayersInTeams.Remove(player))
@@ -162,6 +197,13 @@ namespace Managers
 
         private void OnRulesChanged()
         {
+            if (!isSpawned)
+                return;
+
+            fallbackGameMode =
+                (IOGameMode)ActiveGameModeValue == IOGameMode.TwoTeams
+                    ? IOGameMode.TwoTeams
+                    : IOGameMode.FreeForAll;
             NotifyRulesChanged();
         }
 

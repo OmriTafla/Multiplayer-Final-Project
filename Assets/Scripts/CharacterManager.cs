@@ -3,10 +3,14 @@ using System.Linq;
 using Fusion;
 using Managers;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class CharacterManager : NetworkBehaviour
 {
-    [SerializeField] private SpawnPoint[] spawnPoints;
+    [FormerlySerializedAs("spawnPoints")]
+    [SerializeField] private SpawnPoint[] freeForAllSpawnPoints;
+    [SerializeField] private SpawnPoint[] teamZeroSpawnPoints;
+    [SerializeField] private SpawnPoint[] teamOneSpawnPoints;
     [SerializeField] private NetworkObject playerPrefab;
     [SerializeField] private TeamsManager teamsManager;
 
@@ -21,7 +25,7 @@ public class CharacterManager : NetworkBehaviour
     {
         ResolveReferences();
 
-        if (playerPrefab == null)
+        if (!playerPrefab)
             Debug.LogError("CharacterManager requires the Player network prefab", this);
     }
 
@@ -35,23 +39,13 @@ public class CharacterManager : NetworkBehaviour
 
         ResolveReferences();
 
-        var validSpawnPoints = spawnPoints
-            .Where(spawnPoint => spawnPoint != null)
-            .ToArray();
-
-        if (validSpawnPoints.Length == 0)
-        {
-            SelectionFailedRpc(player, "No valid spawn points configured.");
-            return;
-        }
-
-        if (playerPrefab == null)
+        if (!playerPrefab)
         {
             SelectionFailedRpc(player, "Player prefab is not assigned.");
             return;
         }
 
-        if (teamsManager == null)
+        if (!teamsManager)
         {
             SelectionFailedRpc(player, "TeamsManager is not assigned.");
             return;
@@ -65,23 +59,29 @@ public class CharacterManager : NetworkBehaviour
             return;
         }
 
+        if (!TryGetSpawnPosition(teamId, out var spawnPosition))
+        {
+            teamsManager.HandlePlayerLeft(player);
+            SelectionFailedRpc(player, "No valid spawn points are configured for this game mode.");
+            return;
+        }
+
         var playerColor = teamsManager.GetPlayerColor(teamId);
         var playerDataObject = Runner.GetPlayerObject(player);
 
-        if (playerDataObject != null &&
+        if (playerDataObject &&
             playerDataObject.TryGetComponent(out UI.PlayerData playerData))
         {
             playerData.SetTeam(teamId, playerColor);
         }
 
-        var spawnPoint = validSpawnPoints[Random.Range(0, validSpawnPoints.Length)];
         var avatar = Runner.Spawn(
             playerPrefab,
-            spawnPoint.GetSpawnPosition(),
+            spawnPosition,
             Quaternion.identity,
             player);
 
-        if (avatar == null)
+        if (!avatar)
         {
             teamsManager.HandlePlayerLeft(player);
             SelectionFailedRpc(player, "Could not spawn the player prefab.");
@@ -107,28 +107,35 @@ public class CharacterManager : NetworkBehaviour
 
         if (spawnedPlayers.TryGetValue(player, out var avatar))
         {
-            if (avatar != null)
+            if (avatar)
                 Runner.Despawn(avatar);
 
             spawnedPlayers.Remove(player);
         }
 
-        if (teamsManager != null)
+        if (teamsManager)
             teamsManager.HandlePlayerLeft(player);
+    }
+
+    public Vector3 GetSpawnPosition(PlayerRef player)
+    {
+        ResolveReferences();
+
+        var teamId = -1;
+
+        if (teamsManager)
+            teamsManager.TryGetTeam(player, out teamId);
+
+        return TryGetSpawnPosition(teamId, out var spawnPosition)
+            ? spawnPosition
+            : Vector3.zero;
     }
 
     public Vector3 GetRandomSpawnPosition()
     {
-        ResolveReferences();
-
-        var validSpawnPoints = spawnPoints
-            .Where(spawnPoint => spawnPoint != null)
-            .ToArray();
-
-        if (validSpawnPoints.Length == 0)
-            return Vector3.zero;
-
-        return validSpawnPoints[Random.Range(0, validSpawnPoints.Length)].GetSpawnPosition();
+        return TryGetRandomPosition(freeForAllSpawnPoints, out var spawnPosition)
+            ? spawnPosition
+            : Vector3.zero;
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -137,12 +144,49 @@ public class CharacterManager : NetworkBehaviour
         Debug.LogWarning(reason);
     }
 
+    private bool TryGetSpawnPosition(int teamId, out Vector3 spawnPosition)
+    {
+        if (teamsManager && teamsManager.IsTwoTeams)
+        {
+            var teamSpawnPoints = teamId == 0
+                ? teamZeroSpawnPoints
+                : teamOneSpawnPoints;
+
+            if (TryGetRandomPosition(teamSpawnPoints, out spawnPosition))
+                return true;
+        }
+
+        return TryGetRandomPosition(freeForAllSpawnPoints, out spawnPosition);
+    }
+
+    private static bool TryGetRandomPosition(
+        SpawnPoint[] spawnPoints,
+        out Vector3 spawnPosition)
+    {
+        spawnPosition = Vector3.zero;
+
+        if (spawnPoints is null || spawnPoints.Length == 0)
+            return false;
+
+        var validSpawnPoints = spawnPoints
+            .Where(spawnPoint => spawnPoint)
+            .ToArray();
+
+        if (validSpawnPoints.Length == 0)
+            return false;
+
+        spawnPosition = validSpawnPoints[
+            Random.Range(0, validSpawnPoints.Length)].GetSpawnPosition();
+
+        return true;
+    }
+
     private void ResolveReferences()
     {
-        if (spawnPoints == null || spawnPoints.Length == 0)
-            spawnPoints = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
+        if (freeForAllSpawnPoints is null || freeForAllSpawnPoints.Length == 0)
+            freeForAllSpawnPoints = FindObjectsByType<SpawnPoint>();
 
-        if (teamsManager == null)
+        if (!teamsManager)
             teamsManager = FindAnyObjectByType<TeamsManager>();
     }
 }

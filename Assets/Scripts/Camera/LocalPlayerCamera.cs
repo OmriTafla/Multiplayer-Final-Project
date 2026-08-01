@@ -22,7 +22,7 @@ public class LocalPlayerCamera : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance && Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -30,10 +30,10 @@ public class LocalPlayerCamera : MonoBehaviour
 
         Instance = this;
 
-        if (cinemachineCamera == null)
+        if (!cinemachineCamera)
             cinemachineCamera = GetComponent<CinemachineCamera>();
 
-        if (cinemachineCamera == null)
+        if (!cinemachineCamera)
         {
             Debug.LogError("LocalPlayerCamera requires a CinemachineCamera", this);
             enabled = false;
@@ -48,7 +48,7 @@ public class LocalPlayerCamera : MonoBehaviour
 
     private void Update()
     {
-        if (Mouse.current == null)
+        if (Mouse.current is null)
             return;
 
         var scroll = Mouse.current.scroll.ReadValue().y;
@@ -66,7 +66,7 @@ public class LocalPlayerCamera : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (cinemachineCamera == null)
+        if (!cinemachineCamera)
             return;
 
         var lens = cinemachineCamera.Lens;
@@ -82,7 +82,7 @@ public class LocalPlayerCamera : MonoBehaviour
 
     public void SetTarget(Transform target)
     {
-        if (target == null || cinemachineCamera == null)
+        if (!target || !cinemachineCamera)
             return;
 
         currentTarget = target;
@@ -93,18 +93,18 @@ public class LocalPlayerCamera : MonoBehaviour
 
     public void ClearTarget(Transform target)
     {
-        if (target == null || target != currentTarget)
+        if (!target || target != currentTarget)
             return;
 
         currentTarget = null;
 
-        if (cinemachineCamera != null)
+        if (cinemachineCamera)
             cinemachineCamera.Follow = null;
     }
 
     public void SnapToTarget()
     {
-        if (currentTarget == null || cinemachineCamera == null)
+        if (!currentTarget || !cinemachineCamera)
             return;
 
         cinemachineCamera.CancelDamping(true);

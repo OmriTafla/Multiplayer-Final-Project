@@ -42,7 +42,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
     {
         Instance = this;
 
-        if (inputActions != null)
+        if (inputActions)
             runtimeInputActions = Instantiate(inputActions);
 
         ResolveActions();
@@ -53,7 +53,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
         if (Instance == this)
             Instance = null;
 
-        if (runtimeInputActions != null)
+        if (runtimeInputActions)
             Destroy(runtimeInputActions);
     }
 
@@ -96,7 +96,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
 
     public void RegisterCallbacks(NetworkRunner runner)
     {
-        if (runner == null || callbacksRegistered)
+        if (!runner || callbacksRegistered)
             return;
 
         runner.AddCallbacks(this);
@@ -105,7 +105,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
 
     public void UnregisterCallbacks(NetworkRunner runner)
     {
-        if (runner == null || !callbacksRegistered)
+        if (!runner || !callbacksRegistered)
             return;
 
         runner.RemoveCallbacks(this);
@@ -132,7 +132,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
         if (actionsResolved)
             return;
 
-        if (runtimeInputActions == null)
+        if (!runtimeInputActions)
         {
             Debug.LogError("FusionInputProvider requires an InputActionAsset");
             return;
@@ -187,10 +187,10 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
 
     private void UpdateAimPosition()
     {
-        if (gameplayCamera == null)
+        if (!gameplayCamera)
             gameplayCamera = Camera.main;
 
-        if (gameplayCamera == null)
+        if (!gameplayCamera)
             return;
 
         if (gamepadAimInput.sqrMagnitude >=

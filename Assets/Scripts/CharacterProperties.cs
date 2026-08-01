@@ -40,7 +40,7 @@ public class CharacterProperties : ScriptableObject
 
     public static CharacterProperties GetByID(int id)
     {
-        if (_characterRegistry != null && _characterRegistry.TryGetValue(id, out CharacterProperties character))
+        if (_characterRegistry is not null && _characterRegistry.TryGetValue(id, out CharacterProperties character))
         {
             return character;
         }
