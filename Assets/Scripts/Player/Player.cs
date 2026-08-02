@@ -26,6 +26,8 @@ public class Player : NetworkBehaviour, IHitable
     private readonly int animShootId = Animator.StringToHash("Shoot");
     [SerializeField] private SpriteRenderer miniMapIconColor;
     [SerializeField] private CamShakeData hurtShake;
+    [SerializeField] private AudioSource hurtSource;
+    [SerializeField] private AudioSource shootSource;
     #endregion
 
     #region Inspector References - Owner HUD
@@ -321,10 +323,12 @@ public class Player : NetworkBehaviour, IHitable
         LastFireDirection = transform.forward.normalized;
 
         cannonAnimator.SetTrigger(animShootId);
+        shootSource.Stop();
+        shootSource.Play();
 
         if (Object.HasStateAuthority)
         {
-            PlayShootAnimationRPC();
+            PlayShootEffectsRPC();
 
             var placementManager = FindAnyObjectByType<PlacementManager>();
 
@@ -339,11 +343,16 @@ public class Player : NetworkBehaviour, IHitable
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
-    private void PlayShootAnimationRPC()
+    private void PlayShootEffectsRPC()
     {
-        if (!cannonAnimator) return;
-        
-        cannonAnimator.SetTrigger(animShootId);
+        if (cannonAnimator) 
+            cannonAnimator.SetTrigger(animShootId);
+
+        if (shootSource)
+        {
+            shootSource.Stop();
+            shootSource.Play();
+        }
     }
     #endregion
 
@@ -404,6 +413,9 @@ public class Player : NetworkBehaviour, IHitable
 
         PostProcessingEffectPlayer.Instance.RunVignetteEffect(.1f, 0, 1.5f, .3f, Color.red);
         PostProcessingEffectPlayer.Instance.RunFilmGrainEffect(.1f, 0, 1.5f, .7f);
+
+        hurtSource.Stop();
+        hurtSource.Play();
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
