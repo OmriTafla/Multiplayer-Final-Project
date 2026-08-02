@@ -1049,7 +1049,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Abb2kTools.Projectiles.Shooter
   _LastFireDirection: {x: 0, y: 0, z: 0}
-  shootingCooldown: 0.5
+  shootingCooldown: 1
   cannonAnimator: {fileID: 7825232203457448560}
   shootSource: {fileID: 4790391250570828691}
 --- !u!1 &7358201055602102771

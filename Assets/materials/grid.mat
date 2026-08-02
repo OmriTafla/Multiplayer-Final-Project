@@ -100,8 +100,8 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _GridScale: 1
-    - _GridSides: 4
+    - _GridScale: 0.9
+    - _GridSides: 6.3
     - _LineThickness: 0.05
     - _Metallic: 0
     - _OcclusionStrength: 1
