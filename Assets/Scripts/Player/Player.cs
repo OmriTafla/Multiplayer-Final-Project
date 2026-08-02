@@ -133,7 +133,7 @@ public class Player : NetworkBehaviour, IHitable
     {
         if (_pendingRespawn && rigidBody)
         {
-            rigidBody.position = _pendingRespawnPosition;
+            rigidBody.MovePosition(_pendingRespawnPosition);
             rigidBody.linearVelocity = Vector3.zero;
             rigidBody.angularVelocity = Vector3.zero;
             _pendingRespawn = false;
@@ -334,7 +334,7 @@ public class Player : NetworkBehaviour, IHitable
     }
 
     private void ProcessFire(GameplayInput input)
-    {
+    {        
         if (!input.Buttons.IsSet(GameplayButton.Fire))
             return;
 
@@ -345,9 +345,12 @@ public class Player : NetworkBehaviour, IHitable
         LastFireTick = Runner.Tick;
         LastFireDirection = transform.forward.normalized;
 
-        cannonAnimator.SetTrigger(animShootId);
-        shootSource.Stop();
-        shootSource.Play();
+        if (Runner.IsForward)
+        {
+            cannonAnimator.SetTrigger(animShootId);
+            shootSource.Stop();
+            shootSource.Play();
+        }
 
         if (Object.HasStateAuthority)
         {
