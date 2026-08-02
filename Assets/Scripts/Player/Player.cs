@@ -387,6 +387,9 @@ public class Player : NetworkBehaviour, IHitable
     private void HurtShakeRPC()
     {
         CameraShaker.Instance.Shake(hurtShake);
+
+        PostProcessingEffectPlayer.Instance.RunVignetteEffect(.1f, 0, 1.5f, .3f, Color.red);
+        PostProcessingEffectPlayer.Instance.RunFilmGrainEffect(.1f, 0, 1.5f, .7f);
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
