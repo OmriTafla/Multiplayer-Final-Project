@@ -928,7 +928,7 @@ MonoBehaviour:
       fadeOut: 1
       randomnessMode: 0
   hurtSource: {fileID: 843463544801531969}
-  shooter: {fileID: 0}
+  shooter: {fileID: 8549313746988393279}
   playerUI: {fileID: 4275309682345805136}
   hpLabel: {fileID: 476318218719191834}
   overheadUI: {fileID: 1664950065571512197}
