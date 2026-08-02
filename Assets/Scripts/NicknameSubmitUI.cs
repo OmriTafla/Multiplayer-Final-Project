@@ -22,7 +22,6 @@ public class NicknameSubmitUI : MonoBehaviour
     [FormerlySerializedAs("signInButton")]
     [SerializeField] private Button startGameButton;
 
-    private DropdownOptionsFromGamemodes gameModeOptions;
     private bool connecting;
 
     private void Awake()
@@ -30,8 +29,6 @@ public class NicknameSubmitUI : MonoBehaviour
 #if DEDICATED_SERVER
         gameObject.SetActive(false);
 #else
-        ResolveReferences();
-
         if (startGameButton &&
             startGameButton.onClick.GetPersistentEventCount() == 0)
         {
@@ -43,8 +40,6 @@ public class NicknameSubmitUI : MonoBehaviour
     private void OnEnable()
     {
 #if CLIENT_BUILD
-        ResolveReferences();
-
         if (inputNicknameField)
             inputNicknameField.onSubmit.AddListener(HandleSubmit);
 #endif
@@ -65,8 +60,6 @@ public class NicknameSubmitUI : MonoBehaviour
 #else
         if (connecting)
             return;
-
-        ResolveReferences();
 
         if (!inputNicknameField)
         {
@@ -159,12 +152,6 @@ public class NicknameSubmitUI : MonoBehaviour
 
     private bool TryGetSelectedGameMode(out IOGameMode gameMode)
     {
-        if (gameModeOptions &&
-            gameModeOptions.TryGetSelectedGameMode(out gameMode))
-        {
-            return true;
-        }
-
         gameMode = default;
 
         if (!gameModeDropdown)
@@ -180,18 +167,6 @@ public class NicknameSubmitUI : MonoBehaviour
     private void HandleSubmit(string value)
     {
         StartGame();
-    }
-
-    private void ResolveReferences()
-    {
-        if (!startGameButton)
-            startGameButton = FindStartGameButton(transform);
-
-        if (!gameModeOptions)
-            gameModeOptions = GetComponentInChildren<DropdownOptionsFromGamemodes>(true);
-
-        if (!gameModeDropdown && gameModeOptions)
-            gameModeDropdown = gameModeOptions.Dropdown;
     }
 
     private void SetControlsInteractable(bool interactable)
@@ -218,16 +193,4 @@ public class NicknameSubmitUI : MonoBehaviour
             : shutdownReason;
     }
 
-    private static Button FindStartGameButton(Transform root)
-    {
-        var buttons = root.GetComponentsInChildren<Button>(true);
-
-        foreach (var button in buttons)
-        {
-            if (button.name == "Start Game" || button.name == "SignIn")
-                return button;
-        }
-
-        return null;
-    }
 }

@@ -11,6 +11,7 @@ public class LocalPlayerCamera : MonoBehaviour
 
 #if !UNITY_SERVER
     [SerializeField] private CinemachineCamera cinemachineCamera;
+    [SerializeField] private Camera gameplayCamera;
     [SerializeField] private float minimumOrthographicSize = 8f;
     [SerializeField] private float maximumOrthographicSize = 22f;
     [SerializeField] private float zoomStep = 1.5f;
@@ -31,9 +32,6 @@ public class LocalPlayerCamera : MonoBehaviour
         Instance = this;
 
         if (!cinemachineCamera)
-            cinemachineCamera = GetComponent<CinemachineCamera>();
-
-        if (!cinemachineCamera)
         {
             Debug.LogError("LocalPlayerCamera requires a CinemachineCamera", this);
             enabled = false;
@@ -44,6 +42,11 @@ public class LocalPlayerCamera : MonoBehaviour
             cinemachineCamera.Lens.OrthographicSize,
             minimumOrthographicSize,
             maximumOrthographicSize);
+
+        var inputProvider = FusionInputProvider.Instance;
+
+        if (inputProvider)
+            inputProvider.SetGameplayCamera(gameplayCamera);
     }
 
     private void Update()
@@ -110,8 +113,15 @@ public class LocalPlayerCamera : MonoBehaviour
         cinemachineCamera.CancelDamping(true);
     }
 
+    public Camera GameplayCamera => gameplayCamera;
+
     private void OnDestroy()
     {
+        var inputProvider = FusionInputProvider.Instance;
+
+        if (inputProvider)
+            inputProvider.ClearGameplayCamera(gameplayCamera);
+
         if (Instance == this)
             Instance = null;
     }
@@ -132,5 +142,7 @@ public class LocalPlayerCamera : MonoBehaviour
     public void SnapToTarget()
     {
     }
+
+    public Camera GameplayCamera => null;
 #endif
 }

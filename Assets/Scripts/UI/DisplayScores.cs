@@ -10,8 +10,7 @@ using UnityEngine;
 public class DisplayScores : NetworkBehaviour
 {
     [SerializeField] private TMP_Text scoresText;
-
-    private TeamsManager teamsManager;
+    [SerializeField] private TeamsManager teamsManager;
 
     private void OnEnable()
     {
@@ -30,7 +29,6 @@ public class DisplayScores : NetworkBehaviour
 
     public override void Spawned()
     {
-        ResolveTeamsManager();
         RefreshScores();
     }
 
@@ -44,8 +42,6 @@ public class DisplayScores : NetworkBehaviour
         if (!scoresText)
             return;
 
-        ResolveTeamsManager();
-
         var scoreManager = ScoreManager.Instance;
 
         if (!scoreManager ||
@@ -56,7 +52,7 @@ public class DisplayScores : NetworkBehaviour
             return;
         }
 
-        var entries = BuildEntries(scoreManager.Runner, scores);
+        var entries = BuildEntries(scores);
         var body = teamsManager &&
                    teamsManager.IsReady &&
                    teamsManager.IsTwoTeams
@@ -122,7 +118,6 @@ public class DisplayScores : NetworkBehaviour
     }
 
     private List<PlayerScoreEntry> BuildEntries(
-        NetworkRunner runner,
         Dictionary<PlayerRef, int> scores)
     {
         var entries = new List<PlayerScoreEntry>();
@@ -133,22 +128,16 @@ public class DisplayScores : NetworkBehaviour
             var playerColor = Color.white;
             var teamId = -1;
 
-            if (runner)
+            if (UI.PlayerData.TryGet(score.Key, out var playerData) &&
+                playerData.IsReady)
             {
-                var playerObject = runner.GetPlayerObject(score.Key);
+                var nickname = playerData.NickName.ToString();
 
-                if (playerObject &&
-                    playerObject.TryGetComponent(out UI.PlayerData playerData) &&
-                    playerData.IsReady)
-                {
-                    var nickname = playerData.NickName.ToString();
+                if (!string.IsNullOrWhiteSpace(nickname))
+                    playerName = nickname;
 
-                    if (!string.IsNullOrWhiteSpace(nickname))
-                        playerName = nickname;
-
-                    playerColor = playerData.Color;
-                    teamId = playerData.TeamId;
-                }
+                playerColor = playerData.Color;
+                teamId = playerData.TeamId;
             }
 
             if (teamId < 0 &&
@@ -198,12 +187,6 @@ public class DisplayScores : NetworkBehaviour
     {
         if (scoresText)
             scoresText.text = BuildDisplayText(string.Empty);
-    }
-
-    private void ResolveTeamsManager()
-    {
-        if (!teamsManager)
-            teamsManager = FindAnyObjectByType<TeamsManager>();
     }
 
     private sealed class PlayerScoreEntry

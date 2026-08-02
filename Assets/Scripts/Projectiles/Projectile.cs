@@ -1,6 +1,5 @@
 using DG.Tweening;
 using Fusion;
-using Managers;
 using UnityEngine;
 
 public class Projectile : NetworkBehaviour
@@ -15,9 +14,6 @@ public class Projectile : NetworkBehaviour
     [Networked]
     private TickTimer LifeTimer { get; set; }
 
-    [Networked] public PlayerRef OwnerPlayerRef { get; set; }
-
-    private TeamsManager teamsManager;
     private bool impactResolved;
 
     public override void Spawned()
@@ -26,7 +22,6 @@ public class Projectile : NetworkBehaviour
             return;
 
         LifeTimer = TickTimer.CreateFromSeconds(Runner, lifetime);
-        teamsManager = FindAnyObjectByType<TeamsManager>();
     }
 
     public override void FixedUpdateNetwork()
@@ -58,13 +53,14 @@ public class Projectile : NetworkBehaviour
         if (target.TryGetComponent(out Projectile _))
             return;
 
-        var shooter = OwnerPlayerRef;
+        var shooter = Object.InputAuthority;
 
-        if (target.TryGetComponent(out Player targetPlayer))
+        if (Player.TryGet(target.InputAuthority, out var targetPlayer) &&
+            targetPlayer.Object == target)
         {
             var targetPlayerRef = targetPlayer.Object.InputAuthority;
-
-            teamsManager ??= FindAnyObjectByType<TeamsManager>();
+            var matchManager = MatchManager.Instance;
+            var teamsManager = matchManager ? matchManager.TeamsManager : null;
 
             if (teamsManager && !teamsManager.CanDamage(shooter, targetPlayerRef))
                 return;

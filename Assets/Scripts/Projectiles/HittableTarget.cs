@@ -25,10 +25,12 @@ public class HittableTarget : NetworkBehaviour
         if (!Object || !Object.IsValid || !Object.HasStateAuthority || IsHit)
             return;
 
-        var projectile = other.GetComponentInParent<Projectile>();
-        var hitObject = other.GetComponentInParent<NetworkObject>();
+        if (!other.TryGetComponent(out Projectile projectile))
+            return;
 
-        if (!projectile || !hitObject)
+        var hitObject = projectile.Object;
+
+        if (!hitObject)
             return;
 
         Debug.Log($"{gameObject.name} was hit by {hitObject.name}");

@@ -1,10 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Fusion;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -18,8 +16,6 @@ namespace Collectible
         [SerializeField] private NetworkObject prefabToSpawn;
         
         private const int MAX_NUM_FAILS = 100;
-        private const int MAX_TRACKED_OBJECTS = 1000;
-        // [Networked, Capacity(MAX_TRACKED_OBJECTS)]
         private readonly List<NetworkObject> spawnedObjects = new();
         
         private bool spawnCoroutineDone = false;
@@ -65,10 +61,9 @@ namespace Collectible
                         Random.Range(areaCorners[0].position.y, areaCorners[1].position.y),
                         Random.Range(areaCorners[0].position.z, areaCorners[1].position.z));
 
-                    spawnedObjects.RemoveAll(obj => !obj.IsValid);
-                    
-                    int numItemsInKernel = spawnedObjects
-                        .Count(o => (o.transform.position - spawnPosition).sqrMagnitude <= radiusSquared);
+                    var numItemsInKernel = CountObjectsInRadius(
+                        spawnPosition,
+                        radiusSquared);
 
                     if (numItemsInKernel / kernelVolume >= targetDensity)
                     {
@@ -86,6 +81,27 @@ namespace Collectible
             }
             
             spawnCoroutineDone = true;
+        }
+
+        private int CountObjectsInRadius(Vector3 position, float radiusSquared)
+        {
+            var count = 0;
+
+            for (var index = spawnedObjects.Count - 1; index >= 0; index--)
+            {
+                var spawnedObject = spawnedObjects[index];
+
+                if (!spawnedObject || !spawnedObject.IsValid)
+                {
+                    spawnedObjects.RemoveAt(index);
+                    continue;
+                }
+
+                if ((spawnedObject.transform.position - position).sqrMagnitude <= radiusSquared)
+                    count++;
+            }
+
+            return count;
         }
 
         private IEnumerator SpawnSequence()

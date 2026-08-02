@@ -33,6 +33,8 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
     [SerializeField] private UnityEvent onShutdownCompleted;
 
     private NetworkRunner networkRunner;
+    private NetworkSceneManagerDefault networkSceneManager;
+    private FusionInputProvider inputProvider;
     private bool operationInProgress;
     private bool isInLeaderboardLobby;
     private bool shutdownEventRequested;
@@ -95,14 +97,15 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
         networkRunner.ProvideInput = true;
 #endif
 
-        if (!networkRunner.GetComponent<RunnerSimulatePhysics3D>())
-            networkRunner.gameObject.AddComponent<RunnerSimulatePhysics3D>();
+        networkRunner.gameObject.AddComponent<RunnerSimulatePhysics3D>();
+        networkSceneManager =
+            networkRunner.gameObject.AddComponent<NetworkSceneManagerDefault>();
 
         if (networkEvents)
             networkRunner.AddCallbacks(networkEvents);
 
 #if HOST_OR_CLIENT
-        var inputProvider = networkRunner.GetComponent<FusionInputProvider>();
+        inputProvider = networkRunner.GetComponent<FusionInputProvider>();
 
         if (inputProvider)
             inputProvider.RegisterCallbacks(networkRunner);
@@ -420,13 +423,8 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
                 return default;
             }
 
-            var sceneManager = runner.GetComponent<NetworkSceneManagerDefault>();
-
-            if (!sceneManager)
-                sceneManager = runner.gameObject.AddComponent<NetworkSceneManagerDefault>();
-
             args.SessionName = args.SessionName.Trim();
-            args.SceneManager = sceneManager;
+            args.SceneManager = networkSceneManager;
 
             StartGameResult result;
 
@@ -480,21 +478,26 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
         }
 
         var runnerToShutdown = networkRunner;
+        var inputProviderToShutdown = inputProvider;
         networkRunner = null;
+        networkSceneManager = null;
+        inputProvider = null;
         isInLeaderboardLobby = false;
-        shutdownTask = ShutdownRunnerInternal(runnerToShutdown);
+        shutdownTask = ShutdownRunnerInternal(
+            runnerToShutdown,
+            inputProviderToShutdown);
         return shutdownTask;
     }
 
-    private async Task ShutdownRunnerInternal(NetworkRunner runnerToShutdown)
+    private async Task ShutdownRunnerInternal(
+        NetworkRunner runnerToShutdown,
+        FusionInputProvider inputProviderToShutdown)
     {
         try
         {
 #if HOST_OR_CLIENT
-            var inputProvider = runnerToShutdown.GetComponent<FusionInputProvider>();
-
-            if (inputProvider)
-                inputProvider.UnregisterCallbacks(runnerToShutdown);
+            if (inputProviderToShutdown)
+                inputProviderToShutdown.UnregisterCallbacks(runnerToShutdown);
 #endif
 
             if (networkEvents)

@@ -127,6 +127,17 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
         ClearInput();
     }
 
+    public void SetGameplayCamera(Camera camera)
+    {
+        gameplayCamera = camera;
+    }
+
+    public void ClearGameplayCamera(Camera camera)
+    {
+        if (gameplayCamera == camera)
+            gameplayCamera = null;
+    }
+
     private void ResolveActions()
     {
         if (actionsResolved)
@@ -187,8 +198,15 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
 
     private void UpdateAimPosition()
     {
+#if !UNITY_SERVER
         if (!gameplayCamera)
-            gameplayCamera = Camera.main;
+        {
+            var localPlayerCamera = LocalPlayerCamera.Instance;
+
+            if (localPlayerCamera)
+                gameplayCamera = localPlayerCamera.GameplayCamera;
+        }
+#endif
 
         if (!gameplayCamera)
             return;

@@ -7,15 +7,13 @@ public class NetworkEventsManager : Singleton<NetworkEventsManager>
 {
     [SerializeField, HideInInspector] private NetworkEvents networkEvents;
 
-    private void OnValidate()
-    {
-        networkEvents = GetComponent<NetworkEvents>();
-    }
-
     private void Start()
     {
         if (!networkEvents)
-            networkEvents = GetComponent<NetworkEvents>();
+        {
+            Debug.LogError("NetworkEventsManager requires a NetworkEvents reference", this);
+            return;
+        }
 
         if (SinglePeer_NetworkRunnerManager.Instance)
             SinglePeer_NetworkRunnerManager.Instance.ConfigureNetworkEvents(networkEvents);

@@ -901,8 +901,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24848061a6bb406419ad7da6c2cf3607, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  modelRenderer: {fileID: 8607429086634601754}
-  hitCollider: {fileID: 1720934025811652085}
+  modelRenderers:
+  - {fileID: 8607429086634601754}
+  - {fileID: 4408820086173846559}
+  - {fileID: 2533349612935277087}
+  collisionColliders:
+  - {fileID: 1720934025811652085}
+  - {fileID: 4979769616436737495}
   rigidBody: {fileID: 3458336771368325197}
   animator: {fileID: 408643528584894971}
   cannonAnimator: {fileID: 7825232203457448560}

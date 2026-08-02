@@ -18,7 +18,6 @@ public sealed class LiveLeaderboardSnapshot
     public LiveLeaderboardEntry[] players = Array.Empty<LiveLeaderboardEntry>();
 
     public static string Capture(
-        NetworkRunner runner,
         Dictionary<PlayerRef, int> scores,
         TeamsManager teamsManager,
         IOGameMode gameMode)
@@ -41,7 +40,6 @@ public sealed class LiveLeaderboardSnapshot
         snapshot.players = scores
             .OrderBy(score => score.Key.PlayerId)
             .Select(score => BuildEntry(
-                runner,
                 teamsManager,
                 score.Key,
                 score.Value))
@@ -139,7 +137,6 @@ public sealed class LiveLeaderboardSnapshot
     }
 
     private static LiveLeaderboardEntry BuildEntry(
-        NetworkRunner runner,
         TeamsManager teamsManager,
         PlayerRef player,
         int score)
@@ -153,12 +150,7 @@ public sealed class LiveLeaderboardSnapshot
             color = "FFFFFF"
         };
 
-        var playerObject = runner
-            ? runner.GetPlayerObject(player)
-            : null;
-
-        if (playerObject &&
-            playerObject.TryGetComponent(out UI.PlayerData playerData) &&
+        if (UI.PlayerData.TryGet(player, out var playerData) &&
             playerData.IsReady)
         {
             var nickname = playerData.NickName.ToString();

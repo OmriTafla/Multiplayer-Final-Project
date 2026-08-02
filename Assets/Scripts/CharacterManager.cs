@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Fusion;
 using Managers;
 using UnityEngine;
@@ -11,19 +10,25 @@ public class CharacterManager : NetworkBehaviour
     [SerializeField] private SpawnPoint[] freeForAllSpawnPoints;
     [SerializeField] private SpawnPoint[] teamZeroSpawnPoints;
     [SerializeField] private SpawnPoint[] teamOneSpawnPoints;
+    [SerializeField] private CharacterProperties[] characters;
     [SerializeField] private NetworkObject playerPrefab;
     [SerializeField] private TeamsManager teamsManager;
 
     private readonly Dictionary<PlayerRef, NetworkObject> spawnedPlayers = new();
 
+    private void Awake()
+    {
+        CharacterProperties.InitializeRegistry(characters);
+    }
+
     private void OnValidate()
     {
-        ResolveReferences();
+        ValidateReferences();
     }
 
     public override void Spawned()
     {
-        ResolveReferences();
+        ValidateReferences();
 
         if (!playerPrefab)
             Debug.LogError("CharacterManager requires the Player network prefab", this);
@@ -36,8 +41,6 @@ public class CharacterManager : NetworkBehaviour
 
         if (spawnedPlayers.ContainsKey(player))
             return;
-
-        ResolveReferences();
 
         if (!playerPrefab)
         {
@@ -119,8 +122,6 @@ public class CharacterManager : NetworkBehaviour
 
     public Vector3 GetSpawnPosition(PlayerRef player)
     {
-        ResolveReferences();
-
         var teamId = -1;
 
         if (teamsManager)
@@ -168,25 +169,34 @@ public class CharacterManager : NetworkBehaviour
         if (spawnPoints is null || spawnPoints.Length == 0)
             return false;
 
-        var validSpawnPoints = spawnPoints
-            .Where(spawnPoint => spawnPoint)
-            .ToArray();
+        SpawnPoint selectedSpawnPoint = null;
+        var validSpawnPointCount = 0;
 
-        if (validSpawnPoints.Length == 0)
+        foreach (var spawnPoint in spawnPoints)
+        {
+            if (!spawnPoint)
+                continue;
+
+            validSpawnPointCount++;
+
+            if (Random.Range(0, validSpawnPointCount) == 0)
+                selectedSpawnPoint = spawnPoint;
+        }
+
+        if (!selectedSpawnPoint)
             return false;
 
-        spawnPosition = validSpawnPoints[
-            Random.Range(0, validSpawnPoints.Length)].GetSpawnPosition();
+        spawnPosition = selectedSpawnPoint.GetSpawnPosition();
 
         return true;
     }
 
-    private void ResolveReferences()
+    private void ValidateReferences()
     {
         if (freeForAllSpawnPoints is null || freeForAllSpawnPoints.Length == 0)
-            freeForAllSpawnPoints = FindObjectsByType<SpawnPoint>();
+            Debug.LogError("CharacterManager requires free-for-all spawn points", this);
 
         if (!teamsManager)
-            teamsManager = FindAnyObjectByType<TeamsManager>();
+            Debug.LogError("CharacterManager requires a TeamsManager reference", this);
     }
 }

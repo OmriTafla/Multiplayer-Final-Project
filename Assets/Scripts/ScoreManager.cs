@@ -19,6 +19,7 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
     private int ScoreRevision { get; set; }
 
     [SerializeField, Min(0f)] private float leaderboardPublishDelay = 0.25f;
+    [SerializeField] private TeamsManager teamsManager;
 
     private const float ScoreRatioOnKill = 0.5f;
 
@@ -230,7 +231,6 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
             return;
         }
 
-        var teamsManager = FindAnyObjectByType<TeamsManager>();
         var readyTeamsManager = teamsManager && teamsManager.IsReady
             ? teamsManager
             : null;
@@ -241,7 +241,6 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
                 : IOGameMode.FreeForAll;
 
         var leaderboard = LiveLeaderboardSnapshot.Capture(
-            Runner,
             new Dictionary<PlayerRef, int>(Scores),
             readyTeamsManager,
             gameMode);

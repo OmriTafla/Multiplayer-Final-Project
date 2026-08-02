@@ -1,4 +1,5 @@
 using Fusion;
+using Managers;
 using Singleton;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -7,7 +8,12 @@ public class MatchManager : Singleton<MatchManager>
 {
     [FormerlySerializedAs("cm")]
     [SerializeField] private CharacterManager characterManager;
+    [SerializeField] private TeamsManager teamsManager;
+    [SerializeField] private PlacementManager placementManager;
     [SerializeField] private NetworkObject playerDataPrefab;
+
+    public TeamsManager TeamsManager => teamsManager;
+    public PlacementManager PlacementManager => placementManager;
 
     protected override void Awake()
     {
@@ -111,13 +117,26 @@ public class MatchManager : Singleton<MatchManager>
 
     private bool ResolveReferences()
     {
+        var valid = true;
+
         if (!characterManager)
-            characterManager = FindAnyObjectByType<CharacterManager>();
+        {
+            Debug.LogError("MatchManager requires a CharacterManager reference", this);
+            valid = false;
+        }
 
-        if (characterManager)
-            return true;
+        if (!teamsManager)
+        {
+            Debug.LogError("MatchManager requires a TeamsManager reference", this);
+            valid = false;
+        }
 
-        Debug.LogError("MatchManager requires a CharacterManager reference", this);
-        return false;
+        if (!placementManager)
+        {
+            Debug.LogError("MatchManager requires a PlacementManager reference", this);
+            valid = false;
+        }
+
+        return valid;
     }
 }

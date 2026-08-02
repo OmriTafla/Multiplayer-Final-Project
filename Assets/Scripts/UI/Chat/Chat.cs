@@ -1,12 +1,13 @@
 using UnityEngine;
-using UnityEngine.UI;
 using Fusion;
 using TMPro;
+using UnityEngine.Serialization;
 
 public class Chat : NetworkBehaviour
 {
-    [SerializeField] private GameObject messagePrefab;
-    [SerializeField] private GameObject Content;
+    [SerializeField] private Message messagePrefab;
+    [FormerlySerializedAs("Content")]
+    [SerializeField] private Transform content;
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private string username = "Player";
 
@@ -33,15 +34,8 @@ public class Chat : NetworkBehaviour
 
     private void AddMessage(string username, string message)
     {
-        GameObject instantiate = Instantiate(messagePrefab, Content.transform);
-        instantiate.transform.localPosition = Vector3.zero;
-    
-        Message messageComponent = instantiate.GetComponent<Message>();
-        if (!messageComponent)
-        {
-            Debug.LogError("Message component missing on messagePrefab!");
-            return;
-        }
+        var messageComponent = Instantiate(messagePrefab, content);
+        messageComponent.transform.localPosition = Vector3.zero;
         messageComponent.SetText($"{username}: {message}");
     }
 }

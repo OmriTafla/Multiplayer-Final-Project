@@ -8,6 +8,9 @@ using UnityEngine;
 [RequireComponent(typeof(TMP_Dropdown))]
 public class DropdownOptionsFromGamemodes : MonoBehaviour
 {
+    private static readonly IOGameMode[] GameModes =
+        (IOGameMode[])Enum.GetValues(typeof(IOGameMode));
+
     [SerializeField] private TMP_Dropdown dropdown;
     [SerializeField] private bool includeAny;
 
@@ -15,7 +18,6 @@ public class DropdownOptionsFromGamemodes : MonoBehaviour
     {
         get
         {
-            ResolveDropdown();
             return dropdown;
         }
     }
@@ -24,56 +26,37 @@ public class DropdownOptionsFromGamemodes : MonoBehaviour
 
     private void Awake()
     {
-        ResolveDropdown();
-        RefreshOptions();
-    }
-
-    private void Reset()
-    {
-        ResolveDropdown();
         RefreshOptions();
     }
 
     private void OnValidate()
     {
-        ResolveDropdown();
         RefreshOptions();
     }
 
     public bool TryGetSelectedGameMode(out IOGameMode gameMode)
     {
-        ResolveDropdown();
         gameMode = default;
 
         if (!dropdown)
             return false;
 
         var modeIndex = dropdown.value - (includeAny ? 1 : 0);
-        var values = (IOGameMode[])Enum.GetValues(typeof(IOGameMode));
-
-        if (modeIndex < 0 || modeIndex >= values.Length)
+        if (modeIndex < 0 || modeIndex >= GameModes.Length)
             return false;
 
-        gameMode = values[modeIndex];
+        gameMode = GameModes[modeIndex];
         return true;
     }
 
     public void SetSelectedGameMode(IOGameMode gameMode)
     {
-        ResolveDropdown();
-
         if (!dropdown)
             return;
 
         var value = (int)gameMode + (includeAny ? 1 : 0);
         dropdown.SetValueWithoutNotify(value);
         dropdown.RefreshShownValue();
-    }
-
-    private void ResolveDropdown()
-    {
-        if (!dropdown)
-            dropdown = GetComponent<TMP_Dropdown>();
     }
 
     private void RefreshOptions()
@@ -87,7 +70,7 @@ public class DropdownOptionsFromGamemodes : MonoBehaviour
         if (includeAny)
             options.Add(new TMP_Dropdown.OptionData("All Game Modes"));
 
-        foreach (IOGameMode gameMode in Enum.GetValues(typeof(IOGameMode)))
+        foreach (var gameMode in GameModes)
             options.Add(new TMP_Dropdown.OptionData(gameMode.GetDisplayName()));
 
         dropdown.ClearOptions();

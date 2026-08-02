@@ -1876,6 +1876,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LocalPlayerCamera
   cinemachineCamera: {fileID: 415114111}
+  gameplayCamera: {fileID: 1728765730}
   minimumOrthographicSize: 8
   maximumOrthographicSize: 22
   zoomStep: 1.5
@@ -2078,6 +2079,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   leaderboardPublishDelay: 0.25
+  teamsManager: {fileID: 1260233003}
 --- !u!4 &563555597
 Transform:
   m_ObjectHideFlags: 0
@@ -2779,6 +2781,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   scoresText: {fileID: 270363178}
+  teamsManager: {fileID: 1260233003}
 --- !u!1001 &1169847714
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3013,6 +3016,17 @@ MonoBehaviour:
   - {fileID: 513462134}
   teamZeroSpawnPoints: []
   teamOneSpawnPoints: []
+  characters:
+  - {fileID: 11400000, guid: 7a52335de3c12834bb9fe7e3b4056cdf, type: 2}
+  - {fileID: 11400000, guid: 3517441673228ee42ab6bcc089e24f30, type: 2}
+  - {fileID: 11400000, guid: 64261bd1e5b994d45ac2ea1abd9f8d98, type: 2}
+  - {fileID: 11400000, guid: d5aaf8bdc1d61ac44b42eca3750f4e0c, type: 2}
+  - {fileID: 11400000, guid: 53509120cb173ab439aa7cf7852fc841, type: 2}
+  - {fileID: 11400000, guid: c758e466c398af84d8b274f9d438e4b1, type: 2}
+  - {fileID: 11400000, guid: 25b92919690fc9f40830facf73703dd7, type: 2}
+  - {fileID: 11400000, guid: 1f273df708feb594d883a657780f25fb, type: 2}
+  - {fileID: 11400000, guid: aee12466829dc7248a8857728a54b1b0, type: 2}
+  - {fileID: 11400000, guid: 06337b9d7a40d6640afdc298f618bf4e, type: 2}
   playerPrefab: {fileID: 2437361841328486602, guid: f86056493afc0914aa19cf51b5b36cae, type: 3}
   teamsManager: {fileID: 1260233003}
 --- !u!4 &1292589680
@@ -3259,6 +3273,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41a30a25809eb0f45a1078633c47e4a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Abb2kTools.CameraShaker
+  gameplayCamera: {fileID: 1728765730}
 --- !u!4 &1445157123
 Transform:
   m_ObjectHideFlags: 0
@@ -3283,7 +3298,7 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1796849826914608150, guid: 30f9b485c2a9340498fbd6a8cd48ebb1, type: 3}
-      propertyPath: Content
+      propertyPath: content
       value: 
       objectReference: {fileID: 99200073}
     - target: {fileID: 1796849826914608150, guid: 30f9b485c2a9340498fbd6a8cd48ebb1, type: 3}
@@ -3725,6 +3740,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   characterManager: {fileID: 1292589679}
+  teamsManager: {fileID: 1260233003}
+  placementManager: {fileID: 1420328153}
   playerDataPrefab: {fileID: 2015413166823085070, guid: b5912bc7d2822b1499f9fa154bd30994, type: 3}
 --- !u!114 &1624820819
 MonoBehaviour:

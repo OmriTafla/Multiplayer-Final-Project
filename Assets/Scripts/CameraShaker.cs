@@ -25,14 +25,7 @@ namespace Abb2kTools
 
     public class CameraShaker : Singleton<CameraShaker>
     {
-        private Camera _camera;
-        private Camera Cam
-        {
-            get {
-                if (!_camera) _camera = Camera.main;
-                return _camera;
-            }
-        }
+        [SerializeField] private Camera gameplayCamera;
 
         private Tweener positionShake;
         private Tweener rotationShake;
@@ -72,17 +65,17 @@ namespace Abb2kTools
 
         private void RestoreCleanPosition()
         {
-            if (isShakeApplied && Cam)
+            if (isShakeApplied && gameplayCamera)
             {
-                Cam.transform.position = cleanPos;
-                Cam.transform.rotation = cleanRot;
+                gameplayCamera.transform.position = cleanPos;
+                gameplayCamera.transform.rotation = cleanRot;
                 isShakeApplied = false;
             }
         }
 
         public void Shake(CamShakeData shake)
         {
-            if (!Cam) return;
+            if (!gameplayCamera) return;
 
             DummyShakeTarget.localPosition = Vector3.zero;
             DummyShakeTarget.localRotation = Quaternion.identity;
@@ -119,7 +112,7 @@ namespace Abb2kTools
 
         private void OnBeforeRender()
         {
-            if (!Cam) return;
+            if (!gameplayCamera) return;
 
             bool isPosActive = positionShake is not null && positionShake.IsActive();
             bool isRotActive = rotationShake is not null && rotationShake.IsActive();
@@ -128,15 +121,15 @@ namespace Abb2kTools
 
             if (!isShakeApplied)
             {
-                cleanPos = Cam.transform.position;
-                cleanRot = Cam.transform.rotation;
+                cleanPos = gameplayCamera.transform.position;
+                cleanRot = gameplayCamera.transform.rotation;
             }
 
             Vector3 posOffset = isPosActive ? (cleanRot * DummyShakeTarget.localPosition) : Vector3.zero;
             Quaternion rotOffset = isRotActive ? DummyShakeTarget.localRotation : Quaternion.identity;
 
-            Cam.transform.position = cleanPos + posOffset;
-            Cam.transform.rotation = cleanRot * rotOffset;
+            gameplayCamera.transform.position = cleanPos + posOffset;
+            gameplayCamera.transform.rotation = cleanRot * rotOffset;
 
             isShakeApplied = true;
         }
