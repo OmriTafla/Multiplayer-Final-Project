@@ -11,7 +11,7 @@ namespace Abb2kTools.Projectiles
         [Networked] public Vector3 LastFireDirection { get; private set; }
         public int LastFireTick { get; private set; }
         [SerializeField] private float shootingCooldown = 0.5f;
-        public HashSet<BulletUpgrade> bulletUpgrades = new();
+        public HashSet<Upgrade<Projectile>> bulletUpgrades = new();
     
         public override void Spawned()
         {
