@@ -4,78 +4,24 @@ using UnityEngine;
 
 public class PlacementManager : NetworkBehaviour
 {
-    // [SerializeField] private float maximumPlacementDistance = 20f;
-    // [SerializeField] private float projectileSpawnOffset = 1f;
-    // [SerializeField] private int maximumPlaceablesPerPlayer = 20;
     [SerializeField] private Projectile projectilePrefab;
     
     private readonly Dictionary<PlayerRef, List<NetworkObject>> playerPlaceables = new();
 
-    // public void PlacePlaceable(NetworkObject requestingPlayer, int characterId, Vector3 requestedPosition)
-    // {
-    //     if (!Object.HasStateAuthority)
-    //         return;
-    //
-    //     if (!ValidatePlayer(requestingPlayer, characterId))
-    //         return;
-    //
-    //     var distance = Vector3.Distance(requestingPlayer.transform.position, requestedPosition);
-    //
-    //     if (distance > maximumPlacementDistance)
-    //         return;
-    //
-    //     var properties = CharacterProperties.GetByID(characterId);
-    //
-    //     if (properties == null)
-    //         return;
-    //
-    //     if (!properties.spawnObject.TryGetComponent(out PlaceableObject placeable))
-    //         return;
-    //
-    //     var spawnedObject = Runner.Spawn(
-    //         properties.spawnObject,
-    //         requestedPosition + placeable.GetGPOffset(),
-    //         Quaternion.identity,
-    //         requestingPlayer.InputAuthority);
-    //
-    //     if (spawnedObject == null)
-    //         return;
-    //
-    //     TrackPlaceable(requestingPlayer.InputAuthority, spawnedObject);
-    // }
-
-    // public void DeletePlaceable(NetworkObject requestingPlayer, NetworkObject target)
-    // {
-    //     if (!Object.HasStateAuthority)
-    //         return;
-    //
-    //     if (requestingPlayer == null || target == null)
-    //         return;
-    //
-    //     if (target.GetComponentInChildren<PlaceableObject>() == null)
-    //         return;
-    //
-    //     if (target.InputAuthority != requestingPlayer.InputAuthority)
-    //         return;
-    //
-    //     RemoveTrackedPlaceable(target.InputAuthority, target);
-    //     Runner.Despawn(target);
-    // }
-
-    public Projectile SpawnProjectile(NetworkObject requestingPlayer, Vector3 origin, Vector3 direction)
+    public void SpawnProjectile(NetworkObject requestingPlayer, Vector3 origin, Vector3 direction)
     {
         if (!Object.HasStateAuthority)
-            return null;
+            return;
 
         if (!requestingPlayer)
-            return null;
+            return;
 
         if (direction.sqrMagnitude < 0.0001f)
-            return null;
+            return;
 
         var normalizedDirection = direction.normalized;
 
-        return Runner.Spawn(
+        Runner.Spawn(
             projectilePrefab,
             origin,
             Quaternion.LookRotation(normalizedDirection),

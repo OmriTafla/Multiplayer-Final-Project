@@ -42,7 +42,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
     {
         Instance = this;
 
-        if (inputActions != null)
+        if (inputActions)
             runtimeInputActions = Instantiate(inputActions);
 
         ResolveActions();
@@ -53,7 +53,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
         if (Instance == this)
             Instance = null;
 
-        if (runtimeInputActions != null)
+        if (runtimeInputActions)
             Destroy(runtimeInputActions);
     }
 
@@ -96,7 +96,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
 
     public void RegisterCallbacks(NetworkRunner runner)
     {
-        if (runner == null || callbacksRegistered)
+        if (!runner || callbacksRegistered)
             return;
 
         runner.AddCallbacks(this);
@@ -105,7 +105,7 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
 
     public void UnregisterCallbacks(NetworkRunner runner)
     {
-        if (runner == null || !callbacksRegistered)
+        if (!runner || !callbacksRegistered)
             return;
 
         runner.RemoveCallbacks(this);
@@ -127,12 +127,23 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
         ClearInput();
     }
 
+    public void SetGameplayCamera(Camera camera)
+    {
+        gameplayCamera = camera;
+    }
+
+    public void ClearGameplayCamera(Camera camera)
+    {
+        if (gameplayCamera == camera)
+            gameplayCamera = null;
+    }
+
     private void ResolveActions()
     {
         if (actionsResolved)
             return;
 
-        if (runtimeInputActions == null)
+        if (!runtimeInputActions)
         {
             Debug.LogError("FusionInputProvider requires an InputActionAsset");
             return;
@@ -187,10 +198,17 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
 
     private void UpdateAimPosition()
     {
-        if (gameplayCamera == null)
-            gameplayCamera = Camera.main;
+#if !UNITY_SERVER
+        if (!gameplayCamera)
+        {
+            var localPlayerCamera = LocalPlayerCamera.Instance;
 
-        if (gameplayCamera == null)
+            if (localPlayerCamera)
+                gameplayCamera = localPlayerCamera.GameplayCamera;
+        }
+#endif
+
+        if (!gameplayCamera)
             return;
 
         if (gamepadAimInput.sqrMagnitude >=

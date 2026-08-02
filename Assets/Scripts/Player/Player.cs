@@ -1,17 +1,15 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Abb2kTools;
-using Abb2kTools.Projectiles;
 using DG.Tweening;
 using Fusion;
-using Managers;
+using Fusion.Addons.Physics;
 using TMPro;
 using UnityEngine;
 
 public class Player : NetworkBehaviour, IHitable
 {
-    private const int SCORE_FOR_KILL = 10;
-
     #region Shader Property IDs
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -19,12 +17,17 @@ public class Player : NetworkBehaviour, IHitable
     #endregion
 
     #region Inspector References - Core
-    [SerializeField] private Renderer modelRenderer;
-    [SerializeField] private Collider hitCollider;
+    [SerializeField] private Renderer[] modelRenderers;
+    [SerializeField] private Collider[] collisionColliders;
     [SerializeField] private Rigidbody rigidBody;
+    [SerializeField] private Animator animator;
+    private readonly int animWalkId = Animator.StringToHash("IsWalking");
+    [SerializeField] private Animator cannonAnimator;
+    private readonly int animShootId = Animator.StringToHash("Shoot");
     [SerializeField] private SpriteRenderer miniMapIconColor;
     [SerializeField] private CamShakeData hurtShake;
-    [SerializeField] private Shooter shooter;
+    [SerializeField] private AudioSource hurtSource;
+    [SerializeField] private AudioSource shootSource;
     #endregion
 
     #region Inspector References - Owner HUD
@@ -37,7 +40,8 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private TMP_Text overheadNicknameLabel;
     [SerializeField] private TMP_Text overheadHpLabel;
     [SerializeField] private Transform overheadUIRoot;
-    private Vector3 overheadUIFixedEulerAngles = new Vector3(90f, 0f, 0f);
+    [SerializeField] private Vector3 overheadOffset = new Vector3(0f, 1f, 1f);
+    [SerializeField] private Vector3 overheadEulerAngles = new Vector3(90f, 0f, 0f);
     #endregion
 
     #region Inspector References - Local Movement Prediction
@@ -49,7 +53,7 @@ public class Player : NetworkBehaviour, IHitable
     #region Inspector Tunables - Gameplay
     [SerializeField] private float startingHp = 10f;
     [SerializeField] private float movementSpeed = 5f;
-    // [SerializeField] private float shootingCooldown = 0.5f;
+    [SerializeField] private float shootingCooldown = 0.5f;
     [SerializeField] private float respawnDelay = 3f;
     #endregion
 
@@ -69,22 +73,23 @@ public class Player : NetworkBehaviour, IHitable
     [Networked, OnChangedRender(nameof(OnDeathStateChanged))]
     public NetworkBool IsDead { get; private set; }
 
-    // [Networked] private TickTimer ShootCooldownTimer { get; set; }
+    [Networked] private TickTimer ShootCooldownTimer { get; set; }
     [Networked] private TickTimer RespawnTimer { get; set; }
     [Networked] private NetworkButtons PreviousButtons { get; set; }
-    // [Networked] public Vector3 LastFireDirection { get; private set; }
+    [Networked] public Vector3 LastFireDirection { get; private set; }
 
     public int LastFireTick { get; private set; }
     #endregion
 
     #region Private Runtime State
+    private static readonly Dictionary<PlayerRef, Player> SpawnedPlayers = new();
+
     private CharacterProperties character;
     private string cachedNickname;
     private bool controlsLocalCamera;
     private MaterialPropertyBlock materialPropertyBlock;
-    private Renderer[] modelRenderers;
-    private Collider[] collisionColliders;
-    private TeamsManager teamsManager;
+    private int[] modelMaterialSlotCounts;
+    private PlayerRef registeredPlayer = PlayerRef.None;
 
     private Vector3 _direction;
     private bool _pendingRespawn;
@@ -98,7 +103,7 @@ public class Player : NetworkBehaviour, IHitable
         if (!Object || !Object.HasInputAuthority || IsDead || !visualRoot)
             return;
 
-        var rawInput = FusionInputProvider.Instance != null
+        var rawInput = FusionInputProvider.Instance
             ? FusionInputProvider.Instance.CurrentMoveInput
             : Vector2.zero;
 
@@ -119,7 +124,9 @@ public class Player : NetworkBehaviour, IHitable
         if (!overheadUIRoot)
             return;
 
-        overheadUIRoot.position = transform.position + new Vector3(0, 1, 1);
+        overheadUIRoot.SetPositionAndRotation(
+            transform.position + overheadOffset,
+            Quaternion.Euler(overheadEulerAngles));
     }
 
     private void FixedUpdate()
@@ -142,23 +149,23 @@ public class Player : NetworkBehaviour, IHitable
     #region Fusion Lifecycle
     public override void Spawned()
     {
-        CacheReferences();
+        CacheMaterialSlotCounts();
+        registeredPlayer = Object.InputAuthority;
+
+        if (registeredPlayer != PlayerRef.None)
+            SpawnedPlayers[registeredPlayer] = this;
+
         OnCharacterIdChanged();
 
         if (Object.HasStateAuthority)
         {
             Hp = startingHp;
             IsDead = false;
+            ShootCooldownTimer = TickTimer.None;
             RespawnTimer = TickTimer.None;
         }
 
         StartCoroutine(ResolveNicknameWhenReady());
-
-        if (overheadUIRoot)
-        {
-            overheadUIRoot.SetParent(null, true);
-            overheadUIRoot.rotation = Quaternion.Euler(overheadUIFixedEulerAngles);
-        }
 
         OnTeamColorChanged();
         OnHpChanged();
@@ -167,14 +174,20 @@ public class Player : NetworkBehaviour, IHitable
 
         controlsLocalCamera = Object.HasInputAuthority;
 
-        if (controlsLocalCamera)
-            LocalPlayerCamera.Instance?.SetTarget(transform);
+        var localCamera = LocalPlayerCamera.Instance;
+
+        if (controlsLocalCamera && localCamera)
+            localCamera.SetTarget(transform);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        if (controlsLocalCamera)
-            LocalPlayerCamera.Instance?.ClearTarget(transform);
+        Unregister();
+
+        var localCamera = LocalPlayerCamera.Instance;
+
+        if (controlsLocalCamera && localCamera)
+            localCamera.ClearTarget(transform);
     }
 
     public override void FixedUpdateNetwork()
@@ -199,12 +212,17 @@ public class Player : NetworkBehaviour, IHitable
         ProcessAim(input);
         PreviousButtons = input.Buttons;
     }
+
+    public override void Render()
+    {
+        animator.SetBool(animWalkId, _direction.sqrMagnitude > 0.0001f);
+    }
     #endregion
 
     #region Public API
     public void SetCharacter(CharacterProperties newCharacter)
     {
-        if (!Object.HasStateAuthority || newCharacter == null)
+        if (!Object.HasStateAuthority || !newCharacter)
             return;
 
         CharacterID = newCharacter.CharacterID;
@@ -223,8 +241,22 @@ public class Player : NetworkBehaviour, IHitable
 
     public Collider[] GetCollisionColliders()
     {
-        CacheReferences();
         return collisionColliders;
+    }
+
+    public static bool TryGet(PlayerRef player, out Player playerAvatar)
+    {
+        if (SpawnedPlayers.TryGetValue(player, out playerAvatar) &&
+            playerAvatar &&
+            playerAvatar.Object &&
+            playerAvatar.Object.IsValid)
+        {
+            return true;
+        }
+
+        SpawnedPlayers.Remove(player);
+        playerAvatar = null;
+        return false;
     }
 
     public bool TryReceiveHit(PlayerRef attacker, DamageData data)
@@ -232,9 +264,10 @@ public class Player : NetworkBehaviour, IHitable
         if (!Object.HasStateAuthority || IsDead)
             return false;
 
-        teamsManager ??= FindAnyObjectByType<TeamsManager>();
+        var matchManager = MatchManager.Instance;
+        var teamsManager = matchManager ? matchManager.TeamsManager : null;
 
-        if (teamsManager != null && !teamsManager.CanDamage(attacker, Object.InputAuthority))
+        if (teamsManager && !teamsManager.CanDamage(attacker, Object.InputAuthority))
             return false;
 
         if (data.damage < DamageData.MIN_POSSIBLE_DAMAGE ||
@@ -262,10 +295,12 @@ public class Player : NetworkBehaviour, IHitable
         Hp = Mathf.Max(0f, Hp - data.damage);
 
         if (Hp <= 0f)
+        {
             if (hitBy.HasValue)
                 Die(hitBy.Value);
             else
                 Die();
+        }
         else
         {
             HurtShakeRPC();
@@ -303,20 +338,47 @@ public class Player : NetworkBehaviour, IHitable
         if (!input.Buttons.IsSet(GameplayButton.Fire))
             return;
 
-        shooter.TryShoot();
-        
-        // if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
-        //     return;
-        //
-        // ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
-        // LastFireTick = Runner.Tick;
-        // LastFireDirection = transform.forward.normalized;
-        //
-        // if (Object.HasStateAuthority)
-        // {
-        //     var placementManager = FindAnyObjectByType<PlacementManager>();
-        //     placementManager?.SpawnProjectile(Object, transform.position, LastFireDirection);
-        // }
+        if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
+            return;
+
+        ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
+        LastFireTick = Runner.Tick;
+        LastFireDirection = transform.forward.normalized;
+
+        cannonAnimator.SetTrigger(animShootId);
+        shootSource.Stop();
+        shootSource.Play();
+
+        if (Object.HasStateAuthority)
+        {
+            PlayShootEffectsRPC();
+
+            var matchManager = MatchManager.Instance;
+            var placementManager = matchManager
+                ? matchManager.PlacementManager
+                : null;
+
+            if (placementManager)
+            {
+                placementManager.SpawnProjectile(
+                    Object,
+                    transform.position,
+                    LastFireDirection);
+            }
+        }
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
+    private void PlayShootEffectsRPC()
+    {
+        if (cannonAnimator) 
+            cannonAnimator.SetTrigger(animShootId);
+
+        if (shootSource)
+        {
+            shootSource.Stop();
+            shootSource.Play();
+        }
     }
     #endregion
 
@@ -335,10 +397,15 @@ public class Player : NetworkBehaviour, IHitable
     {
         if (!Object.HasStateAuthority)
             return;
-        
-        ScoreManager.Instance?.AddScoreForKillingPlayer(killer, Object.InputAuthority);
-        ScoreManager.Instance?.ResetPlayerScore(Object.InputAuthority);
-        
+
+        var scoreManager = ScoreManager.Instance;
+
+        if (scoreManager)
+        {
+            scoreManager.AddScoreForKillingPlayer(killer, Object.InputAuthority);
+            scoreManager.ResetPlayerScore(Object.InputAuthority);
+        }
+
         Die();
     }
 
@@ -353,7 +420,7 @@ public class Player : NetworkBehaviour, IHitable
 
     private void Respawn()
     {
-        _pendingRespawnPosition = MatchManager.Instance.GetRandomSpawnPosition();
+        _pendingRespawnPosition = MatchManager.Instance.GetSpawnPosition(Object.InputAuthority);
         _pendingRespawn = true;
 
         Hp = startingHp;
@@ -369,6 +436,12 @@ public class Player : NetworkBehaviour, IHitable
     private void HurtShakeRPC()
     {
         CameraShaker.Instance.Shake(hurtShake);
+
+        PostProcessingEffectPlayer.Instance.RunVignetteEffect(.1f, 0, 1.5f, .3f, Color.red);
+        PostProcessingEffectPlayer.Instance.RunFilmGrainEffect(.1f, 0, 1.5f, .7f);
+
+        hurtSource.Stop();
+        hurtSource.Play();
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -376,16 +449,23 @@ public class Player : NetworkBehaviour, IHitable
     {
         Color ogColor = TeamColor.a > 0f
             ? TeamColor
-            : (character != null ? character.characterColor : Color.white);
+            : (character ? character.characterColor : Color.white);
 
-        foreach (var model in modelRenderers)
+        for (var modelIndex = 0; modelIndex < modelRenderers.Length; modelIndex++)
         {
+            var model = modelRenderers[modelIndex];
+
+            if (!model)
+                continue;
+
+            var materialSlotCount = modelMaterialSlotCounts[modelIndex];
+
             DOTween.Kill(model);
 
             DOTween.Sequence()
-                .Append(DOTween.To(() => ogColor, x => UpdateHitColor(model, x), Color.white, .05f))
-                .Append(DOTween.To(() => Color.white, x => UpdateHitColor(model, x), Color.red, .1f))
-                .Append(DOTween.To(() => Color.red, x => UpdateHitColor(model, x), ogColor, .15f))
+                .Append(DOTween.To(() => ogColor, x => UpdateHitColor(model, materialSlotCount, x), Color.white, .05f))
+                .Append(DOTween.To(() => Color.white, x => UpdateHitColor(model, materialSlotCount, x), Color.red, .1f))
+                .Append(DOTween.To(() => Color.red, x => UpdateHitColor(model, materialSlotCount, x), ogColor, .15f))
                 .SetTarget(model)
                 .SetLink(model.gameObject);
         }
@@ -406,27 +486,29 @@ public class Player : NetworkBehaviour, IHitable
 
     private void ApplyDisplayColor()
     {
-        CacheReferences();
-
-        if (modelRenderers == null || modelRenderers.Length == 0)
+        if (modelRenderers is null || modelRenderers.Length == 0)
             return;
+
+        CacheMaterialSlotCounts();
 
         var displayColor = TeamColor.a > 0f
             ? TeamColor
-            : character != null
+            : character
                 ? character.characterColor
                 : Color.white;
 
         materialPropertyBlock ??= new MaterialPropertyBlock();
 
-        foreach (var renderer in modelRenderers)
+        for (var rendererIndex = 0; rendererIndex < modelRenderers.Length; rendererIndex++)
         {
+            var renderer = modelRenderers[rendererIndex];
+
             if (!renderer)
                 continue;
 
-            var materials = renderer.sharedMaterials;
+            var materialSlotCount = modelMaterialSlotCounts[rendererIndex];
 
-            if (materials.Length == 0)
+            if (materialSlotCount == 0)
             {
                 materialPropertyBlock.Clear();
                 renderer.GetPropertyBlock(materialPropertyBlock);
@@ -437,7 +519,7 @@ public class Player : NetworkBehaviour, IHitable
                 continue;
             }
 
-            for (var materialIndex = 0; materialIndex < materials.Length; materialIndex++)
+            for (var materialIndex = 0; materialIndex < materialSlotCount; materialIndex++)
             {
                 materialPropertyBlock.Clear();
                 renderer.GetPropertyBlock(materialPropertyBlock, materialIndex);
@@ -449,14 +531,16 @@ public class Player : NetworkBehaviour, IHitable
         }
     }
 
-    private void UpdateHitColor(Renderer renderer, Color color)
+    private void UpdateHitColor(
+        Renderer renderer,
+        int materialSlotCount,
+        Color color)
     {
         if (!renderer) return;
 
         materialPropertyBlock ??= new MaterialPropertyBlock();
-        var materials = renderer.sharedMaterials;
 
-        if (materials.Length == 0)
+        if (materialSlotCount == 0)
         {
             renderer.GetPropertyBlock(materialPropertyBlock);
             materialPropertyBlock.SetColor(BaseColorId, color);
@@ -466,7 +550,7 @@ public class Player : NetworkBehaviour, IHitable
             return;
         }
 
-        for (var i = 0; i < materials.Length; i++)
+        for (var i = 0; i < materialSlotCount; i++)
         {
             renderer.GetPropertyBlock(materialPropertyBlock, i);
             materialPropertyBlock.SetColor(BaseColorId, color);
@@ -489,9 +573,7 @@ public class Player : NetworkBehaviour, IHitable
 
     private void OnDeathStateChanged()
     {
-        CacheReferences();
-
-        if (modelRenderers != null)
+        if (modelRenderers is not null)
         {
             foreach (var renderer in modelRenderers)
             {
@@ -500,7 +582,7 @@ public class Player : NetworkBehaviour, IHitable
             }
         }
 
-        if (collisionColliders != null)
+        if (collisionColliders is not null)
         {
             foreach (var collider in collisionColliders)
             {
@@ -515,8 +597,10 @@ public class Player : NetworkBehaviour, IHitable
         if (overheadUI)
             overheadUI.gameObject.SetActive(!IsDead);
 
-        if (controlsLocalCamera && !IsDead)
-            LocalPlayerCamera.Instance?.SnapToTarget();
+        var localCamera = LocalPlayerCamera.Instance;
+
+        if (controlsLocalCamera && !IsDead && localCamera)
+            localCamera.SnapToTarget();
     }
 
     private void ConfigureLocalPresentation()
@@ -554,35 +638,55 @@ public class Player : NetworkBehaviour, IHitable
 
     private string GetNickname()
     {
-        var dataObject = Runner.GetPlayerObject(Object.InputAuthority);
-
-        if (!dataObject)
-            return $"Player {Object.InputAuthority.PlayerId}";
-
-        var playerData = dataObject.GetComponent<UI.PlayerData>();
-
-        return playerData != null
+        return UI.PlayerData.TryGet(Object.InputAuthority, out var playerData)
             ? playerData.NickName.ToString()
             : $"Player {Object.InputAuthority.PlayerId}";
     }
     #endregion
 
     #region Shared Helpers
-    private void CacheReferences()
+    private void OnDestroy()
     {
-        if (modelRenderers == null || modelRenderers.Length == 0)
-            modelRenderers = GetComponentsInChildren<Renderer>(true);
+        Unregister();
+    }
 
-        if (collisionColliders == null || collisionColliders.Length == 0)
-            collisionColliders = GetComponentsInChildren<Collider>(true);
+    private void CacheMaterialSlotCounts()
+    {
+        if (modelRenderers is null)
+        {
+            modelMaterialSlotCounts = Array.Empty<int>();
+            return;
+        }
 
-        if (modelRenderer == null && modelRenderers.Length > 0)
-            modelRenderer = modelRenderers[0];
+        if (modelMaterialSlotCounts is not null &&
+            modelMaterialSlotCounts.Length == modelRenderers.Length)
+        {
+            return;
+        }
 
-        if (hitCollider == null && collisionColliders.Length > 0)
-            hitCollider = collisionColliders[0];
+        modelMaterialSlotCounts = new int[modelRenderers.Length];
 
-        teamsManager ??= FindAnyObjectByType<TeamsManager>();
+        for (var index = 0; index < modelRenderers.Length; index++)
+        {
+            var renderer = modelRenderers[index];
+            modelMaterialSlotCounts[index] = renderer
+                ? renderer.sharedMaterials.Length
+                : 0;
+        }
+    }
+
+    private void Unregister()
+    {
+        if (registeredPlayer == PlayerRef.None)
+            return;
+
+        if (SpawnedPlayers.TryGetValue(registeredPlayer, out var playerAvatar) &&
+            playerAvatar == this)
+        {
+            SpawnedPlayers.Remove(registeredPlayer);
+        }
+
+        registeredPlayer = PlayerRef.None;
     }
     #endregion
 }

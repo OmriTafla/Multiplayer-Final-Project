@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4281a848d5530404f8b3b99c74c9c942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Chat
-  messagePrefab: {fileID: 4648891711399231610, guid: 9b5287430a1e023419a447bbab0cd356, type: 3}
-  Content: {fileID: 0}
+  messagePrefab: {fileID: 5394249809258169686, guid: 9b5287430a1e023419a447bbab0cd356, type: 3}
+  content: {fileID: 0}
   inputField: {fileID: 0}
   username: Player
 --- !u!114 &8368698832841663872

@@ -8,7 +8,7 @@ public class ActivateObjectsBySceneAuth : MonoBehaviour
 
     public void HandleNewRunner(NetworkRunner newRunner)
     {
-        var isSceneAuth = newRunner != null && newRunner.IsServer;
+        var isSceneAuth = newRunner && newRunner.IsServer;
         foreach (var obj in sceneAuthExclusiveObjs)
             obj.SetActive(isSceneAuth);
     }

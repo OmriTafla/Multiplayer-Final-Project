@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
@@ -7,6 +8,8 @@ namespace UI
     public class PlayerData : NetworkBehaviour
     {
         public static event Action PlayerDataChanged;
+
+        private static readonly Dictionary<PlayerRef, PlayerData> SpawnedPlayers = new();
 
         [Networked, OnChangedRender(nameof(OnDataChanged))]
         public NetworkString<_16> NickName { get; set; }
@@ -17,43 +20,63 @@ namespace UI
         [Networked, OnChangedRender(nameof(OnDataChanged))]
         public int TeamId { get; private set; } = -1;
 
+        private bool isSpawned;
+        private PlayerRef registeredPlayer = PlayerRef.None;
+
+        public bool IsReady => isSpawned;
+
         public override void Spawned()
         {
+            isSpawned = true;
+            registeredPlayer = Object.InputAuthority;
+
+            if (registeredPlayer != PlayerRef.None)
+                SpawnedPlayers[registeredPlayer] = this;
+
             NotifyChanged();
 
             if (!HasInputAuthority)
                 return;
 
-            var pendingName = PlayerPrefs.GetString("PendingNickname", "");
-            var pendingColourName = PlayerPrefs.GetString("PendingColour", "White");
+            var pendingName = PlayerPrefs.GetString("PendingNickname", string.Empty);
 
             if (string.IsNullOrWhiteSpace(pendingName))
                 return;
 
-            Rpc_SetNicknameAndColor(
-                pendingName,
-                ColorFromName(pendingColourName));
+            RpcSetNickname(pendingName.Trim());
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
+            isSpawned = false;
+            Unregister();
             NotifyChanged();
         }
 
+        public static bool TryGet(PlayerRef player, out PlayerData playerData)
+        {
+            if (SpawnedPlayers.TryGetValue(player, out playerData) &&
+                playerData &&
+                playerData.isSpawned)
+            {
+                return true;
+            }
+
+            SpawnedPlayers.Remove(player);
+            playerData = null;
+            return false;
+        }
+
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        private void Rpc_SetNicknameAndColor(string nickname, Color requestedColor)
+        private void RpcSetNickname(string nickname)
         {
             NickName = nickname;
-
-            if (TeamId < 0)
-                Color = requestedColor;
-
             NotifyChanged();
         }
 
         public void SetTeam(int teamId, Color playerColor)
         {
-            if (!Object.HasStateAuthority)
+            if (!isSpawned || !Object.HasStateAuthority)
                 return;
 
             TeamId = teamId;
@@ -63,7 +86,7 @@ namespace UI
 
         private void OnDataChanged()
         {
-            if (!Object.HasStateAuthority)
+            if (isSpawned && !Object.HasStateAuthority)
                 NotifyChanged();
         }
 
@@ -72,16 +95,24 @@ namespace UI
             PlayerDataChanged?.Invoke();
         }
 
-        private static Color ColorFromName(string name)
+        private void OnDestroy()
         {
-            return name switch
+            isSpawned = false;
+            Unregister();
+        }
+
+        private void Unregister()
+        {
+            if (registeredPlayer == PlayerRef.None)
+                return;
+
+            if (SpawnedPlayers.TryGetValue(registeredPlayer, out var playerData) &&
+                playerData == this)
             {
-                "Red" => UnityEngine.Color.red,
-                "Blue" => UnityEngine.Color.blue,
-                "Green" => UnityEngine.Color.green,
-                "Yellow" => UnityEngine.Color.yellow,
-                _ => UnityEngine.Color.white
-            };
+                SpawnedPlayers.Remove(registeredPlayer);
+            }
+
+            registeredPlayer = PlayerRef.None;
         }
     }
 }

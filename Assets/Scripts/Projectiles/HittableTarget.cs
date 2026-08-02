@@ -14,7 +14,7 @@ public class HittableTarget : NetworkBehaviour
 
     public override void Spawned()
     {
-        if (modelRenderer != null)
+        if (modelRenderer)
             originalColor = modelRenderer.material.color;
 
         OnHitStateChanged();
@@ -22,13 +22,15 @@ public class HittableTarget : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (Object == null || !Object.IsValid || !Object.HasStateAuthority || IsHit)
+        if (!Object || !Object.IsValid || !Object.HasStateAuthority || IsHit)
             return;
 
-        var projectile = other.GetComponentInParent<Projectile>();
-        var hitObject = other.GetComponentInParent<NetworkObject>();
+        if (!other.TryGetComponent(out Projectile projectile))
+            return;
 
-        if (projectile == null || hitObject == null)
+        var hitObject = projectile.Object;
+
+        if (!hitObject)
             return;
 
         Debug.Log($"{gameObject.name} was hit by {hitObject.name}");
@@ -39,7 +41,7 @@ public class HittableTarget : NetworkBehaviour
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RpcPlayHitEffect()
     {
-        if (hitEffectPrefab == null)
+        if (!hitEffectPrefab)
             return;
 
         var effect = Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
@@ -49,7 +51,7 @@ public class HittableTarget : NetworkBehaviour
 
     private void OnHitStateChanged()
     {
-        if (modelRenderer != null)
+        if (modelRenderer)
             modelRenderer.material.color = IsHit ? hitColor : originalColor;
     }
 }

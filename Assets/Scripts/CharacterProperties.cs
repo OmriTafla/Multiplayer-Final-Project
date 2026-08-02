@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Fusion;
+using Unity.Collections;
 
 [CreateAssetMenu(fileName = "CharacterProperties", menuName = "Scriptable Objects/CharacterProperties")]
 public class CharacterProperties : ScriptableObject
@@ -18,21 +18,24 @@ public class CharacterProperties : ScriptableObject
 
     private static Dictionary<int, CharacterProperties> _characterRegistry;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void InitializeRegistry()
+    public static void InitializeRegistry(IEnumerable<CharacterProperties> characters)
     {
         _characterRegistry = new();
 
-        var allCharacters = Resources.LoadAll<CharacterProperties>("");
+        if (characters is null)
+            return;
 
-        foreach (var character in allCharacters)
-        {
+        foreach (var character in characters)
             Register(character);
-        }
     }
 
     public static void Register(CharacterProperties character)
     {
+        if (!character)
+            return;
+
+        _characterRegistry ??= new Dictionary<int, CharacterProperties>();
+
         if (_characterRegistry.ContainsKey(character.CharacterID)) return;
 
         _characterRegistry.Add(character.CharacterID, character);
@@ -40,7 +43,7 @@ public class CharacterProperties : ScriptableObject
 
     public static CharacterProperties GetByID(int id)
     {
-        if (_characterRegistry != null && _characterRegistry.TryGetValue(id, out CharacterProperties character))
+        if (_characterRegistry is not null && _characterRegistry.TryGetValue(id, out CharacterProperties character))
         {
             return character;
         }

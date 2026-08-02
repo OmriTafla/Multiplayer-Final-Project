@@ -1,4 +1,4 @@
-// #if DOTWEEN
+#if DOTWEEN
 using DG.Tweening;
 using Singleton;
 using UnityEngine;
@@ -25,14 +25,7 @@ namespace Abb2kTools
 
     public class CameraShaker : Singleton<CameraShaker>
     {
-        private Camera _camera;
-        private Camera Cam
-        {
-            get {
-                if (_camera == null) _camera = Camera.main;
-                return _camera;
-            }
-        }
+        [SerializeField] private Camera gameplayCamera;
 
         private Tweener positionShake;
         private Tweener rotationShake;
@@ -42,7 +35,7 @@ namespace Abb2kTools
         {
             get
             {
-                if (_dummyShakeTarget == null)
+                if (!_dummyShakeTarget)
                 {
                     GameObject go = new GameObject("[CameraShaker_DummyTarget]");
                     go.transform.SetParent(transform);
@@ -72,24 +65,24 @@ namespace Abb2kTools
 
         private void RestoreCleanPosition()
         {
-            if (isShakeApplied && Cam != null)
+            if (isShakeApplied && gameplayCamera)
             {
-                Cam.transform.position = cleanPos;
-                Cam.transform.rotation = cleanRot;
+                gameplayCamera.transform.position = cleanPos;
+                gameplayCamera.transform.rotation = cleanRot;
                 isShakeApplied = false;
             }
         }
 
         public void Shake(CamShakeData shake)
         {
-            if (Cam == null) return;
+            if (!gameplayCamera) return;
 
             DummyShakeTarget.localPosition = Vector3.zero;
             DummyShakeTarget.localRotation = Quaternion.identity;
 
-            if (shake.positionShake != null && shake.positionShake.duration > 0)
+            if (shake.positionShake is not null && shake.positionShake.duration > 0)
             {
-                if (positionShake != null) positionShake.Complete();
+                if (positionShake is not null) positionShake.Complete();
 
                 positionShake = DummyShakeTarget.DOShakePosition(
                     duration: shake.positionShake.duration,
@@ -102,9 +95,9 @@ namespace Abb2kTools
                 );
             }
             
-            if (shake.rotationShake != null && shake.rotationShake.duration > 0)
+            if (shake.rotationShake is not null && shake.rotationShake.duration > 0)
             {
-                if (rotationShake != null) rotationShake.Complete();
+                if (rotationShake is not null) rotationShake.Complete();
 
                 rotationShake = DummyShakeTarget.DOShakeRotation(
                     duration: shake.rotationShake.duration,
@@ -119,27 +112,27 @@ namespace Abb2kTools
 
         private void OnBeforeRender()
         {
-            if (Cam == null) return;
+            if (!gameplayCamera) return;
 
-            bool isPosActive = positionShake != null && positionShake.IsActive();
-            bool isRotActive = rotationShake != null && rotationShake.IsActive();
+            bool isPosActive = positionShake is not null && positionShake.IsActive();
+            bool isRotActive = rotationShake is not null && rotationShake.IsActive();
 
             if (!isPosActive && !isRotActive) return;
 
             if (!isShakeApplied)
             {
-                cleanPos = Cam.transform.position;
-                cleanRot = Cam.transform.rotation;
+                cleanPos = gameplayCamera.transform.position;
+                cleanRot = gameplayCamera.transform.rotation;
             }
 
             Vector3 posOffset = isPosActive ? (cleanRot * DummyShakeTarget.localPosition) : Vector3.zero;
             Quaternion rotOffset = isRotActive ? DummyShakeTarget.localRotation : Quaternion.identity;
 
-            Cam.transform.position = cleanPos + posOffset;
-            Cam.transform.rotation = cleanRot * rotOffset;
+            gameplayCamera.transform.position = cleanPos + posOffset;
+            gameplayCamera.transform.rotation = cleanRot * rotOffset;
 
             isShakeApplied = true;
         }
     }
 }
-// #endif
+#endif

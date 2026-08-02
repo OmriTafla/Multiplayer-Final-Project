@@ -1,6 +1,5 @@
 using DG.Tweening;
 using Fusion;
-using Managers;
 using UnityEngine;
 
 public class Projectile : NetworkBehaviour
@@ -9,17 +8,12 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
 
-    public int piercingLeft = 0;
-
     [SerializeField]
     private Renderer myRenderer;
 
     [Networked]
     private TickTimer LifeTimer { get; set; }
 
-    [Networked] public PlayerRef OwnerPlayerRef { get; set; }
-
-    private TeamsManager teamsManager;
     private bool impactResolved;
 
     public override void Spawned()
@@ -28,7 +22,6 @@ public class Projectile : NetworkBehaviour
             return;
 
         LifeTimer = TickTimer.CreateFromSeconds(Runner, lifetime);
-        teamsManager = FindAnyObjectByType<TeamsManager>();
     }
 
     public override void FixedUpdateNetwork()
@@ -60,42 +53,35 @@ public class Projectile : NetworkBehaviour
         if (target.TryGetComponent(out Projectile _))
             return;
 
-        var shooter = OwnerPlayerRef;
+        var shooter = Object.InputAuthority;
 
-        if (target.TryGetComponent(out Player targetPlayer))
+        if (Player.TryGet(target.InputAuthority, out var targetPlayer) &&
+            targetPlayer.Object == target)
         {
             var targetPlayerRef = targetPlayer.Object.InputAuthority;
-
-            //TODO: get the reference from the spawning player
-            teamsManager ??= FindAnyObjectByType<TeamsManager>();
+            var matchManager = MatchManager.Instance;
+            var teamsManager = matchManager ? matchManager.TeamsManager : null;
 
             if (teamsManager && !teamsManager.CanDamage(shooter, targetPlayerRef))
                 return;
 
-            ResolveCollision(targetPlayer, shooter, target);
+            impactResolved = true;
+
+            targetPlayer.OnHit(damageData, shooter);
+            PlayHitAnimAndkillRPC(target.transform.position);
             return;
         }
 
         if (target.TryGetComponent(out IHitable hittable))
         {
-            ResolveCollision(hittable, shooter, target);
-        }
-    }
-
-    private void ResolveCollision(IHitable targetPlayer, PlayerRef shooter, NetworkObject target)
-    {
-        targetPlayer.OnHit(damageData, shooter);
-        if (piercingLeft == 0)
-        {
+            hittable.OnHit(damageData, shooter);
             impactResolved = true;
             PlayHitAnimAndkillRPC(target.transform.position);
-            return;
         }
-        piercingLeft--;
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    void PlayHitAnimAndkillRPC(Vector3 hitPos)
+    private void PlayHitAnimAndkillRPC(Vector3 hitPos)
     {
         speed = 0;
 

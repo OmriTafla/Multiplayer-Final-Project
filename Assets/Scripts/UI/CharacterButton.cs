@@ -18,7 +18,7 @@ public class CharacterButton : MonoBehaviour
     [SerializeField]
     private TMP_Text _spawnName;
 
-    public int? MyCharacterID => _myCharacter == null ? null : _myCharacter.CharacterID;
+    public int? MyCharacterID => _myCharacter ? _myCharacter.CharacterID : null;
 
     public void Setup(CharacterProperties character)
     {
@@ -27,12 +27,12 @@ public class CharacterButton : MonoBehaviour
         _btnSpr.color = character.characterColor;
 
         _name.text = $"Name: {character.characterName}";
-        _spawnName.text = $"Spawns: {(character.spawnObject == null ? "None" : character.spawnObject.name)}";
+        _spawnName.text = $"Spawns: {(character.spawnObject ? character.spawnObject.name : "None")}";
     }
 
     public void OnClick()
     {
-        if (_myCharacter == null) return;
+        if (!_myCharacter) return;
         
         OnSelected?.Invoke(_myCharacter.CharacterID);
     }
