@@ -132,7 +132,7 @@ jobs:
             -projectPath "$GITHUB_WORKSPACE" \
             -buildTarget Linux64 \
             -standaloneBuildSubtarget Server \
-            -build "${{ steps.build-directory.outputs.path }}/$SERVER_EXECUTABLE" \
+            -buildLinux64Player "${{ steps.build-directory.outputs.path }}/$SERVER_EXECUTABLE" \
             -logFile -
 
       - name: Verify server build
