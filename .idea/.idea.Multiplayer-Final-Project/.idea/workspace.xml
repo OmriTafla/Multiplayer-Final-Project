@@ -11,9 +11,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Collectible/DensityObjectSpawner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Collectible/DensityObjectSpawner.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PlacementManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/PlacementManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +35,12 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/494cfb45237f4d9d8ae455761adae515214400/21/235bad5e/SetupCoroutine.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/494cfb45237f4d9d8ae455761adae515214400/37/ed8fd77d/MonoBehaviour.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/494cfb45237f4d9d8ae455761adae515214400/53/c89a9d9b/CustomYieldInstruction.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/494cfb45237f4d9d8ae455761adae515214400/c0/788ca879/WaitUntil.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/65f1e0e59b834a808e040db2f4dbdd6acdc00/7b/623e1368/SimulationBehaviourUpdater.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f713e1c3c5f545ce9b1df47230f4f85346ae00/ee/d540c7df/ExceptionDispatchInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Photon/Fusion/Editor/Fusion.Unity.Editor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Camera/DisableOnDedicatedServer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Camera/LocalPlayerCamera.cs" root0="FORCE_HIGHLIGHTING" />
@@ -46,6 +51,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Networking/DedicatedServerBootstrap.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Networking/FusionInputProvider.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/NicknameSubmitUI.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/PlayerData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.mathematics@19a9377c4ffa/Unity.Mathematics/math.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
@@ -55,61 +61,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000000000056" />
-      <entry key="S10" value="1.0000000784062142" />
-      <entry key="S30" value="1.0058996056528218" />
-      <entry key="S60" value="1.1256715807599378" />
-      <entry key="M2" value="2.0244503255462076" />
-      <entry key="M5" value="12.179951230678647" />
-      <entry key="M10" value="38.0027496748024" />
-      <entry key="M15" value="59.785363172383555" />
-      <entry key="M30" value="115.0581585759794" />
-      <entry key="H1" value="230.28844129523" />
-      <entry key="H2" value="407.3681733674641" />
-      <entry key="H4" value="585.312253871556" />
-      <entry key="D1" value="871.605191313244" />
-      <entry key="W1" value="962.199997466704" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="3.076770009396137E-175" />
+      <entry key="S5" value="1.567609957496062E-70" />
+      <entry key="S10" value="1.2520424127467835E-35" />
+      <entry key="S30" value="2.335756898248185E-12" />
+      <entry key="S60" value="1.7153320528001928E-6" />
+      <entry key="M2" value="0.002499052474321317" />
+      <entry key="M5" value="0.8360511519059352" />
+      <entry key="M10" value="9.956545232517437" />
+      <entry key="M15" value="24.47882899901718" />
+      <entry key="M30" value="73.62330385061128" />
+      <entry key="H1" value="184.2133421531743" />
+      <entry key="H2" value="364.3439534708341" />
+      <entry key="H4" value="553.5410737564822" />
+      <entry key="D1" value="863.5354695418412" />
+      <entry key="W1" value="960.9222771521678" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="1.2552648967680812E-167" />
-      <entry key="S2" value="1.8822783456912494E-42" />
-      <entry key="S5" value="2.0411435004364236E-17" />
-      <entry key="S10" value="4.517908701305389E-9" />
-      <entry key="S30" value="0.0017251064144658055" />
-      <entry key="S60" value="0.06979216724012251" />
-      <entry key="M2" value="0.8526932962660329" />
-      <entry key="M5" value="5.844965029899583" />
-      <entry key="M10" value="14.159326368764292" />
-      <entry key="M15" value="20.629493085638405" />
-      <entry key="M30" value="35.453699646096226" />
-      <entry key="H1" value="62.41634476346367" />
-      <entry key="H2" value="103.84862820692315" />
-      <entry key="H4" value="147.45475022984192" />
-      <entry key="D1" value="224.59767746996417" />
-      <entry key="W1" value="250.7885913748986" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0002823945761488" />
+      <entry key="S2" value="1.129632557063789" />
+      <entry key="S5" value="1.4416575257407325" />
+      <entry key="S10" value="1.6645731906575323" />
+      <entry key="S30" value="1.8726650960429423" />
+      <entry key="S60" value="1.934165560670348" />
+      <entry key="M2" value="1.9675749451634568" />
+      <entry key="M5" value="2.387679656207874" />
+      <entry key="M10" value="5.702891203609321" />
+      <entry key="M15" value="10.44211676014573" />
+      <entry key="M30" value="24.68381174900757" />
+      <entry key="H1" value="51.927222458635875" />
+      <entry key="H2" value="94.88008026991012" />
+      <entry key="H4" value="141.45051409716513" />
+      <entry key="D1" value="224.51820157253658" />
+      <entry key="W1" value="252.45555855488615" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="6.035597772456551E-7" />
-      <entry key="MS500" value="0.05703534303396574" />
-      <entry key="S2" value="0.48869288320540266" />
-      <entry key="S5" value="0.7509558516678944" />
-      <entry key="S10" value="0.8665771672683036" />
-      <entry key="S30" value="0.9608752343676574" />
-      <entry key="S60" value="1.1701329766532713" />
-      <entry key="M2" value="2.8565295310206835" />
-      <entry key="M5" value="17.98872252643221" />
-      <entry key="M10" value="52.11141229952487" />
-      <entry key="M15" value="80.36207612290794" />
-      <entry key="M30" value="150.46105034089803" />
-      <entry key="H1" value="292.6545061694755" />
-      <entry key="H2" value="511.1720895341221" />
-      <entry key="H4" value="732.7343994555756" />
-      <entry key="D1" value="1096.1945059072068" />
-      <entry key="W1" value="1212.9872563953888" />
+      <entry key="MS100" value="0.003906250000000001" />
+      <entry key="MS500" value="0.3299239444662997" />
+      <entry key="S2" value="0.8406425260159754" />
+      <entry key="S5" value="1.264154841053739" />
+      <entry key="S10" value="1.553618154103887" />
+      <entry key="S30" value="1.828646398640767" />
+      <entry key="S60" value="1.9111069890744603" />
+      <entry key="M2" value="1.9582409507845364" />
+      <entry key="M5" value="3.2164548029704143" />
+      <entry key="M10" value="15.64375536707174" />
+      <entry key="M15" value="34.89772766294938" />
+      <entry key="M30" value="98.27379964142766" />
+      <entry key="H1" value="236.0999416467119" />
+      <entry key="H2" value="459.1838424570264" />
+      <entry key="H4" value="694.9606522372076" />
+      <entry key="D1" value="1088.0453688671025" />
+      <entry key="W1" value="1213.376502630343" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -127,33 +133,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to&quot;: &quot;Unity Editor&quot;,
-    &quot;DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider&quot;: &quot;Unity Editor&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;Unity Attach To.Attach to.executor&quot;: &quot;Debug&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMThirdPartyAiProvidersConfigurable&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;unity.profiler.toolWindow.autoShown&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to": "Unity Editor",
+    "DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider": "Unity Editor",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Unity Attach To.Attach to.executor": "Debug",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "readdding-projectile-upgrades",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "ml.llm.LLMThirdPartyAiProvidersConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "unity.profiler.toolWindow.autoShown": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Unity Attach To.Attach to">
     <configuration name="Standalone Player" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="$PROJECT_DIR$/Builds/Server\unity_multliplayer_course.exe" />
