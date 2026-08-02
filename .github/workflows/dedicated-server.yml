@@ -136,7 +136,7 @@ jobs:
             -serverBuildPath "${{ steps.build-directory.outputs.path }}/$SERVER_EXECUTABLE" \
             -logFile -
 
-            - name: Verify dedicated server build
+      - name: Verify dedicated server build
         if: steps.request.outputs.operation == 'deploy'
         shell: bash
         run: |
