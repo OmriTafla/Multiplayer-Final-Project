@@ -38,7 +38,7 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         {
             SubscribeLeaderboardEvents();
 
-            foreach (var player in Runner.ActivePlayers)
+            foreach (var player in Runner.CommittedPlayers)
             {
                 if (!Scores.ContainsKey(player))
                     Scores.Add(player, 0);
@@ -104,11 +104,15 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
 
     public void AddScore(PlayerRef player, int score)
     {
-        if (!isSpawned || !Object.HasStateAuthority || player == PlayerRef.None)
+        if (!isSpawned ||
+            !Object.HasStateAuthority ||
+            player == PlayerRef.None ||
+            !Runner ||
+            !Runner.IsPlayerCommitted(player) ||
+            !Scores.ContainsKey(player))
+        {
             return;
-
-        if (!Scores.ContainsKey(player))
-            Scores.Add(player, 0);
+        }
 
         Scores.Set(player, Scores.Get(player) + score);
         MarkScoresChanged(false);

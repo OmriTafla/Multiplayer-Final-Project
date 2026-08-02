@@ -38,6 +38,10 @@ namespace Collectible
             base.Spawned();
 
             spawnCoroutineDone = false;
+
+            if (!Object.HasStateAuthority)
+                return;
+
             StartCoroutine(SpawnSequence());
         }
 
@@ -71,8 +75,10 @@ namespace Collectible
                     }
                     else
                     {
-                        spawnedObjects.Add(SinglePeer_NetworkRunnerManager.Instance.NetworkRunner.Spawn(prefabToSpawn, spawnPosition));
-                    }
+                        var spawnedObject = Runner.Spawn(prefabToSpawn, spawnPosition);
+
+                        if (spawnedObject)
+                            spawnedObjects.Add(spawnedObject);                    }     
                 }
 
                 if (tryOnce) break;
