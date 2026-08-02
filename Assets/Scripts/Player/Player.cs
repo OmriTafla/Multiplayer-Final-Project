@@ -23,12 +23,12 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private Rigidbody rigidBody;
     [SerializeField] private Animator animator;
     private readonly int animWalkId = Animator.StringToHash("IsWalking");
-    [SerializeField] private Animator cannonAnimator;
-    private readonly int animShootId = Animator.StringToHash("Shoot");
+    // [SerializeField] private Animator cannonAnimator;
+    // private readonly int animShootId = Animator.StringToHash("Shoot");
     [SerializeField] private SpriteRenderer miniMapIconColor;
     [SerializeField] private CamShakeData hurtShake;
     [SerializeField] private AudioSource hurtSource;
-    [SerializeField] private AudioSource shootSource;
+    // [SerializeField] private AudioSource shootSource;
     [SerializeField] private Shooter shooter;
     #endregion
 
@@ -340,48 +340,53 @@ public class Player : NetworkBehaviour, IHitable
         if (!input.Buttons.IsSet(GameplayButton.Fire))
             return;
 
-        if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
-            return;
+        shooter.TryShoot();
 
-        ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
-        LastFireTick = Runner.Tick;
-        LastFireDirection = transform.forward.normalized;
-
-        cannonAnimator.SetTrigger(animShootId);
-        shootSource.Stop();
-        shootSource.Play();
-
-        if (Object.HasStateAuthority)
-        {
-            PlayShootEffectsRPC();
-
-            var matchManager = MatchManager.Instance;
-            var placementManager = matchManager
-                ? matchManager.PlacementManager
-                : null;
-
-            if (placementManager)
-            {
-                placementManager.SpawnProjectile(
-                    Object,
-                    transform.position,
-                    LastFireDirection);
-            }
-        }
+        // if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
+        //     return;
+        //
+        // ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
+        // LastFireTick = Runner.Tick;
+        // LastFireDirection = transform.forward.normalized;
+        //
+        // if (Runner.IsForward)
+        // {
+        //     cannonAnimator.SetTrigger(animShootId);
+        //     shootSource.Stop();
+        //     shootSource.Play();
+        // }
+        //
+        // if (Object.HasStateAuthority)
+        // {
+        //     PlayShootEffectsRPC();
+        //
+        //     var matchManager = MatchManager.Instance;
+        //     var placementManager = matchManager
+        //         ? matchManager.PlacementManager
+        //         : null;
+        //
+        //     if (placementManager)
+        //     {
+        //         placementManager.SpawnProjectile(
+        //             Object,
+        //             transform.position,
+        //             LastFireDirection);
+        //     }
+        // }
     }
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
-    private void PlayShootEffectsRPC()
-    {
-        if (cannonAnimator) 
-            cannonAnimator.SetTrigger(animShootId);
-
-        if (shootSource)
-        {
-            shootSource.Stop();
-            shootSource.Play();
-        }
-    }
+    // [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
+    // private void PlayShootEffectsRPC()
+    // {
+    //     if (cannonAnimator) 
+    //         cannonAnimator.SetTrigger(animShootId);
+    //
+    //     if (shootSource)
+    //     {
+    //         shootSource.Stop();
+    //         shootSource.Play();
+    //     }
+    // }
     #endregion
 
     #region Death / Respawn

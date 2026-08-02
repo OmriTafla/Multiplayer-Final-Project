@@ -12,6 +12,11 @@ namespace Abb2kTools.Projectiles
         public int LastFireTick { get; private set; }
         [SerializeField] private float shootingCooldown = 0.5f;
         public HashSet<Upgrade<Projectile>> bulletUpgrades = new();
+        
+        [Header("Animation")]
+        [SerializeField] private Animator cannonAnimator;
+        private readonly int animShootId = Animator.StringToHash("Shoot");
+        [SerializeField] private AudioSource shootSource;
     
         public override void Spawned()
         {
@@ -34,9 +39,19 @@ namespace Abb2kTools.Projectiles
             ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
             LastFireTick = Runner.Tick;
             LastFireDirection = transform.forward.normalized;
+            
+            if (Runner.IsForward)
+            {
+                cannonAnimator.SetTrigger(animShootId);
+                shootSource.Stop();
+                shootSource.Play();
+            }
 
             if (Object.HasStateAuthority)
             {
+                PlayShootEffectsRPC();
+
+                
                 var placementManager = FindAnyObjectByType<PlacementManager>();
                 var newProjectile = placementManager?.SpawnProjectile(
                     Object, transform.position, LastFireDirection);
@@ -45,6 +60,19 @@ namespace Abb2kTools.Projectiles
                 {
                     bulletUpgrade.ApplyUpgrade(newProjectile);
                 }
+            }
+        }
+        
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
+        private void PlayShootEffectsRPC()
+        {
+            if (cannonAnimator) 
+                cannonAnimator.SetTrigger(animShootId);
+
+            if (shootSource)
+            {
+                shootSource.Stop();
+                shootSource.Play();
             }
         }
     }

@@ -861,6 +861,7 @@ GameObject:
   - component: {fileID: 3458336771368325197}
   - component: {fileID: -3512152510963605281}
   - component: {fileID: 3840523597240702830}
+  - component: {fileID: 8549313746988393279}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -910,7 +911,6 @@ MonoBehaviour:
   - {fileID: 4979769616436737495}
   rigidBody: {fileID: 3458336771368325197}
   animator: {fileID: 408643528584894971}
-  cannonAnimator: {fileID: 7825232203457448560}
   miniMapIconColor: {fileID: 2533349612935277087}
   hurtShake:
     positionShake:
@@ -928,7 +928,7 @@ MonoBehaviour:
       fadeOut: 1
       randomnessMode: 0
   hurtSource: {fileID: 843463544801531969}
-  shootSource: {fileID: 4790391250570828691}
+  shooter: {fileID: 0}
   playerUI: {fileID: 4275309682345805136}
   hpLabel: {fileID: 476318218719191834}
   overheadUI: {fileID: 1664950065571512197}
@@ -971,6 +971,7 @@ MonoBehaviour:
   - {fileID: 2524672585982938568}
   - {fileID: -3512152510963605281}
   - {fileID: 3840523597240702830}
+  - {fileID: 8549313746988393279}
   - {fileID: 1011467736368549346}
   ForceRemoteRenderTimeframe: 0
 --- !u!54 &3458336771368325197
@@ -1035,6 +1036,22 @@ MonoBehaviour:
   StateHashes: 00000000f2425c4cc1f1797bb28de91d813ecc2a
   TriggerHashes: 00000000
   TotalWords: 1
+--- !u!114 &8549313746988393279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6059781578005178534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c6d092c1f75496eadc02dec2c8f4bb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Abb2kTools.Projectiles.Shooter
+  _LastFireDirection: {x: 0, y: 0, z: 0}
+  shootingCooldown: 0.5
+  cannonAnimator: {fileID: 7825232203457448560}
+  shootSource: {fileID: 4790391250570828691}
 --- !u!1 &7358201055602102771
 GameObject:
   m_ObjectHideFlags: 0
