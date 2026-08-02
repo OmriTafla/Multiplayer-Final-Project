@@ -133,7 +133,7 @@ public class Player : NetworkBehaviour, IHitable
     {
         if (_pendingRespawn && rigidBody)
         {
-            rigidBody.MovePosition(_pendingRespawnPosition);
+            rigidBody.position = _pendingRespawnPosition;
             rigidBody.linearVelocity = Vector3.zero;
             rigidBody.angularVelocity = Vector3.zero;
             _pendingRespawn = false;
@@ -334,41 +334,43 @@ public class Player : NetworkBehaviour, IHitable
     }
 
     private void ProcessFire(GameplayInput input)
-    {        
+    {
         if (!input.Buttons.IsSet(GameplayButton.Fire))
             return;
 
-        if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
-            return;
+        shooter.TryShoot();
 
-        ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
-        LastFireTick = Runner.Tick;
-        LastFireDirection = transform.forward.normalized;
-
-        if (Runner.IsForward)
-        {
-            cannonAnimator.SetTrigger(animShootId);
-            shootSource.Stop();
-            shootSource.Play();
-        }
-
-        if (Object.HasStateAuthority)
-        {
-            PlayShootEffectsRPC();
-
-            var matchManager = MatchManager.Instance;
-            var placementManager = matchManager
-                ? matchManager.PlacementManager
-                : null;
-
-            if (placementManager)
-            {
-                placementManager.SpawnProjectile(
-                    Object,
-                    transform.position,
-                    LastFireDirection);
-            }
-        }
+        // if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
+        //     return;
+        //
+        // ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
+        // LastFireTick = Runner.Tick;
+        // LastFireDirection = transform.forward.normalized;
+        //
+        // if (Runner.IsForward)
+        // {
+        //     cannonAnimator.SetTrigger(animShootId);
+        //     shootSource.Stop();
+        //     shootSource.Play();
+        // }
+        //
+        // if (Object.HasStateAuthority)
+        // {
+        //     PlayShootEffectsRPC();
+        //
+        //     var matchManager = MatchManager.Instance;
+        //     var placementManager = matchManager
+        //         ? matchManager.PlacementManager
+        //         : null;
+        //
+        //     if (placementManager)
+        //     {
+        //         placementManager.SpawnProjectile(
+        //             Object,
+        //             transform.position,
+        //             LastFireDirection);
+        //     }
+        // }
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]

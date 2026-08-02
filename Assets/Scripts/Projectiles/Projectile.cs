@@ -7,6 +7,7 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float speed = 20f;
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
+    public int piercingLeft = 0;
 
     [SerializeField]
     private Renderer myRenderer;
@@ -65,16 +66,24 @@ public class Projectile : NetworkBehaviour
             if (teamsManager && !teamsManager.CanDamage(shooter, targetPlayerRef))
                 return;
 
-            impactResolved = true;
-
             targetPlayer.OnHit(damageData, shooter);
-            PlayHitAnimAndkillRPC(target.transform.position);
+
+            ResolveCollision(target);
             return;
         }
 
         if (target.TryGetComponent(out IHitable hittable))
         {
             hittable.OnHit(damageData, shooter);
+            ResolveCollision(target);
+        }
+    }
+
+    private void ResolveCollision(NetworkObject target)
+    {
+        piercingLeft--;
+        if (piercingLeft < 0)
+        {
             impactResolved = true;
             PlayHitAnimAndkillRPC(target.transform.position);
         }

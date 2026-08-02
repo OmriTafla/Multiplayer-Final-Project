@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlacementManager : NetworkBehaviour
 {
-    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Projectile projectilePrefab;
 
     private readonly Dictionary<PlayerRef, List<NetworkObject>> playerPlaceables = new();
 
@@ -26,20 +26,20 @@ public class PlacementManager : NetworkBehaviour
         Runner.Despawn(target);
     }
 
-    public void SpawnProjectile(NetworkObject requestingPlayer, Vector3 origin, Vector3 direction)
+    public Projectile SpawnProjectile(NetworkObject requestingPlayer, Vector3 origin, Vector3 direction)
     {
         if (!Object.HasStateAuthority)
-            return;
+            return null;
 
         if (!requestingPlayer)
-            return;
+            return null;
 
         if (direction.sqrMagnitude < 0.0001f)
-            return;
+            return null;
 
         var normalizedDirection = direction.normalized;
 
-        Runner.Spawn(
+        return Runner.Spawn(
             projectilePrefab,
             origin,
             Quaternion.LookRotation(normalizedDirection),
