@@ -132,28 +132,47 @@ jobs:
             -projectPath "$GITHUB_WORKSPACE" \
             -buildTarget Linux64 \
             -standaloneBuildSubtarget Server \
-            -buildLinux64Player "${{ steps.build-directory.outputs.path }}/$SERVER_EXECUTABLE" \
+            -executeMethod DedicatedServerBuild.BuildLinux \
+            -serverBuildPath "${{ steps.build-directory.outputs.path }}/$SERVER_EXECUTABLE" \
             -logFile -
 
-      - name: Verify server build
+            - name: Verify dedicated server build
         if: steps.request.outputs.operation == 'deploy'
         shell: bash
         run: |
           set -Eeuo pipefail
-          build_directory="${{ steps.build-directory.outputs.path }}"
-          test -f "$build_directory/$SERVER_EXECUTABLE"
-          test -d "$build_directory/MPFinalServer_Data"
-          chmod +x "$build_directory/$SERVER_EXECUTABLE"
 
-      - name: Deploy both game modes
-        if: steps.request.outputs.operation == 'deploy'
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          release_id="$GITHUB_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          /opt/mygame/bin/deploy.sh \
-            "${{ steps.build-directory.outputs.path }}" \
-            "$release_id"
+          build_directory="${{ steps.build-directory.outputs.path }}"
+          executable="$build_directory/$SERVER_EXECUTABLE"
+          data_directory="$build_directory/MPFinalServer_Data"
+          assembly="$data_directory/Managed/Assembly-CSharp.dll"
+          strings_file="$RUNNER_TEMP/server-assembly-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT.txt"
+
+          test -f "$executable"
+          test -d "$data_directory"
+          test -f "$assembly"
+          chmod +x "$executable"
+
+          command -v strings >/dev/null
+
+          strings -el "$assembly" > "$strings_file"
+
+          if ! grep -F "Dedicated server started session" "$strings_file" >/dev/null; then
+            echo "UNITY_SERVER code was not found in Assembly-CSharp.dll"
+            exit 1
+          fi
+
+          if grep -F "Joined leaderboard lobby" "$strings_file" >/dev/null; then
+            echo "Client-only code was found in the supposed server build"
+            exit 1
+          fi
+
+          if grep -F "Host or Client" "$strings_file" >/dev/null; then
+            echo "The build used the normal Player subtarget"
+            exit 1
+          fi
+
+          echo "Verified Unity Dedicated Server build"
 
       - name: Control dedicated servers
         if: steps.request.outputs.operation != 'deploy'
