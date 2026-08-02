@@ -20,8 +20,10 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private Renderer modelRenderer;
     [SerializeField] private Collider hitCollider;
     [SerializeField] private Rigidbody rigidBody;
-    private readonly int animWalkId = Animator.StringToHash("IsWalking");
     [SerializeField] private Animator animator;
+    private readonly int animWalkId = Animator.StringToHash("IsWalking");
+    [SerializeField] private Animator cannonAnimator;
+    private readonly int animShootId = Animator.StringToHash("Shoot");
     [SerializeField] private SpriteRenderer miniMapIconColor;
     [SerializeField] private CamShakeData hurtShake;
     #endregion
@@ -318,8 +320,12 @@ public class Player : NetworkBehaviour, IHitable
         LastFireTick = Runner.Tick;
         LastFireDirection = transform.forward.normalized;
 
+        cannonAnimator.SetTrigger(animShootId);
+
         if (Object.HasStateAuthority)
         {
+            PlayShootAnimationRPC();
+
             var placementManager = FindAnyObjectByType<PlacementManager>();
 
             if (placementManager)
@@ -330,6 +336,14 @@ public class Player : NetworkBehaviour, IHitable
                     LastFireDirection);
             }
         }
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
+    private void PlayShootAnimationRPC()
+    {
+        if (!cannonAnimator) return;
+        
+        cannonAnimator.SetTrigger(animShootId);
     }
     #endregion
 
