@@ -11,7 +11,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Photon/Fusion/Resources/PhotonAppSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Photon/Fusion/Resources/PhotonAppSettings.asset" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Enums/UpgradeType.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Enums/UpgradeType.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Upgrades/BulletUpgrade.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/BulletUpgrade.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Upgrades/PeircingUpgrade.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/PeircingUpgrade.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +50,7 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Collectible/Collectible.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Collectible/DensityObjectSpawner.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Enums/GameplayInput.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Enums/UpgradeType.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Managers/TeamsManager.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Networking/DedicatedServerBootstrap.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Networking/FusionInputProvider.cs" root0="FORCE_HIGHLIGHTING" />
@@ -60,61 +65,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="6.894398831756637E-8" />
-      <entry key="MS500" value="0.03695721875762946" />
-      <entry key="S2" value="0.4384547911800982" />
-      <entry key="S5" value="0.7190679437043702" />
-      <entry key="S10" value="0.8479990805829514" />
-      <entry key="S30" value="0.9940654461184033" />
-      <entry key="S60" value="1.3806005311343543" />
-      <entry key="M2" value="2.751858784605058" />
-      <entry key="M5" value="11.0950005472495" />
-      <entry key="M10" value="26.83771022859404" />
-      <entry key="M15" value="42.603236405991346" />
-      <entry key="M30" value="91.60397824430389" />
-      <entry key="H1" value="199.7249850820626" />
-      <entry key="H2" value="382.5092286178962" />
-      <entry key="H4" value="581.9014046387322" />
-      <entry key="D1" value="914.6115701451041" />
-      <entry key="W1" value="1018.6641587039818" />
+      <entry key="MS100" value="4.688057939323094E-41" />
+      <entry key="MS500" value="3.046584099077264E-8" />
+      <entry key="S2" value="0.05652405301499851" />
+      <entry key="S5" value="1.3339046753612824" />
+      <entry key="S10" value="4.90123939681785" />
+      <entry key="S30" value="13.702714808600197" />
+      <entry key="S60" value="19.668742861144896" />
+      <entry key="M2" value="26.637000660331697" />
+      <entry key="M5" value="35.7501121483694" />
+      <entry key="M10" value="44.354207809136156" />
+      <entry key="M15" value="54.41436504115279" />
+      <entry key="M30" value="93.53709813467783" />
+      <entry key="H1" value="191.99533125474682" />
+      <entry key="H2" value="373.70820207608944" />
+      <entry key="H4" value="584.7840147772896" />
+      <entry key="D1" value="948.9823227472352" />
+      <entry key="W1" value="1062.80450705745" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0000132835474136" />
-      <entry key="MS500" value="1.105843164045316" />
-      <entry key="S2" value="1.570381857934212" />
-      <entry key="S5" value="1.7988519165423535" />
-      <entry key="S10" value="1.8937948454103373" />
-      <entry key="S30" value="1.9908207726916363" />
-      <entry key="S60" value="2.269941151425792" />
-      <entry key="M2" value="3.1487681553245417" />
-      <entry key="M5" value="5.731894709815454" />
-      <entry key="M10" value="9.526977809332381" />
-      <entry key="M15" value="13.68042631032559" />
-      <entry key="M30" value="27.033847454098897" />
-      <entry key="H1" value="53.91199984330912" />
-      <entry key="H2" value="97.80314803937732" />
-      <entry key="H4" value="146.89536239976331" />
-      <entry key="D1" value="235.5064234633319" />
-      <entry key="W1" value="265.13211617552366" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0000001285407045" />
+      <entry key="S10" value="1.0004898096402735" />
+      <entry key="S30" value="1.124107879005641" />
+      <entry key="S60" value="1.4976939628439467" />
+      <entry key="M2" value="1.997756862805287" />
+      <entry key="M5" value="2.660020363378478" />
+      <entry key="M10" value="4.260397073844135" />
+      <entry key="M15" value="6.847545418428151" />
+      <entry key="M30" value="17.57253809636041" />
+      <entry key="H1" value="42.65921722572348" />
+      <entry key="H2" value="86.91001430696893" />
+      <entry key="H4" value="139.0696704328149" />
+      <entry key="D1" value="235.52206696917835" />
+      <entry key="W1" value="267.6495589587899" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="5.6756331990096746E-5" />
-      <entry key="MS500" value="0.1927318011542756" />
-      <entry key="S2" value="1.3482257611047852" />
-      <entry key="S5" value="2.1513785400559944" />
-      <entry key="S10" value="2.534939459378414" />
-      <entry key="S30" value="2.9081645893939063" />
-      <entry key="S60" value="3.601748546774361" />
-      <entry key="M2" value="5.858717762636991" />
-      <entry key="M5" value="16.78869092084164" />
-      <entry key="M10" value="36.33015560112147" />
-      <entry key="M15" value="56.24941718376584" />
-      <entry key="M30" value="118.60105968151427" />
-      <entry key="H1" value="253.59576157346757" />
-      <entry key="H2" value="480.27180385529846" />
-      <entry key="H4" value="728.7651554027258" />
-      <entry key="D1" value="1150.1093777691437" />
-      <entry key="W1" value="1283.794888090113" />
+      <entry key="MS100" value="8.92413525614649E-4" />
+      <entry key="MS500" value="0.24553492883916764" />
+      <entry key="S2" value="0.7602496834568844" />
+      <entry key="S5" value="2.201016796504459" />
+      <entry key="S10" value="5.830335226779558" />
+      <entry key="S30" value="14.77208759563844" />
+      <entry key="S60" value="21.071951116110856" />
+      <entry key="M2" value="28.526170026867113" />
+      <entry key="M5" value="38.333067584436634" />
+      <entry key="M10" value="48.56267126146512" />
+      <entry key="M15" value="61.218713391541314" />
+      <entry key="M30" value="111.07195592124701" />
+      <entry key="H1" value="234.61500643497695" />
+      <entry key="H2" value="460.57872590601136" />
+      <entry key="H4" value="723.8220445145364" />
+      <entry key="D1" value="1184.4954874109626" />
+      <entry key="W1" value="1330.4526251679604" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
