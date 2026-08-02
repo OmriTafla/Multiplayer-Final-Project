@@ -1,0 +1,171 @@
+name: Dedicated Server Deploy and Control
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Operation to perform
+        required: true
+        default: status
+        type: choice
+        options:
+          - status
+          - logs
+          - restart
+          - start
+          - stop
+          - deploy
+      target:
+        description: Server instance to control
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - ffa
+          - teams
+
+permissions:
+  contents: read
+
+concurrency:
+  group: multiplayer-production-server
+  cancel-in-progress: false
+
+jobs:
+  manage-server:
+    name: Manage dedicated servers
+    runs-on:
+      - self-hosted
+      - linux
+    timeout-minutes: 90
+    env:
+      UNITY_EDITOR: /home/unity/Unity/Hub/Editor/6000.4.12f1/Editor/Unity
+      SERVER_EXECUTABLE: MPFinalServer.x86_64
+
+    steps:
+      - name: Resolve request
+        id: request
+        shell: bash
+        env:
+          REQUESTED_OPERATION: ${{ inputs.operation }}
+          REQUESTED_TARGET: ${{ inputs.target }}
+        run: |
+          set -Eeuo pipefail
+
+          if [[ "$GITHUB_REF_NAME" != "main" ]]; then
+            echo "Production server operations are allowed only from main."
+            exit 1
+          fi
+
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            operation="deploy"
+            target="both"
+          else
+            operation="$REQUESTED_OPERATION"
+            target="$REQUESTED_TARGET"
+          fi
+
+          case "$operation" in
+            status|logs|restart|start|stop|deploy) ;;
+            *)
+              echo "Unsupported operation: $operation"
+              exit 1
+              ;;
+          esac
+
+          case "$target" in
+            both|ffa|teams) ;;
+            *)
+              echo "Unsupported target: $target"
+              exit 1
+              ;;
+          esac
+
+          if [[ "$operation" == "deploy" ]]; then
+            target="both"
+          fi
+
+          {
+            echo "operation=$operation"
+            echo "target=$target"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Operation: $operation"
+          echo "Target: $target"
+
+      - name: Check out main
+        if: steps.request.outputs.operation == 'deploy'
+        uses: actions/checkout@v4
+        with:
+          clean: false
+          lfs: true
+
+      - name: Prepare build directory
+        if: steps.request.outputs.operation == 'deploy'
+        id: build-directory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          build_directory="$RUNNER_TEMP/mygame-build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          mkdir -p "$build_directory"
+          echo "path=$build_directory" >> "$GITHUB_OUTPUT"
+
+      - name: Build Linux dedicated server
+        if: steps.request.outputs.operation == 'deploy'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          if [[ ! -x "$UNITY_EDITOR" ]]; then
+            echo "Unity Editor was not found at $UNITY_EDITOR"
+            exit 1
+          fi
+
+          "$UNITY_EDITOR" \
+            -batchmode \
+            -quit \
+            -nographics \
+            -projectPath "$GITHUB_WORKSPACE" \
+            -buildTarget Linux64 \
+            -standaloneBuildSubtarget Server \
+            -build "${{ steps.build-directory.outputs.path }}/$SERVER_EXECUTABLE" \
+            -logFile -
+
+      - name: Verify server build
+        if: steps.request.outputs.operation == 'deploy'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          build_directory="${{ steps.build-directory.outputs.path }}"
+          test -f "$build_directory/$SERVER_EXECUTABLE"
+          test -d "$build_directory/MPFinalServer_Data"
+          chmod +x "$build_directory/$SERVER_EXECUTABLE"
+
+      - name: Deploy both game modes
+        if: steps.request.outputs.operation == 'deploy'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          release_id="$GITHUB_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          /opt/mygame/bin/deploy.sh \
+            "${{ steps.build-directory.outputs.path }}" \
+            "$release_id"
+
+      - name: Control dedicated servers
+        if: steps.request.outputs.operation != 'deploy'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo -n /opt/mygame/bin/mygame-control \
+            "${{ steps.request.outputs.operation }}" \
+            "${{ steps.request.outputs.target }}"
+
+      - name: Final server status
+        if: always() && steps.request.outcome == 'success' && steps.request.outputs.operation != 'status'
+        shell: bash
+        run: |
+          sudo -n /opt/mygame/bin/mygame-control status both
