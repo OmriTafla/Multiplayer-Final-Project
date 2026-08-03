@@ -1,5 +1,7 @@
 
 using System.Collections.Generic;
+using Enums;
+using EnumUtils;
 using Fusion;
 using UnityEngine;
 
@@ -11,7 +13,9 @@ namespace Abb2kTools.Projectiles
         [Networked] public Vector3 LastFireDirection { get; private set; }
         public int LastFireTick { get; private set; }
         [SerializeField] private float shootingCooldown = 0.5f;
-        public HashSet<Upgrade<Projectile>> bulletUpgrades = new();
+
+        [Networked, OnChangedRender(nameof(UpdateUpgradesRPC))] public NetworkDictionary<UpgradeType, uint> BulletUpgradesBought => default;
+        private HashSet<Upgrade<Projectile>> _bulletUpgradeObjs;
         
         [Header("Animation")]
         [SerializeField] private Animator cannonAnimator;
@@ -56,10 +60,20 @@ namespace Abb2kTools.Projectiles
                 var newProjectile = placementManager?.SpawnProjectile(
                     Object, transform.position, LastFireDirection);
 
-                foreach (var bulletUpgrade in bulletUpgrades)
+                foreach (var bulletUpgrade in _bulletUpgradeObjs)
                 {
                     bulletUpgrade.ApplyUpgrade(newProjectile);
                 }
+            }
+        }
+
+        [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+        private void UpdateUpgradesRPC()
+        {
+            _bulletUpgradeObjs.Clear();
+            foreach (var upgrade in BulletUpgradesBought)
+            {
+                _bulletUpgradeObjs.Add(UpgradeFactory.MakeProjectileUpgrade(upgrade.Value))
             }
         }
         
