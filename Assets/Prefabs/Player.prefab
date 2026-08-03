@@ -911,6 +911,7 @@ MonoBehaviour:
   - {fileID: 4979769616436737495}
   rigidBody: {fileID: 3458336771368325197}
   animator: {fileID: 408643528584894971}
+  cannonAnimator: {fileID: 0}
   miniMapIconColor: {fileID: 2533349612935277087}
   hurtShake:
     positionShake:
@@ -928,6 +929,7 @@ MonoBehaviour:
       fadeOut: 1
       randomnessMode: 0
   hurtSource: {fileID: 843463544801531969}
+  shootSource: {fileID: 0}
   shooter: {fileID: 8549313746988393279}
   playerUI: {fileID: 4275309682345805136}
   hpLabel: {fileID: 476318218719191834}
@@ -935,9 +937,10 @@ MonoBehaviour:
   overheadNicknameLabel: {fileID: 2136165468820885055}
   overheadHpLabel: {fileID: 2849114065553330534}
   overheadUIRoot: {fileID: 5161717482653698084}
-  overheadOffset: {x: 0, y: 1, z: 1}
+  overheadOffset: {x: 1, y: 1, z: 1}
   overheadEulerAngles: {x: 90, y: 0, z: 0}
   visualRoot: {fileID: 4568523811385076386}
+  visualLeadDistance: 1
   visualLeadStrength: 1
   visualCatchUpSpeed: 10
   startingHp: 10
