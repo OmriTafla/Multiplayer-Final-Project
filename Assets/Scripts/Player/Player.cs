@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Abb2kTools;
+using Abb2kTools.Projectiles;
 using DG.Tweening;
 using Fusion;
 using Fusion.Addons.Physics;
@@ -28,6 +29,7 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private CamShakeData hurtShake;
     [SerializeField] private AudioSource hurtSource;
     [SerializeField] private AudioSource shootSource;
+    [SerializeField] private Shooter shooter;
     #endregion
 
     #region Inspector References - Owner HUD
