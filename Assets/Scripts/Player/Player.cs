@@ -48,8 +48,9 @@ public class Player : NetworkBehaviour, IHitable
 
     #region Inspector References - Local Movement Prediction
     [SerializeField] private Transform visualRoot;
-    [SerializeField] private float visualLeadStrength = 1f;
-    [SerializeField] private float visualCatchUpSpeed = 10f;
+    [SerializeField] private float visualLeadDistance = 0.3f;
+    [SerializeField] private float visualLeadStrength = 12f;
+    [SerializeField] private float visualCatchUpSpeed = 6f;
     #endregion
 
     #region Inspector Tunables - Gameplay
@@ -110,15 +111,20 @@ public class Player : NetworkBehaviour, IHitable
             : Vector2.zero;
 
         var desiredDirection = new Vector3(rawInput.x, 0f, rawInput.y);
+        var hasInput = desiredDirection.sqrMagnitude > 0.0001f;
 
-        visualLeadOffset += desiredDirection * (visualLeadStrength * Time.deltaTime);
+        var targetOffset = hasInput
+            ? Vector3.ClampMagnitude(desiredDirection, 1f) * visualLeadDistance
+            : Vector3.zero;
+
+        var lerpSpeed = hasInput ? visualLeadStrength : visualCatchUpSpeed;
 
         visualLeadOffset = Vector3.Lerp(
             visualLeadOffset,
-            Vector3.zero,
-            visualCatchUpSpeed * Time.deltaTime);
+            targetOffset,
+            lerpSpeed * Time.deltaTime);
 
-        visualRoot.localPosition = visualLeadOffset;
+        visualRoot.position = transform.position + visualLeadOffset;
     }
 
     private void LateUpdate()
