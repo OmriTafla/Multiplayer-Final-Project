@@ -1,4 +1,4 @@
-
+using System;
 using System.Collections.Generic;
 using Enums;
 using EnumUtils;
@@ -14,8 +14,9 @@ namespace Abb2kTools.Projectiles
         public int LastFireTick { get; private set; }
         [SerializeField] private float shootingCooldown = 0.5f;
 
-        [Networked, OnChangedRender(nameof(UpdateUpgradesRPC))] public NetworkDictionary<UpgradeType, uint> BulletUpgradesBought => default;
-        private HashSet<Upgrade<Projectile>> _bulletUpgradeObjs;
+        [Networked, Capacity((int)UpgradeType.COUNT),
+         OnChangedRender(nameof(UpdateUpgradesClient))] 
+        public NetworkDictionary<UpgradeType, uint> BulletUpgradesBought => default;
         
         [Header("Animation")]
         [SerializeField] private Animator cannonAnimator;
@@ -29,6 +30,8 @@ namespace Abb2kTools.Projectiles
             if (Object.HasStateAuthority)
             {
                 ShootCooldownTimer = TickTimer.None;
+
+                BulletUpgradesBought.Set(UpgradeType.BulletPierce, 2);
             }
         }
 
@@ -67,13 +70,25 @@ namespace Abb2kTools.Projectiles
             }
         }
 
+        private void UpdateUpgradesClient()
+        {
+            if (Object.HasStateAuthority)
+            {
+                UpdateUpgradesRPC();
+            }
+        }
+        
         [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
         private void UpdateUpgradesRPC()
         {
             _bulletUpgradeObjs.Clear();
             foreach (var upgrade in BulletUpgradesBought)
             {
-                _bulletUpgradeObjs.Add(UpgradeFactory.MakeProjectileUpgrade(upgrade.Value))
+                for (int i = 0; i < upgrade.Value; i++)
+                {
+                    _bulletUpgradeObjs.Add(UpgradeFactory.MakeProjectileUpgrade(upgrade.Key));
+                }
+                print($"Added {upgrade.Key} {upgrade.Value} times");
             }
         }
         

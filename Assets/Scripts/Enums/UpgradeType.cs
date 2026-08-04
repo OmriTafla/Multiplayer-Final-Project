@@ -3,6 +3,7 @@ namespace Enums
     public enum UpgradeType
     {
         Unknown,
-        BulletPierce
+        BulletPierce,
+        COUNT
     }
 }
