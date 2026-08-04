@@ -938,7 +938,7 @@ MonoBehaviour:
   overheadNicknameLabel: {fileID: 2136165468820885055}
   overheadHpLabel: {fileID: 2849114065553330534}
   overheadUIRoot: {fileID: 5161717482653698084}
-  overheadOffset: {x: 1, y: 1, z: 1}
+  overheadOffset: {x: 0, y: 1.5, z: 1}
   overheadEulerAngles: {x: 90, y: 0, z: 0}
   startingHp: 10
   movementSpeed: 3
@@ -1050,6 +1050,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   _LastFireDirection: {x: 0, y: 0, z: 0}
+  _BulletUpgradesBought:
+    _items: []
   shootingCooldown: 1
   cannonAnimator: {fileID: 7825232203457448560}
   shootSource: {fileID: 4790391250570828691}
