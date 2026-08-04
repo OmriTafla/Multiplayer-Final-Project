@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4130a1deafdf4dabb7faf763a6f536db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Collectible.Collectible
-  scoreForHit: 5
+  scoreForHit: 1
   myRenderer: {fileID: 9030119252747714916}
 --- !u!114 &7153478171367295400
 MonoBehaviour:

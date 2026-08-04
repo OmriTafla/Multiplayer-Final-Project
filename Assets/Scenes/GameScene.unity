@@ -3253,6 +3253,7 @@ RectTransform:
   m_Children:
   - {fileID: 1561996164}
   - {fileID: 1583810076}
+  - {fileID: 7000000000000000002}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -6261,6 +6262,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d79928b0ade1374cb269ce8c89bc744, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!1001 &7000000000000000001
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1114903138}
+    m_Modifications:
+    - target: {fileID: 8100000000000000002, guid: 27822b3a7aca1a8d4ff2ce2fb3d7008d, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8100000000000000002, guid: 27822b3a7aca1a8d4ff2ce2fb3d7008d, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8100000000000000002, guid: 27822b3a7aca1a8d4ff2ce2fb3d7008d, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8100000000000000002, guid: 27822b3a7aca1a8d4ff2ce2fb3d7008d, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8100000000000000002, guid: 27822b3a7aca1a8d4ff2ce2fb3d7008d, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8130000000000000004, guid: 27822b3a7aca1a8d4ff2ce2fb3d7008d, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4291936178
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 27822b3a7aca1a8d4ff2ce2fb3d7008d, type: 3}
+--- !u!224 &7000000000000000002 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8100000000000000002, guid: 27822b3a7aca1a8d4ff2ce2fb3d7008d, type: 3}
+  m_PrefabInstance: {fileID: 7000000000000000001}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

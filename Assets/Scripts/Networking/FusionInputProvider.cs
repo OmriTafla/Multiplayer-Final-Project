@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
@@ -265,21 +266,24 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
         if (Application.isBatchMode || !actionsResolved)
             return;
 
+        var pointerOverUI = EventSystem.current &&
+                            EventSystem.current.IsPointerOverGameObject();
+
         currentInput.Move = Vector2.ClampMagnitude(
             moveAction.ReadValue<Vector2>(),
             1f);
 
         currentInput.Buttons.Set(
             GameplayButton.Fire,
-            fireAction.IsPressed());
+            !pointerOverUI && fireAction.IsPressed());
 
         currentInput.Buttons.Set(
             GameplayButton.Place,
-            placePressed);
+            !pointerOverUI && placePressed);
 
         currentInput.Buttons.Set(
             GameplayButton.Delete,
-            deletePressed);
+            !pointerOverUI && deletePressed);
 
         input.Set(currentInput);
 

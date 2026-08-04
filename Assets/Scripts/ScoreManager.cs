@@ -24,7 +24,7 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
     [SerializeField, Min(0f)] private float leaderboardPublishDelay = 0.25f;
     [SerializeField] private TeamsManager teamsManager;
 
-    private const float ScoreRatioOnKill = 0.5f;
+    private const int ScorePerPlayerKill = 10;
 
     private bool isSpawned;
     private bool leaderboardEventsSubscribed;
@@ -42,7 +42,7 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
             lastPublishedLeaderboard = null;
             SubscribeLeaderboardEvents();
 
-            foreach (var player in Runner.CommittedPlayers)
+            foreach (var player in Runner.ActivePlayers)
             {
                 if (!Scores.ContainsKey(player))
                     Scores.Add(player, 0);
@@ -84,13 +84,12 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
             !Object.HasStateAuthority ||
             killer == PlayerRef.None ||
             killed == PlayerRef.None ||
-            killer == killed ||
-            !Scores.ContainsKey(killed))
+            killer == killed)
         {
             return;
         }
 
-        AddScore(killer, (int)(Scores.Get(killed) * ScoreRatioOnKill));
+        TryAddScore(killer, ScorePerPlayerKill);
     }
 
     public void ResetPlayerScore(PlayerRef player)
@@ -110,20 +109,70 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         MarkScoresChanged(false);
     }
 
-    public void AddScore(PlayerRef player, int score)
+    public bool TryGetScore(PlayerRef player, out int score)
+    {
+        score = 0;
+
+        if (!isSpawned ||
+            player == PlayerRef.None ||
+            !Scores.ContainsKey(player))
+        {
+            return false;
+        }
+
+        score = Scores.Get(player);
+        return true;
+    }
+
+    public bool TrySpendScore(PlayerRef player, int price)
     {
         if (!isSpawned ||
             !Object.HasStateAuthority ||
             player == PlayerRef.None ||
+            price < 0 ||
             !Runner ||
-            !Runner.IsPlayerCommitted(player) ||
+            !Runner.IsPlayerValid(player) ||
             !Scores.ContainsKey(player))
         {
-            return;
+            return false;
         }
+
+        var score = Scores.Get(player);
+
+        if (score < price)
+            return false;
+
+        if (price == 0)
+            return true;
+
+        Scores.Set(player, score - price);
+        MarkScoresChanged(false);
+        return true;
+    }
+
+    public bool TryAddScore(PlayerRef player, int score)
+    {
+        if (!isSpawned ||
+            !Object.HasStateAuthority ||
+            player == PlayerRef.None ||
+            score <= 0 ||
+            !Runner ||
+            !Runner.IsPlayerValid(player))
+        {
+            return false;
+        }
+
+        if (!Scores.ContainsKey(player))
+            Scores.Add(player, 0);
 
         Scores.Set(player, Scores.Get(player) + score);
         MarkScoresChanged(false);
+        return true;
+    }
+
+    public void AddScore(PlayerRef player, int score)
+    {
+        TryAddScore(player, score);
     }
 
     public void RemovePlayer(PlayerRef player)

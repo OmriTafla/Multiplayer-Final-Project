@@ -12,8 +12,15 @@
   <component name="ChangeListManager">
     <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Collectible.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Collectible.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Player.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Player.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Collectible/Collectible.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Collectible/Collectible.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Networking/FusionInputProvider.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Networking/FusionInputProvider.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Player/Player.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Player/Player.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ScoreManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Upgrades/BulletUpgrade.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/BulletUpgrade.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -151,7 +158,7 @@
     "cidr.known.project.marker": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "readdding-projectile-upgrades",
+    "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -246,41 +253,20 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs</url>
-          <line>84</line>
-          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Player\Shooter.cs" containingFunctionPresentation="Method 'UpdateUpgradesRPC'">
-            <startOffsets>
-              <option value="2717" />
-            </startOffsets>
-            <endOffsets>
-              <option value="2762" />
-            </endOffsets>
-          </properties>
+          <line>62</line>
+          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Player\Shooter.cs" containingFunctionPresentation="Method 'UpdateUpgradesRPC'" />
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs</url>
-          <line>32</line>
-          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Player\Shooter.cs" containingFunctionPresentation="Method 'Spawned'">
-            <startOffsets>
-              <option value="1041" />
-            </startOffsets>
-            <endOffsets>
-              <option value="1095" />
-            </endOffsets>
-          </properties>
+          <line>35</line>
+          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Player\Shooter.cs" containingFunctionPresentation="Method 'Spawned'" />
           <option name="timeStamp" value="5" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Assets/Scripts/Upgrades/BulletUpgrade.cs</url>
-          <line>12</line>
-          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Upgrades\BulletUpgrade.cs" containingFunctionPresentation="Method 'ApplyUpgrade'">
-            <startOffsets>
-              <option value="324" />
-            </startOffsets>
-            <endOffsets>
-              <option value="363" />
-            </endOffsets>
-          </properties>
+          <line>11</line>
+          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Upgrades\BulletUpgrade.cs" containingFunctionPresentation="Method 'ApplyUpgrade'" />
           <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>

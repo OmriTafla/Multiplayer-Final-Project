@@ -862,6 +862,7 @@ GameObject:
   - component: {fileID: -3512152510963605281}
   - component: {fileID: 3840523597240702830}
   - component: {fileID: 8549313746988393279}
+  - component: {fileID: 6677001100220033445}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -942,6 +943,8 @@ MonoBehaviour:
   startingHp: 10
   movementSpeed: 3
   respawnDelay: 3
+  healthRegenerationDelay: 5
+  healthRegenerationInterval: 1
   _CharacterID: 0
   _TeamId: -1
   _TeamColor: {r: 0, g: 0, b: 0, a: 0}
@@ -969,6 +972,7 @@ MonoBehaviour:
   - {fileID: -3512152510963605281}
   - {fileID: 3840523597240702830}
   - {fileID: 8549313746988393279}
+  - {fileID: 6677001100220033445}
   - {fileID: 1011467736368549346}
   ForceRemoteRenderTimeframe: 0
 --- !u!54 &3458336771368325197
@@ -1044,11 +1048,26 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8c6d092c1f75496eadc02dec2c8f4bb7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Abb2kTools.Projectiles.Shooter
+  m_EditorClassIdentifier: '::'
   _LastFireDirection: {x: 0, y: 0, z: 0}
   shootingCooldown: 1
   cannonAnimator: {fileID: 7825232203457448560}
   shootSource: {fileID: 4790391250570828691}
+  upgradeShop: {fileID: 6677001100220033445}
+--- !u!114 &6677001100220033445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6059781578005178534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a39b5d8c788ad0483f505a2db4a8cce, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: '::'
+  upgradePrices: {fileID: 11400000, guid: fdc96058cd636ba465f7a8fe079795ef, type: 2}
+  _UpgradeRevision: 0
 --- !u!1 &7358201055602102771
 GameObject:
   m_ObjectHideFlags: 0

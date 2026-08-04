@@ -1,4 +1,3 @@
-using DG.Tweening;
 using Fusion;
 using UnityEngine;
 
@@ -6,7 +5,7 @@ namespace Collectible
 {
     public class Collectible : NetworkBehaviour, IHitable
     {
-        public int scoreForHit;
+        [SerializeField, Min(1)] private int scoreForHit = 1;
 
         public void OnHit(DamageData data, PlayerRef? hitBy)
         {
@@ -15,16 +14,17 @@ namespace Collectible
                 return;
             }
             
-            if (hitBy.HasValue)
+            if (!hitBy.HasValue)
+                return;
+
+            var scoreManager = ScoreManager.Instance;
+
+            if (!scoreManager ||
+                !scoreManager.TryAddScore(hitBy.Value, scoreForHit))
             {
-                ScoreManager.Instance.AddScore(hitBy.Value, scoreForHit);
+                return;
             }
 
-            SelfDestruct();
-        }
-
-        private void SelfDestruct()
-        {
             Runner.Despawn(Object);
         }
     }

@@ -55,6 +55,7 @@ public class Projectile : NetworkBehaviour
             return;
 
         var shooter = Object.InputAuthority;
+        var hitPosition = other.ClosestPoint(transform.position);
 
         if (Player.TryGet(target.InputAuthority, out var targetPlayer) &&
             targetPlayer.Object == target)
@@ -68,23 +69,23 @@ public class Projectile : NetworkBehaviour
 
             targetPlayer.OnHit(damageData, shooter);
 
-            ResolveCollision(target);
+            ResolveCollision(hitPosition);
             return;
         }
 
         if (target.TryGetComponent(out IHitable hittable))
         {
             hittable.OnHit(damageData, shooter);
-            ResolveCollision(target);
+            ResolveCollision(hitPosition);
         }
     }
 
-    private void ResolveCollision(NetworkObject target)
+    private void ResolveCollision(Vector3 hitPosition)
     {
         if (piercingLeft == 0)
         {
             impactResolved = true;
-            PlayHitAnimAndkillRPC(target.transform.position);
+            PlayHitAnimAndkillRPC(hitPosition);
             return;
         }
         piercingLeft--;
@@ -95,7 +96,10 @@ public class Projectile : NetworkBehaviour
     {
         speed = 0;
 
-        transform.rotation = Quaternion.LookRotation((transform.position - hitPos).normalized);
+        var impactDirection = transform.position - hitPos;
+
+        if (impactDirection.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.LookRotation(impactDirection.normalized);
 
         myRenderer.material.DOColor(Color.white, .15f);
 

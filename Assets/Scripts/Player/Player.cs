@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Abb2kTools;
-using Abb2kTools.Projectiles;
 using DG.Tweening;
 using Fusion;
 using TMPro;
@@ -48,6 +47,8 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private float startingHp = 10f;
     [SerializeField] private float movementSpeed = 5f;
     [SerializeField] private float respawnDelay = 3f;
+    [SerializeField, Min(0f)] private float healthRegenerationDelay = 5f;
+    [SerializeField, Min(0.05f)] private float healthRegenerationInterval = 1f;
     #endregion
 
     #region Networked State
@@ -67,6 +68,8 @@ public class Player : NetworkBehaviour, IHitable
     public NetworkBool IsDead { get; private set; }
 
     [Networked] private TickTimer RespawnTimer { get; set; }
+    [Networked] private TickTimer HealthRegenerationDelayTimer { get; set; }
+    [Networked] private TickTimer HealthRegenerationIntervalTimer { get; set; }
     #endregion
 
     #region Private Runtime State
@@ -110,6 +113,8 @@ public class Player : NetworkBehaviour, IHitable
             Hp = startingHp;
             IsDead = false;
             RespawnTimer = TickTimer.None;
+            HealthRegenerationDelayTimer = TickTimer.None;
+            HealthRegenerationIntervalTimer = TickTimer.None;
         }
 
         StartCoroutine(ResolveNicknameWhenReady());
@@ -141,6 +146,7 @@ public class Player : NetworkBehaviour, IHitable
     public override void FixedUpdateNetwork()
     {
         ProcessRespawn();
+        ProcessHealthRegeneration();
         SetCollisionCollidersEnabled(!IsDead);
 
         if (IsDead)
@@ -241,7 +247,11 @@ public class Player : NetworkBehaviour, IHitable
             return;
         }
 
+        var previousHp = Hp;
         Hp = Mathf.Max(0f, Hp - data.damage);
+
+        if (Hp >= previousHp)
+            return;
 
         if (Hp <= 0f)
         {
@@ -252,6 +262,7 @@ public class Player : NetworkBehaviour, IHitable
         }
         else
         {
+            RestartHealthRegeneration();
             HurtShakeRPC();
             ApplyBodyFlashRPC();
         }
@@ -360,6 +371,8 @@ public class Player : NetworkBehaviour, IHitable
 
         IsDead = true;
         RespawnTimer = TickTimer.CreateFromSeconds(Runner, respawnDelay);
+        HealthRegenerationDelayTimer = TickTimer.None;
+        HealthRegenerationIntervalTimer = TickTimer.None;
         Debug.Log($"{cachedNickname} died");
     }
 
@@ -404,8 +417,59 @@ public class Player : NetworkBehaviour, IHitable
         Hp = startingHp;
         IsDead = false;
         RespawnTimer = TickTimer.None;
+        HealthRegenerationDelayTimer = TickTimer.None;
+        HealthRegenerationIntervalTimer = TickTimer.None;
 
         Debug.Log($"{cachedNickname} respawned");
+    }
+    #endregion
+
+    #region Health Regeneration
+    private void RestartHealthRegeneration()
+    {
+        HealthRegenerationDelayTimer = TickTimer.CreateFromSeconds(
+            Runner,
+            healthRegenerationDelay);
+        HealthRegenerationIntervalTimer = TickTimer.None;
+    }
+
+    private void ProcessHealthRegeneration()
+    {
+        if (!Object.HasStateAuthority || IsDead)
+            return;
+
+        if (Hp >= startingHp)
+        {
+            HealthRegenerationDelayTimer = TickTimer.None;
+            HealthRegenerationIntervalTimer = TickTimer.None;
+            return;
+        }
+
+        if (!HealthRegenerationDelayTimer.ExpiredOrNotRunning(Runner))
+            return;
+
+        if (HealthRegenerationDelayTimer.Expired(Runner))
+        {
+            HealthRegenerationDelayTimer = TickTimer.None;
+            RegenerateHealthPoint();
+            return;
+        }
+
+        if (!HealthRegenerationIntervalTimer.ExpiredOrNotRunning(Runner))
+            return;
+
+        RegenerateHealthPoint();
+    }
+
+    private void RegenerateHealthPoint()
+    {
+        Hp = Mathf.Min(startingHp, Hp + 1f);
+
+        HealthRegenerationIntervalTimer = Hp < startingHp
+            ? TickTimer.CreateFromSeconds(
+                Runner,
+                Mathf.Max(healthRegenerationInterval, Runner.DeltaTime))
+            : TickTimer.None;
     }
     #endregion
 
