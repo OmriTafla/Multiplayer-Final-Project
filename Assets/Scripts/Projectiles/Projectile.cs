@@ -7,7 +7,7 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float speed = 20f;
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
-    public int piercingLeft = 0;
+    public uint piercingLeft = 0;
 
     [SerializeField]
     private Renderer myRenderer;
@@ -81,12 +81,13 @@ public class Projectile : NetworkBehaviour
 
     private void ResolveCollision(NetworkObject target)
     {
-        piercingLeft--;
-        if (piercingLeft < 0)
+        if (piercingLeft == 0)
         {
             impactResolved = true;
             PlayHitAnimAndkillRPC(target.transform.position);
+            return;
         }
+        piercingLeft--;
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

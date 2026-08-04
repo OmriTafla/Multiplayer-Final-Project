@@ -12,13 +12,9 @@
   <component name="ChangeListManager">
     <list default="true" id="0b5a1ab2-b115-4d15-8887-1509163ba20d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Multiplayer-Final-Project/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/EnumUtils/UpgradeFactory.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/EnumUtils/UpgradeFactory.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Enums/UpgradeType.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Enums/UpgradeType.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Projectiles/Projectile.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Upgrades/BulletUpgrade.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Upgrades/BulletUpgrade.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Upgrades/PeircingUpgrade.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Upgrades/PeircingUpgrade.cs.meta" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,59 +66,59 @@
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
       <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000001671197" />
-      <entry key="S10" value="1.0000129274746379" />
-      <entry key="S30" value="1.023469539313109" />
-      <entry key="S60" value="1.1531999257844332" />
-      <entry key="M2" value="1.396161318351077" />
-      <entry key="M5" value="2.753979952917594" />
-      <entry key="M10" value="11.500475218686791" />
-      <entry key="M15" value="24.537822574234823" />
-      <entry key="M30" value="68.26344832815222" />
-      <entry key="H1" value="164.70746982459573" />
-      <entry key="H2" value="348.9339271378496" />
-      <entry key="H4" value="579.9715498141181" />
-      <entry key="D1" value="999.794457752448" />
-      <entry key="W1" value="1131.4030175639018" />
+      <entry key="S2" value="1.0000336060739328" />
+      <entry key="S5" value="1.0261885784924736" />
+      <entry key="S10" value="1.278189174990992" />
+      <entry key="S30" value="2.5702514372539156" />
+      <entry key="S60" value="3.567724081373361" />
+      <entry key="M2" value="5.29337278046441" />
+      <entry key="M5" value="11.161547505347901" />
+      <entry key="M10" value="16.73609212748695" />
+      <entry key="M15" value="19.482617780838435" />
+      <entry key="M30" value="22.854444725292435" />
+      <entry key="H1" value="25.053963564894456" />
+      <entry key="H2" value="39.03880011608988" />
+      <entry key="H4" value="139.0539118213933" />
+      <entry key="D1" value="787.7196387142387" />
+      <entry key="W1" value="1115.0892190939644" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="2.5822565133742742E-172" />
-      <entry key="S5" value="2.3163269564352043E-69" />
-      <entry key="S10" value="4.815230905370382E-35" />
-      <entry key="S30" value="3.934409800725973E-12" />
-      <entry key="S60" value="2.6270081409096193E-6" />
-      <entry key="M2" value="0.0030590595395235936" />
-      <entry key="M5" value="0.3713701441426631" />
-      <entry key="M10" value="2.6378587629502266" />
-      <entry key="M15" value="5.739598090118899" />
-      <entry key="M30" value="16.257421876567577" />
-      <entry key="H1" value="39.9484193769712" />
-      <entry key="H2" value="84.62330227516752" />
-      <entry key="H4" value="141.42614072112062" />
-      <entry key="D1" value="251.20966471904532" />
-      <entry key="W1" value="287.7857746792561" />
+      <entry key="MS100" value="1.52587890625E-5" />
+      <entry key="MS500" value="0.1088188204120155" />
+      <entry key="S2" value="0.5743628894707706" />
+      <entry key="S5" value="0.8129774647796607" />
+      <entry key="S10" value="1.025282701209132" />
+      <entry key="S30" value="1.7253771761720518" />
+      <entry key="S60" value="2.248322116614732" />
+      <entry key="M2" value="3.326697541968769" />
+      <entry key="M5" value="7.652197155095584" />
+      <entry key="M10" value="11.949059189756936" />
+      <entry key="M15" value="14.090912702088877" />
+      <entry key="M30" value="16.73430205986274" />
+      <entry key="H1" value="18.337505517130083" />
+      <entry key="H2" value="22.308442070724702" />
+      <entry key="H4" value="47.01542291107462" />
+      <entry key="D1" value="211.08805380331717" />
+      <entry key="W1" value="296.7610877125468" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.002899460098884862" />
-      <entry key="MS500" value="0.3107874172259849" />
-      <entry key="S2" value="0.7466479152611682" />
-      <entry key="S5" value="0.8897056382406886" />
-      <entry key="S10" value="0.9432528001734926" />
-      <entry key="S30" value="1.002754567949286" />
-      <entry key="S60" value="1.1387838128834034" />
-      <entry key="M2" value="1.388150498253195" />
-      <entry key="M5" value="3.1138896041988215" />
-      <entry key="M10" value="14.11639525048719" />
-      <entry key="M15" value="30.248476460615514" />
-      <entry key="M30" value="84.48489837531642" />
-      <entry key="H1" value="204.61632090249503" />
-      <entry key="H2" value="433.51717726495133" />
-      <entry key="H4" value="721.3646623516977" />
-      <entry key="D1" value="1250.9944742630487" />
-      <entry key="W1" value="1419.1872205791287" />
+      <entry key="MS100" value="1.904801749559004E-5" />
+      <entry key="MS500" value="0.11924096580596391" />
+      <entry key="S2" value="0.852950252567219" />
+      <entry key="S5" value="1.4343906301966" />
+      <entry key="S10" value="2.0629354431468028" />
+      <entry key="S30" value="4.190005785963998" />
+      <entry key="S60" value="5.75384788550988" />
+      <entry key="M2" value="8.570922367248992" />
+      <entry key="M5" value="18.762122819155415" />
+      <entry key="M10" value="28.643622163164157" />
+      <entry key="M15" value="33.54064916754129" />
+      <entry key="M30" value="39.56910892446171" />
+      <entry key="H1" value="43.3806604789415" />
+      <entry key="H2" value="61.34010343097232" />
+      <entry key="H4" value="186.06004136616986" />
+      <entry key="D1" value="998.7998611936504" />
+      <entry key="W1" value="1411.8487251586262" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -253,26 +249,39 @@
           <line>84</line>
           <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Player\Shooter.cs" containingFunctionPresentation="Method 'UpdateUpgradesRPC'">
             <startOffsets>
-              <option value="2652" />
+              <option value="2717" />
             </startOffsets>
             <endOffsets>
-              <option value="2697" />
+              <option value="2762" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Assets/Scripts/Player/Shooter.cs</url>
-          <line>33</line>
+          <line>32</line>
           <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Player\Shooter.cs" containingFunctionPresentation="Method 'Spawned'">
             <startOffsets>
-              <option value="1097" />
+              <option value="1041" />
             </startOffsets>
             <endOffsets>
-              <option value="1151" />
+              <option value="1095" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/Upgrades/BulletUpgrade.cs</url>
+          <line>12</line>
+          <properties documentPath="C:\Users\omrit\Documents\GitHub\Multiplayer-Final-Project\Assets\Scripts\Upgrades\BulletUpgrade.cs" containingFunctionPresentation="Method 'ApplyUpgrade'">
+            <startOffsets>
+              <option value="324" />
+            </startOffsets>
+            <endOffsets>
+              <option value="363" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

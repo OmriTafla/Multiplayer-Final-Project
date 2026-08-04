@@ -14,8 +14,7 @@ namespace Abb2kTools.Projectiles
         public int LastFireTick { get; private set; }
         [SerializeField] private float shootingCooldown = 0.5f;
 
-        [Networked, Capacity((int)UpgradeType.COUNT),
-         OnChangedRender(nameof(UpdateUpgradesClient))] 
+        [Networked, Capacity((int)UpgradeType.COUNT)] 
         public NetworkDictionary<UpgradeType, uint> BulletUpgradesBought => default;
         
         [Header("Animation")]
@@ -63,34 +62,35 @@ namespace Abb2kTools.Projectiles
                 var newProjectile = placementManager?.SpawnProjectile(
                     Object, transform.position, LastFireDirection);
 
-                foreach (var bulletUpgrade in _bulletUpgradeObjs)
+                foreach (var bulletUpgrade in BulletUpgradesBought)
                 {
-                    bulletUpgrade.ApplyUpgrade(newProjectile);
+                    print("Applying upgrade");
+                    Upgrade.ApplyUpgrade(newProjectile, bulletUpgrade.Key, bulletUpgrade.Value);
                 }
             }
         }
 
-        private void UpdateUpgradesClient()
-        {
-            if (Object.HasStateAuthority)
-            {
-                UpdateUpgradesRPC();
-            }
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
-        private void UpdateUpgradesRPC()
-        {
-            _bulletUpgradeObjs.Clear();
-            foreach (var upgrade in BulletUpgradesBought)
-            {
-                for (int i = 0; i < upgrade.Value; i++)
-                {
-                    _bulletUpgradeObjs.Add(UpgradeFactory.MakeProjectileUpgrade(upgrade.Key));
-                }
-                print($"Added {upgrade.Key} {upgrade.Value} times");
-            }
-        }
+        // private void UpdateUpgradesClient()
+        // {
+        //     if (Object.HasStateAuthority)
+        //     {
+        //         UpdateUpgradesRPC();
+        //     }
+        // }
+        //
+        // [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority)]
+        // private void UpdateUpgradesRPC()
+        // {
+        //     _bulletUpgradeObjs.Clear();
+        //     foreach (var upgrade in BulletUpgradesBought)
+        //     {
+        //         for (int i = 0; i < upgrade.Value; i++)
+        //         {
+        //             _bulletUpgradeObjs.Add(UpgradeFactory.MakeProjectileUpgrade(upgrade.Key));
+        //         }
+        //         print($"Added {upgrade.Key} {upgrade.Value} times");
+        //     }
+        // }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
         private void PlayShootEffectsRPC()
