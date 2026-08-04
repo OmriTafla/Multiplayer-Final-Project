@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using EasyTextEffects;
 using Enums;
 using EnumUtils;
 using Fusion;
@@ -133,9 +134,15 @@ public class LobbyLeaderboardUI : MonoBehaviour
         if (session is null)
         {
             target.text =
-                $"<b>{title}</b>\n" +
+                $"<b><link=swing+gradient>{title}</b></link>\n" +
                 "<color=#FFD166>No active session</color>\n" +
-                "Start Game to host";
+                "<link=wiggle>Start Game to host</link>";
+
+            if (target.TryGetComponent(out TextEffect effect))
+            {
+                effect.Refresh();
+            }
+
             return;
         }
 
@@ -177,10 +184,10 @@ public class LobbyLeaderboardUI : MonoBehaviour
     private void SetConnecting()
     {
         if (freeForAllText)
-            freeForAllText.text = "<b>Free For All</b>\nConnecting...";
+            freeForAllText.text = "<b><link=swing+gradient>Free For All</b></link>\n<link=size>Connecting...</link>";
 
         if (twoTeamsText)
-            twoTeamsText.text = "<b>Two Teams</b>\nConnecting...";
+            twoTeamsText.text = "<b><link=swing+gradient>Two Teams</b></link>\n<link=size>Connecting...</link>";
     }
 
     private void SetAllUnavailable()
@@ -201,15 +208,15 @@ public class LobbyLeaderboardUI : MonoBehaviour
         if (freeForAllText)
         {
             freeForAllText.text =
-                "<b>Free For All</b>\n" +
-                "<color=#FF7777>Leaderboard connection unavailable</color>";
+                "<b><link=swing+gradient>Free For All</b>\n" +
+                "<color=#FF7777>Leaderboard connection unavailable</color></link>";
         }
 
         if (twoTeamsText)
         {
             twoTeamsText.text =
-                "<b>Two Teams</b>\n" +
-                "<color=#FF7777>Leaderboard connection unavailable</color>";
+                "<b><link=swing+gradient>Two Teams</b>\n" +
+                "<color=#FF7777>Leaderboard connection unavailable</color></link>";
         }
     }
 
