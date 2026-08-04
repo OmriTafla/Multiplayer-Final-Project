@@ -24,21 +24,31 @@ public class FlashTransition : MonoBehaviour
 
     [SerializeField] private Graphic[] toFadeGraphics;
 
-    private Vector2? originalScale;
+    private Vector3? originalScale;
+    private bool isOff = false;
 
-    void Awake()
+    void Start()
     {
-        originalScale = scalerParent.sizeDelta;
+        InitOGScale(); 
+    }
+
+    void InitOGScale()
+    {
+        if (!originalScale.HasValue)
+            originalScale = scalerParent.localScale;
     }
 
     public void Enter()
     {
-        if (originalScale == null)
-            originalScale = scalerParent.sizeDelta;
+        if (!isOff) return;
+
+        KillActiveTweens();
+        InitOGScale();
 
         if (flashImage)
         {
             flashImage.color = new Color(flashColor.r, flashColor.g, flashColor.b, 0);
+            
             DOTween.Sequence()
                 .Append(flashImage.DOFade(1, flashInDuration))
                 .AppendCallback(StartManualTextEffects)
@@ -46,29 +56,38 @@ public class FlashTransition : MonoBehaviour
                 .SetLink(gameObject)
                 .SetTarget(this);
 
-            scalerParent.sizeDelta = Vector2.zero;
+            scalerParent.localScale = Vector3.zero;
 
             DOTween.Sequence()
-                .Append(DOTween.To(() => scalerParent.sizeDelta.x, x => scalerParent.sizeDelta = new Vector2(x, scalerParent.sizeDelta.y), originalScale.Value.x, XScaleInDuration).SetEase(XScaleInEase))
-                .Join(DOTween.To(() => scalerParent.sizeDelta.y, y => scalerParent.sizeDelta = new Vector2(scalerParent.sizeDelta.x, y), originalScale.Value.y, YScaleInDuration).SetEase(YScaleInEase))
+                .Append(scalerParent.DOScaleX(originalScale.Value.x, XScaleInDuration).SetEase(XScaleInEase))
+                .Join(scalerParent.DOScaleY(originalScale.Value.y, YScaleInDuration).SetEase(YScaleInEase))
                 .SetLink(gameObject)
                 .SetTarget(this);
 
             foreach (var graphic in toFadeGraphics)
             {
-                graphic.color = new Color(graphic.color.r, graphic.color.g, graphic.color.b, 0);
-
                 if (graphic)
+                {
+                    graphic.color = new Color(graphic.color.r, graphic.color.g, graphic.color.b, 0);
                     graphic.DOFade(1, Mathf.Min(XScaleInDuration, YScaleInDuration)).SetLink(gameObject).SetTarget(this);
+                }
             }
         }
+
+        isOff = false;
     }
 
     public void Exit()
     {
+        if (isOff) return;
+
+        KillActiveTweens();
+        InitOGScale();
+
         if (flashImage)
         {
             flashImage.color = new Color(flashColor.r, flashColor.g, flashColor.b, 0);
+            
             DOTween.Sequence()
                 .Append(flashImage.DOFade(1, flashInDuration))
                 .AppendCallback(StopManualTextEffects)
@@ -76,11 +95,11 @@ public class FlashTransition : MonoBehaviour
                 .SetLink(gameObject)
                 .SetTarget(this);
 
-            scalerParent.sizeDelta = originalScale.Value;
+            scalerParent.localScale = originalScale.Value;
 
             DOTween.Sequence()
-                .Append(DOTween.To(() => scalerParent.sizeDelta.x, x => scalerParent.sizeDelta = new Vector2(x, scalerParent.sizeDelta.y), 0, XScaleInDuration).SetEase(XScaleInEase))
-                .Join(DOTween.To(() => scalerParent.sizeDelta.y, y => scalerParent.sizeDelta = new Vector2(scalerParent.sizeDelta.x, y), 0, YScaleInDuration).SetEase(YScaleInEase))
+                .Append(scalerParent.DOScaleX(0, YScaleInDuration).SetEase(XScaleInEase))
+                .Join(scalerParent.DOScaleY(0, XScaleInDuration).SetEase(YScaleInEase))
                 .SetLink(gameObject)
                 .SetTarget(this);
 
@@ -90,14 +109,21 @@ public class FlashTransition : MonoBehaviour
                     graphic.DOFade(0, Mathf.Min(XScaleInDuration, YScaleInDuration)).SetLink(gameObject).SetTarget(this);
             }
         }
+
+        isOff = true;
     }
 
     public void InstantExit()
     {
+        if (isOff) return;
+
+        KillActiveTweens();
+        InitOGScale();
+
         if (flashImage)
         {
             flashImage.color = new Color(flashColor.r, flashColor.g, flashColor.b, 0);
-            scalerParent.sizeDelta = Vector2.zero;
+            scalerParent.localScale = Vector3.zero;
 
             foreach (var graphic in toFadeGraphics)
             {
@@ -106,6 +132,20 @@ public class FlashTransition : MonoBehaviour
             }
 
             StopManualTextEffects();
+        }
+
+        isOff = true;
+    }
+
+    private void KillActiveTweens()
+    {
+        DOTween.Kill(this);
+        if (scalerParent) scalerParent.DOKill();
+        if (flashImage) flashImage.DOKill();
+        
+        foreach (var graphic in toFadeGraphics)
+        {
+            if (graphic) graphic.DOKill();
         }
     }
 

@@ -25,7 +25,8 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private float flashesDelay;
     [SerializeField] private float flashesOffsetDelay;
     [SerializeField] private FlashTransition[] flashes;
-    
+
+    bool firstEntry = false;
 
     protected override void Awake()
     {
@@ -41,7 +42,8 @@ public class UIManager : Singleton<UIManager>
 
         DOTween.Sequence()
             .AppendInterval(flashesDelay).AppendInterval(flashesDelay)
-            .AppendCallback(RunFlashes)
+            .AppendCallback(() => RunFlashes(true))
+            .AppendCallback(() => firstEntry = true)
             .SetLink(gameObject)
             .SetTarget(this);
 
@@ -52,7 +54,7 @@ public class UIManager : Singleton<UIManager>
 #endif
     }
 
-    void RunFlashes()
+    void RunFlashes(bool enter)
     {
         if (flashes.Length <= 0) return;
 
@@ -63,14 +65,20 @@ public class UIManager : Singleton<UIManager>
 
             DOTween.Sequence()
                 .AppendInterval(delay)
-                .AppendCallback(() => flashes[index].Enter());
+                .AppendCallback(() =>
+                {
+                    if (enter)
+                        flashes[index].Enter();
+                    else
+                        flashes[index].Exit();
+                });
         }
     }
 
     public void ShowStartMenu()
     {
-        SetActive(startMenu, true);
-        SetActive(leaderboards, true);
+        if (firstEntry)
+            RunFlashes(true);
         SetActive(waitingScreen, false);
     }
 
@@ -79,15 +87,15 @@ public class UIManager : Singleton<UIManager>
         if (waitingText)
             waitingText.text = message;
 
-        SetActive(startMenu, false);
-        SetActive(leaderboards, false);
+        if (firstEntry)
+            RunFlashes(false);
         SetActive(waitingScreen, true);
     }
 
     private void HideAll()
     {
-        SetActive(startMenu, false);
-        SetActive(leaderboards, false);
+        if (firstEntry)
+            RunFlashes(false);
         SetActive(waitingScreen, false);
     }
 

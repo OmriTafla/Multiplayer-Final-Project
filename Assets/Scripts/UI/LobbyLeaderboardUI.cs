@@ -129,6 +129,8 @@ public class LobbyLeaderboardUI : MonoBehaviour
         if (!target)
             return;
 
+        TextEffect targetEffect = target.GetComponent<TextEffect>();;
+
         var title = mode.GetDisplayName();
 
         if (session is null)
@@ -138,10 +140,8 @@ public class LobbyLeaderboardUI : MonoBehaviour
                 "<color=#FFD166>No active session</color>\n" +
                 "<link=wiggle>Start Game to host</link>";
 
-            if (target.TryGetComponent(out TextEffect effect))
-            {
-                effect.Refresh();
-            }
+            if (targetEffect)
+                targetEffect.Refresh();
 
             return;
         }
@@ -177,8 +177,11 @@ public class LobbyLeaderboardUI : MonoBehaviour
         var body = snapshot.BuildBody(mode);
 
         target.text = string.IsNullOrWhiteSpace(body)
-            ? $"<b>{title}</b>\n{onlineLine} · {capacityLine}\n\nNo active players"
-            : $"<b>{title}</b>\n{onlineLine} · {capacityLine}\n\n{body}";
+            ? $"<b><link=swing+gradient>{title}</b></link>\n<link=bounce>{onlineLine}</link> · {capacityLine}\n\n<link=swing>No active players</link>"
+            : $"<b><link=swing+gradient>{title}</b></link>\n<link=bounce>{onlineLine}</link> · {capacityLine}\n\n<link=swing>{body}</link>";
+
+        if (targetEffect)
+            targetEffect.Refresh();
     }
 
     private void SetConnecting()
