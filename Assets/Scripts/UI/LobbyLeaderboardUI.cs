@@ -142,6 +142,13 @@ public class LobbyLeaderboardUI : MonoBehaviour
         var onlineLine = session.IsOpen
             ? "<color=#77FF99>Server online</color>"
             : "<color=#FFD166>Match locked</color>";
+        var playerCount = Mathf.Max(0, session.PlayerCount);
+        var maximumPlayers = Mathf.Max(1, session.MaxPlayers);
+
+        if (playerCount >= maximumPlayers)
+            onlineLine = "<color=#FFD166>Session full</color>";
+
+        var capacityLine = $"{playerCount}/{maximumPlayers} players";
 
         if (!session.Properties.TryGetValue(
                 SessionPropertyKeys.Leaderboard,
@@ -149,20 +156,22 @@ public class LobbyLeaderboardUI : MonoBehaviour
             !property.IsString ||
             !LiveLeaderboardSnapshot.TryParse(
                 (string)property,
-                out var snapshot))
+                out var snapshot) ||
+            snapshot.gameMode != (int)mode)
         {
             target.text =
-                $"<b>{title}</b>\n{onlineLine}\n\nNo active players";
+                $"<b>{title}</b>\n{onlineLine} · {capacityLine}\n\n" +
+                (playerCount == 0
+                    ? "No active players"
+                    : "Leaderboard syncing...");
             return;
         }
 
-        var playerCount = snapshot.players.Length;
-        var playerLabel = playerCount == 1 ? "player" : "players";
         var body = snapshot.BuildBody(mode);
 
         target.text = string.IsNullOrWhiteSpace(body)
-            ? $"<b>{title}</b>\n{onlineLine}\n\nNo active players"
-            : $"<b>{title}</b>\n{onlineLine} · {playerCount} {playerLabel}\n\n{body}";
+            ? $"<b>{title}</b>\n{onlineLine} · {capacityLine}\n\nNo active players"
+            : $"<b>{title}</b>\n{onlineLine} · {capacityLine}\n\n{body}";
     }
 
     private void SetConnecting()

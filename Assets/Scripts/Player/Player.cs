@@ -5,7 +5,6 @@ using Abb2kTools;
 using Abb2kTools.Projectiles;
 using DG.Tweening;
 using Fusion;
-using Fusion.Addons.Physics;
 using TMPro;
 using UnityEngine;
 
@@ -21,14 +20,13 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private Renderer[] modelRenderers;
     [SerializeField] private Collider[] collisionColliders;
     [SerializeField] private Rigidbody rigidBody;
+    [SerializeField] private NetworkTransform networkTransform;
+    [SerializeField] private float collisionSkin = 0.02f;
     [SerializeField] private Animator animator;
     private readonly int animWalkId = Animator.StringToHash("IsWalking");
-    [SerializeField] private Animator cannonAnimator;
-    private readonly int animShootId = Animator.StringToHash("Shoot");
     [SerializeField] private SpriteRenderer miniMapIconColor;
     [SerializeField] private CamShakeData hurtShake;
     [SerializeField] private AudioSource hurtSource;
-    [SerializeField] private AudioSource shootSource;
     [SerializeField] private Shooter shooter;
     #endregion
 
@@ -46,17 +44,9 @@ public class Player : NetworkBehaviour, IHitable
     [SerializeField] private Vector3 overheadEulerAngles = new Vector3(90f, 0f, 0f);
     #endregion
 
-    #region Inspector References - Local Movement Prediction
-    [SerializeField] private Transform visualRoot;
-    [SerializeField] private float visualLeadDistance = 0.3f;
-    [SerializeField] private float visualLeadStrength = 12f;
-    [SerializeField] private float visualCatchUpSpeed = 6f;
-    #endregion
-
     #region Inspector Tunables - Gameplay
     [SerializeField] private float startingHp = 10f;
     [SerializeField] private float movementSpeed = 5f;
-    [SerializeField] private float shootingCooldown = 0.5f;
     [SerializeField] private float respawnDelay = 3f;
     #endregion
 
@@ -76,12 +66,7 @@ public class Player : NetworkBehaviour, IHitable
     [Networked, OnChangedRender(nameof(OnDeathStateChanged))]
     public NetworkBool IsDead { get; private set; }
 
-    [Networked] private TickTimer ShootCooldownTimer { get; set; }
     [Networked] private TickTimer RespawnTimer { get; set; }
-    [Networked] private NetworkButtons PreviousButtons { get; set; }
-    [Networked] public Vector3 LastFireDirection { get; private set; }
-
-    public int LastFireTick { get; private set; }
     #endregion
 
     #region Private Runtime State
@@ -95,38 +80,9 @@ public class Player : NetworkBehaviour, IHitable
     private PlayerRef registeredPlayer = PlayerRef.None;
 
     private Vector3 _direction;
-    private bool _pendingRespawn;
-    private Vector3 _pendingRespawnPosition;
-    private Vector3 visualLeadOffset;
     #endregion
 
     #region Unity Lifecycle
-    private void Update()
-    {
-        if (!Object || !Object.HasInputAuthority || IsDead || !visualRoot)
-            return;
-
-        var rawInput = FusionInputProvider.Instance
-            ? FusionInputProvider.Instance.CurrentMoveInput
-            : Vector2.zero;
-
-        var desiredDirection = new Vector3(rawInput.x, 0f, rawInput.y);
-        var hasInput = desiredDirection.sqrMagnitude > 0.0001f;
-
-        var targetOffset = hasInput
-            ? Vector3.ClampMagnitude(desiredDirection, 1f) * visualLeadDistance
-            : Vector3.zero;
-
-        var lerpSpeed = hasInput ? visualLeadStrength : visualCatchUpSpeed;
-
-        visualLeadOffset = Vector3.Lerp(
-            visualLeadOffset,
-            targetOffset,
-            lerpSpeed * Time.deltaTime);
-
-        visualRoot.position = transform.position + visualLeadOffset;
-    }
-
     private void LateUpdate()
     {
         if (!overheadUIRoot)
@@ -135,22 +91,6 @@ public class Player : NetworkBehaviour, IHitable
         overheadUIRoot.SetPositionAndRotation(
             transform.position + overheadOffset,
             Quaternion.Euler(overheadEulerAngles));
-    }
-
-    private void FixedUpdate()
-    {
-        if (_pendingRespawn && rigidBody)
-        {
-            rigidBody.position = _pendingRespawnPosition;
-            rigidBody.linearVelocity = Vector3.zero;
-            rigidBody.angularVelocity = Vector3.zero;
-            _pendingRespawn = false;
-        }
-
-        if (rigidBody && !IsDead)
-        {
-            rigidBody.AddForce(_direction * movementSpeed - rigidBody.linearVelocity, ForceMode.VelocityChange);
-        }
     }
     #endregion
 
@@ -169,7 +109,6 @@ public class Player : NetworkBehaviour, IHitable
         {
             Hp = startingHp;
             IsDead = false;
-            ShootCooldownTimer = TickTimer.None;
             RespawnTimer = TickTimer.None;
         }
 
@@ -179,6 +118,7 @@ public class Player : NetworkBehaviour, IHitable
         OnHpChanged();
         OnDeathStateChanged();
         ConfigureLocalPresentation();
+        ConfigureRigidbody();
 
         controlsLocalCamera = Object.HasInputAuthority;
 
@@ -200,25 +140,26 @@ public class Player : NetworkBehaviour, IHitable
 
     public override void FixedUpdateNetwork()
     {
-        if (!GetInput<GameplayInput>(out var input))
+        ProcessRespawn();
+        SetCollisionCollidersEnabled(!IsDead);
+
+        if (IsDead)
         {
-            ProcessRespawn();
             _direction = Vector3.zero;
             return;
         }
 
-        if (IsDead)
+        if (!GetInput<GameplayInput>(out var input))
         {
-            ProcessRespawn();
-            PreviousButtons = input.Buttons;
             _direction = Vector3.zero;
             return;
         }
 
         Move(input.Move);
-        ProcessFire(input);
         ProcessAim(input);
-        PreviousButtons = input.Buttons;
+
+        if (Object.HasStateAuthority)
+            ProcessFire(input);
     }
 
     public override void Render()
@@ -320,16 +261,77 @@ public class Player : NetworkBehaviour, IHitable
     #region Movement / Aim / Fire
     private void Move(Vector2 movementInput)
     {
+        if (!IsFinite(movementInput.x) || !IsFinite(movementInput.y))
+            movementInput = Vector2.zero;
+
         movementInput = Vector2.ClampMagnitude(movementInput, 1f);
 
         _direction = new Vector3(
             movementInput.x,
             0f,
             movementInput.y);
+
+        var displacement = _direction * movementSpeed * Runner.DeltaTime;
+
+        if (!rigidBody || displacement.sqrMagnitude <= 0.000001f)
+            return;
+
+        Physics.SyncTransforms();
+
+        for (var iteration = 0; iteration < 2; iteration++)
+        {
+            var distance = displacement.magnitude;
+
+            if (distance <= 0.0001f)
+                break;
+
+            var direction = displacement / distance;
+
+            if (!rigidBody.SweepTest(
+                    direction,
+                    out var hit,
+                    distance + collisionSkin,
+                    QueryTriggerInteraction.Ignore))
+            {
+                transform.position += displacement;
+                break;
+            }
+
+            var moveDistance = Mathf.Clamp(
+                hit.distance - collisionSkin,
+                0f,
+                distance);
+
+            transform.position += direction * moveDistance;
+
+            var normal = hit.normal;
+            normal.y = 0f;
+
+            if (normal.sqrMagnitude <= 0.0001f)
+                break;
+
+            displacement = Vector3.ProjectOnPlane(
+                displacement - direction * moveDistance,
+                normal.normalized);
+
+            if (displacement.sqrMagnitude <= 0.000001f)
+                break;
+
+            Physics.SyncTransforms();
+        }
+
+        Physics.SyncTransforms();
     }
 
     private void ProcessAim(GameplayInput input)
     {
+        if (!IsFinite(input.AimPosition.x) ||
+            !IsFinite(input.AimPosition.y) ||
+            !IsFinite(input.AimPosition.z))
+        {
+            return;
+        }
+
         var aimPoint = new Vector3(
             input.AimPosition.x,
             transform.position.y,
@@ -347,51 +349,6 @@ public class Player : NetworkBehaviour, IHitable
             return;
 
         shooter.TryShoot();
-
-        // if (!ShootCooldownTimer.ExpiredOrNotRunning(Runner))
-        //     return;
-        //
-        // ShootCooldownTimer = TickTimer.CreateFromSeconds(Runner, shootingCooldown);
-        // LastFireTick = Runner.Tick;
-        // LastFireDirection = transform.forward.normalized;
-        //
-        // if (Runner.IsForward)
-        // {
-        //     cannonAnimator.SetTrigger(animShootId);
-        //     shootSource.Stop();
-        //     shootSource.Play();
-        // }
-        //
-        // if (Object.HasStateAuthority)
-        // {
-        //     PlayShootEffectsRPC();
-        //
-        //     var matchManager = MatchManager.Instance;
-        //     var placementManager = matchManager
-        //         ? matchManager.PlacementManager
-        //         : null;
-        //
-        //     if (placementManager)
-        //     {
-        //         placementManager.SpawnProjectile(
-        //             Object,
-        //             transform.position,
-        //             LastFireDirection);
-        //     }
-        // }
-    }
-
-    [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
-    private void PlayShootEffectsRPC()
-    {
-        if (cannonAnimator) 
-            cannonAnimator.SetTrigger(animShootId);
-
-        if (shootSource)
-        {
-            shootSource.Stop();
-            shootSource.Play();
-        }
     }
     #endregion
 
@@ -433,8 +390,16 @@ public class Player : NetworkBehaviour, IHitable
 
     private void Respawn()
     {
-        _pendingRespawnPosition = MatchManager.Instance.GetSpawnPosition(Object.InputAuthority);
-        _pendingRespawn = true;
+        var respawnPosition = MatchManager.Instance.GetSpawnPosition(
+            Object.InputAuthority);
+
+        if (networkTransform)
+            networkTransform.Teleport(respawnPosition, transform.rotation);
+        else
+            transform.position = respawnPosition;
+
+        _direction = Vector3.zero;
+        Physics.SyncTransforms();
 
         Hp = startingHp;
         IsDead = false;
@@ -700,6 +665,35 @@ public class Player : NetworkBehaviour, IHitable
         }
 
         registeredPlayer = PlayerRef.None;
+    }
+
+    private void SetCollisionCollidersEnabled(bool value)
+    {
+        if (collisionColliders is null)
+            return;
+
+        foreach (var collider in collisionColliders)
+        {
+            if (collider && collider.enabled != value)
+                collider.enabled = value;
+        }
+    }
+
+    private void ConfigureRigidbody()
+    {
+        if (!rigidBody)
+            return;
+
+        rigidBody.useGravity = false;
+        rigidBody.isKinematic = true;
+        rigidBody.interpolation = RigidbodyInterpolation.None;
+        rigidBody.collisionDetectionMode =
+            CollisionDetectionMode.ContinuousSpeculative;
+    }
+
+    private static bool IsFinite(float value)
+    {
+        return !float.IsNaN(value) && !float.IsInfinity(value);
     }
     #endregion
 }

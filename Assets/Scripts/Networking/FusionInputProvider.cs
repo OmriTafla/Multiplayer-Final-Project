@@ -57,9 +57,6 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
             Destroy(runtimeInputActions);
     }
 
-    public Vector2 CurrentMoveInput =>
-        actionsResolved ? moveAction.ReadValue<Vector2>() : Vector2.zero;
-
     private void OnEnable()
     {
         if (Application.isBatchMode)

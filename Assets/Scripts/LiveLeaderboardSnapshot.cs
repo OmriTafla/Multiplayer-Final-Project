@@ -72,6 +72,32 @@ public sealed class LiveLeaderboardSnapshot
         }
     }
 
+    public static bool TryParseEntry(
+        string json,
+        out LiveLeaderboardEntry entry)
+    {
+        entry = null;
+
+        if (string.IsNullOrWhiteSpace(json))
+            return false;
+
+        try
+        {
+            entry = JsonUtility.FromJson<LiveLeaderboardEntry>(json);
+
+            if (IsValidEntry(entry))
+                return true;
+
+            entry = null;
+            return false;
+        }
+        catch (ArgumentException)
+        {
+            entry = null;
+            return false;
+        }
+    }
+
     public string BuildBody(IOGameMode mode)
     {
         return mode == IOGameMode.TwoTeams
@@ -199,6 +225,15 @@ public sealed class LiveLeaderboardSnapshot
         }
 
         return "FFFFFF";
+    }
+
+    private static bool IsValidEntry(LiveLeaderboardEntry entry)
+    {
+        return entry is not null &&
+               entry.playerId >= 0 &&
+               entry.score >= 0 &&
+               entry.teamId >= -1 &&
+               !string.IsNullOrWhiteSpace(entry.playerName);
     }
 }
 

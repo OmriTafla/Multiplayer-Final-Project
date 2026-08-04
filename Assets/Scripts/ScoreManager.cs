@@ -10,6 +10,9 @@ using UnityEngine;
 public class ScoreManager : NetworkedSingleton<ScoreManager>
 {
     public static event Action ScoresChanged;
+    public static event Action<LiveLeaderboardEntry> LeaderboardJsonReceived;
+
+    public static LiveLeaderboardEntry LatestJsonLeaderboardEntry { get; private set; }
 
     [Networked, Capacity(GameManager.MAX_PLAYERS)]
     private NetworkDictionary<PlayerRef, int> Scores { get; } =
@@ -36,6 +39,7 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
 
         if (Object.HasStateAuthority)
         {
+            lastPublishedLeaderboard = null;
             SubscribeLeaderboardEvents();
 
             foreach (var player in Runner.CommittedPlayers)
@@ -55,6 +59,10 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         StopLeaderboardPublishRoutine();
         UnsubscribeLeaderboardEvents();
         isSpawned = false;
+
+        if (Instance == this)
+            LatestJsonLeaderboardEntry = null;
+
         NotifyScoresChanged();
     }
 
@@ -252,6 +260,14 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         if (leaderboard == lastPublishedLeaderboard)
             return;
 
+        if (LiveLeaderboardSnapshot.TryParse(
+                leaderboard,
+                out var snapshot))
+        {
+            foreach (var player in snapshot.players)
+                ReceiveLeaderboardJsonRPC(JsonUtility.ToJson(player));
+        }
+
         Runner.SessionInfo.UpdateCustomProperties(
             new Dictionary<string, SessionProperty>
             {
@@ -259,6 +275,21 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
             });
 
         lastPublishedLeaderboard = leaderboard;
+    }
+
+    [Rpc(
+        RpcSources.StateAuthority,
+        RpcTargets.All,
+        TickAligned = false)]
+    private void ReceiveLeaderboardJsonRPC(string json)
+    {
+        if (!LiveLeaderboardSnapshot.TryParseEntry(
+                json,
+                out var entry))
+            return;
+
+        LatestJsonLeaderboardEntry = entry;
+        LeaderboardJsonReceived?.Invoke(entry);
     }
 
     private void StopLeaderboardPublishRoutine()
@@ -277,6 +308,9 @@ public class ScoreManager : NetworkedSingleton<ScoreManager>
         isSpawned = false;
 
         if (Instance == this)
+        {
+            LatestJsonLeaderboardEntry = null;
             Instance = null;
+        }
     }
 }

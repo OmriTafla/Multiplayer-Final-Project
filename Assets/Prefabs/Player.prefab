@@ -449,7 +449,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.4651163, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4913497212544060848}
@@ -473,7 +473,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Radius: 0.9
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4254609426698749326
 GameObject:
@@ -910,8 +910,9 @@ MonoBehaviour:
   - {fileID: 1720934025811652085}
   - {fileID: 4979769616436737495}
   rigidBody: {fileID: 3458336771368325197}
+  networkTransform: {fileID: -3512152510963605281}
+  collisionSkin: 0.02
   animator: {fileID: 408643528584894971}
-  cannonAnimator: {fileID: 0}
   miniMapIconColor: {fileID: 2533349612935277087}
   hurtShake:
     positionShake:
@@ -929,7 +930,6 @@ MonoBehaviour:
       fadeOut: 1
       randomnessMode: 0
   hurtSource: {fileID: 843463544801531969}
-  shootSource: {fileID: 0}
   shooter: {fileID: 8549313746988393279}
   playerUI: {fileID: 4275309682345805136}
   hpLabel: {fileID: 476318218719191834}
@@ -939,13 +939,8 @@ MonoBehaviour:
   overheadUIRoot: {fileID: 5161717482653698084}
   overheadOffset: {x: 1, y: 1, z: 1}
   overheadEulerAngles: {x: 90, y: 0, z: 0}
-  visualRoot: {fileID: 4568523811385076386}
-  visualLeadDistance: 1
-  visualLeadStrength: 1
-  visualCatchUpSpeed: 10
   startingHp: 10
   movementSpeed: 3
-  shootingCooldown: 1
   respawnDelay: 3
   _CharacterID: 0
   _TeamId: -1
@@ -953,7 +948,6 @@ MonoBehaviour:
   _Hp: 0
   _IsDead:
     _value: 0
-  _LastFireDirection: {x: 0, y: 0, z: 0}
 --- !u!114 &2437361841328486602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1000,10 +994,10 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 0
   m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
   m_Constraints: 116
-  m_CollisionDetection: 1
+  m_CollisionDetection: 3
 --- !u!114 &-3512152510963605281
 MonoBehaviour:
   m_ObjectHideFlags: 0
