@@ -306,6 +306,11 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
         callbacksRegistered = false;
+
+        var manager = SinglePeer_NetworkRunnerManager.Instance;
+
+        if (manager)
+            manager.HandleRunnerShutdown(runner, shutdownReason);
     }
 
     public void OnConnectedToServer(NetworkRunner runner)
@@ -314,6 +319,10 @@ public class FusionInputProvider : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
+        var manager = SinglePeer_NetworkRunnerManager.Instance;
+
+        if (manager)
+            manager.HandleRunnerDisconnected(runner, reason);
     }
 
     public void OnConnectRequest(

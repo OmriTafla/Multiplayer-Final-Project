@@ -38,6 +38,7 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
     private bool operationInProgress;
     private bool isInLeaderboardLobby;
     private bool shutdownEventRequested;
+    private bool disconnectRecoveryInProgress;
     private Task shutdownTask;
 
     public NetworkRunner NetworkRunner => networkRunner;
@@ -529,6 +530,86 @@ public class SinglePeer_NetworkRunnerManager : PersistentSingleton<SinglePeer_Ne
         await ShutdownRunner(false);
         CreateRunner();
     }
+
+    public void HandleRunnerDisconnected(
+        NetworkRunner runner,
+        NetDisconnectReason reason)
+    {
+        Debug.LogWarning($"Runner disconnected: {reason}", this);
+
+        HandleUnexpectedRunnerStop(
+            runner,
+            "The host or server disconnected.\nYou were returned to the main menu.");
+    }
+
+    public void HandleRunnerShutdown(
+        NetworkRunner runner,
+        ShutdownReason reason)
+    {
+        Debug.LogWarning($"Runner shut down: {reason}", this);
+
+        HandleUnexpectedRunnerStop(
+            runner,
+            "The host or server closed the session.\nYou were returned to the main menu.");
+    }
+
+    private void HandleUnexpectedRunnerStop(
+        NetworkRunner runner,
+        string message)
+    {
+        if (!runner ||
+            runner != networkRunner ||
+            isInLeaderboardLobby ||
+            operationInProgress ||
+            disconnectRecoveryInProgress)
+        {
+            return;
+        }
+
+#if DEDICATED_SERVER
+        Debug.LogError(message, this);
+#else
+        _ = RecoverFromUnexpectedRunnerStop(message);
+#endif
+    }
+
+#if HOST_OR_CLIENT
+    private async Task RecoverFromUnexpectedRunnerStop(string message)
+    {
+        if (disconnectRecoveryInProgress)
+            return;
+
+        disconnectRecoveryInProgress = true;
+
+        try
+        {
+            if (inputProvider)
+                inputProvider.DisableGameplayInput();
+
+            await ShutdownRunner(false);
+
+            var gameManager = GameManager.Instance;
+
+            if (!gameManager)
+            {
+                Debug.LogError(
+                    "Cannot return to the main menu because GameManager is missing",
+                    this);
+                return;
+            }
+
+            await gameManager.ReturnToMenuWithMessageAsync(message);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception);
+        }
+        finally
+        {
+            disconnectRecoveryInProgress = false;
+        }
+    }
+#endif
 
     private int GetMaximumPlayers()
     {

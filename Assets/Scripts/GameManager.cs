@@ -42,6 +42,26 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
         await ReturnToMenuAsync();
     }
 
+    public async Task ReturnToMenuWithMessageAsync(string message)
+    {
+        await ReturnToMenuAsync();
+
+        var uiManager = UIManager.Instance;
+
+        if (!uiManager)
+            return;
+
+        uiManager.ShowStatus(
+            string.IsNullOrWhiteSpace(message)
+                ? "The host or server disconnected."
+                : message.Trim());
+
+        await Task.Delay(3000);
+
+        if (uiManager)
+            uiManager.ShowStartMenu();
+    }
+
     private async Task ReturnToMenuAsync()
     {
         if (returningToMenu)
@@ -58,9 +78,12 @@ public class GameManager : PersistentSingleton<GameManager>, IGameManager
 
             if (SceneManager.GetActiveScene().name != connectionSceneName)
             {
-                SceneManager.LoadScene(
+                var loadOperation = SceneManager.LoadSceneAsync(
                     connectionSceneName,
                     LoadSceneMode.Single);
+
+                while (loadOperation is not null && !loadOperation.isDone)
+                    await Task.Yield();
             }
         }
         catch (Exception exception)
