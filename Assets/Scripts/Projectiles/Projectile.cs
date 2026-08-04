@@ -7,22 +7,43 @@ public class Projectile : NetworkBehaviour
     [SerializeField] private float speed = 20f;
     [SerializeField] private float lifetime = 20f;
     [SerializeField] private DamageData damageData;
-    public uint piercingLeft = 0;
-
-    [SerializeField]
-    private Renderer myRenderer;
+    [SerializeField] private Renderer myRenderer;
+    [SerializeField] private GameObject pierceIndicator;
 
     [Networked]
     private TickTimer LifeTimer { get; set; }
+
+    [Networked, OnChangedRender(nameof(RefreshPierceIndicator))]
+    public uint PiercingLeft { get; private set; }
 
     private bool impactResolved;
 
     public override void Spawned()
     {
+        if (Object.HasStateAuthority)
+            LifeTimer = TickTimer.CreateFromSeconds(Runner, lifetime);
+
+        RefreshPierceIndicator();
+    }
+
+    public void AddPiercing(uint amount)
+    {
+        if (!Object.HasStateAuthority || amount == 0)
+            return;
+
+        PiercingLeft += amount;
+        RefreshPierceIndicator();
+    }
+
+    public void SetDamage(float damage)
+    {
         if (!Object.HasStateAuthority)
             return;
 
-        LifeTimer = TickTimer.CreateFromSeconds(Runner, lifetime);
+        damageData.damage = Mathf.Clamp(
+            damage,
+            DamageData.MIN_POSSIBLE_DAMAGE,
+            DamageData.MAX_POSSIBLE_DAMAGE);
     }
 
     public override void FixedUpdateNetwork()
@@ -82,13 +103,21 @@ public class Projectile : NetworkBehaviour
 
     private void ResolveCollision(Vector3 hitPosition)
     {
-        if (piercingLeft == 0)
+        if (PiercingLeft == 0)
         {
             impactResolved = true;
             PlayHitAnimAndkillRPC(hitPosition);
             return;
         }
-        piercingLeft--;
+
+        PiercingLeft--;
+        RefreshPierceIndicator();
+    }
+
+    private void RefreshPierceIndicator()
+    {
+        if (pierceIndicator)
+            pierceIndicator.SetActive(PiercingLeft > 0);
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]

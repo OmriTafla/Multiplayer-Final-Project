@@ -4,6 +4,7 @@ namespace Enums
     {
         Unknown,
         BulletPierce,
+        BulletDamage,
         COUNT
     }
 }

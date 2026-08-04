@@ -20,3 +20,9 @@ MonoBehaviour:
     - 5
     - 10
     - 20
+  - type: 2
+    displayName: Bullet Damage
+    icon: {fileID: 0}
+    prices:
+    - 5
+    - 10

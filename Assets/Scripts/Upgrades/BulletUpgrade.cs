@@ -2,6 +2,9 @@ using Enums;
 
 public static class Upgrade
 {
+    private const float FirstDamageUpgrade = 5f;
+    private const float SecondDamageUpgrade = 8f;
+
     public static void ApplyUpgrade(
         Projectile projectile,
         UpgradeType upgradeType,
@@ -11,6 +14,11 @@ public static class Upgrade
             return;
 
         if (upgradeType == UpgradeType.BulletPierce)
-            projectile.piercingLeft += (uint)times;
+            projectile.AddPiercing((uint)times);
+
+        if (upgradeType == UpgradeType.BulletDamage)
+            projectile.SetDamage(times == 1
+                ? FirstDamageUpgrade
+                : SecondDamageUpgrade);
     }
 }
